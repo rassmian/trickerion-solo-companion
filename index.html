@@ -393,6 +393,10 @@
       gap: 25px;
     }
 
+    .game-layout > * {
+      min-width: 0;
+    }
+
     @media (max-width: 900px) {
       .game-layout {
         grid-template-columns: 1fr;
@@ -405,6 +409,11 @@
       }
       .action-panel {
         padding: 15px;
+      }
+      /* Force inline grids to stack on mobile */
+      .action-content [style*="grid-template-columns: 1fr 1fr"],
+      .action-content [style*="grid-template-columns: 1fr 1fr 1fr"] {
+        grid-template-columns: 1fr !important;
       }
     }
 
@@ -497,6 +506,9 @@
       display: flex;
       flex-direction: column;
       gap: 20px;
+      max-width: 100%;
+      min-width: 0;
+      overflow-x: hidden;
     }
 
     /* Phase tracker */
@@ -560,7 +572,9 @@
       border-radius: 8px;
       padding: 25px;
       min-height: 300px;
+      min-width: 0;
       overflow-x: hidden;
+      max-width: 100%;
     }
 
     .action-panel h2 {
@@ -574,6 +588,12 @@
       color: var(--text-secondary);
       line-height: 1.7;
       font-size: 1.05rem;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+
+    .action-content * {
+      max-width: 100%;
       word-wrap: break-word;
       overflow-wrap: break-word;
     }
@@ -1028,7 +1048,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.9.3-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.9.4-beta</p>
       <button class="restart-btn hidden" id="restart-btn">↺ New Game</button>
     </header>
 
