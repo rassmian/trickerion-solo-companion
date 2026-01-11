@@ -609,6 +609,18 @@
       flex-wrap: wrap;
     }
 
+    @media (max-width: 600px) {
+      .action-buttons {
+        position: sticky;
+        bottom: 0;
+        background: var(--bg-card);
+        padding: 15px;
+        margin: 25px -15px -15px -15px;
+        border-top: 1px solid var(--border);
+        z-index: 10;
+      }
+    }
+
     /* Heir's tricks display */
     .tricks-list {
       display: flex;
@@ -1048,7 +1060,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.9.4-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.9.5-beta</p>
       <button class="restart-btn hidden" id="restart-btn">↺ New Game</button>
     </header>
 
