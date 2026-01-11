@@ -28,7 +28,7 @@ Visit: https://rassmian.github.io/trickerion-solo-companion/
 
 - Trickerion base game (physical copy)
 - Modern web browser (Chrome, Firefox, Safari, Edge)
-- The app works on desktop and mobile
+- The app works on desktop and mobile (but has not yet been tested or optimised for mobile)
 
 ## Debug Mode
 
