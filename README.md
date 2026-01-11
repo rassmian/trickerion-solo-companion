@@ -17,7 +17,7 @@ You still play with the physical board game — this app manages the Heir's deci
 ## How to Use
 
 ### Option 1: Online
-Visit: `[Your GitHub Pages URL here]`
+Visit: https://rassmian.github.io/trickerion-solo-companion/
 
 ### Option 2: Local
 1. Download or clone this repository
