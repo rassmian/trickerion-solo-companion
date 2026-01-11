@@ -43,6 +43,8 @@
       background: var(--bg-dark);
       color: var(--text-primary);
       min-height: 100vh;
+      overflow-x: hidden;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
       background-image: 
         radial-gradient(ellipse at 20% 20%, rgba(212, 168, 71, 0.03) 0%, transparent 50%),
         radial-gradient(ellipse at 80% 80%, rgba(184, 122, 201, 0.02) 0%, transparent 50%);
@@ -52,6 +54,7 @@
       max-width: 1200px;
       margin: 0 auto;
       padding: 20px;
+      overflow-x: hidden;
     }
 
     /* Header */
@@ -396,6 +399,15 @@
       }
     }
 
+    @media (max-width: 600px) {
+      .container {
+        padding: 10px;
+      }
+      .action-panel {
+        padding: 15px;
+      }
+    }
+
     /* Sidebar - Heir State */
     .sidebar {
       display: flex;
@@ -548,6 +560,7 @@
       border-radius: 8px;
       padding: 25px;
       min-height: 300px;
+      overflow-x: hidden;
     }
 
     .action-panel h2 {
@@ -561,6 +574,8 @@
       color: var(--text-secondary);
       line-height: 1.7;
       font-size: 1.05rem;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
     }
 
     .action-content p {
@@ -852,6 +867,14 @@
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
     }
 
+    @media (max-width: 600px) {
+      .modal-content {
+        max-width: 95vw;
+        max-height: 85vh;
+        border-radius: 8px;
+      }
+    }
+
     .modal-header {
       padding: 16px 20px;
       border-bottom: 1px solid var(--border);
@@ -871,7 +894,9 @@
       color: var(--text-muted);
       font-size: 1.5rem;
       cursor: pointer;
-      padding: 0;
+      padding: 8px;
+      min-width: 44px;
+      min-height: 44px;
       line-height: 1;
     }
 
@@ -940,6 +965,14 @@
       padding: 10px;
     }
 
+    @media (max-width: 600px) {
+      .prophecy-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        padding: 5px;
+      }
+    }
+
     .prophecy-item {
       position: relative;
       cursor: pointer;
@@ -995,7 +1028,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.9.1-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.9.3-beta</p>
       <button class="restart-btn hidden" id="restart-btn">↺ New Game</button>
     </header>
 
