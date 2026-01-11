@@ -4766,7 +4766,7 @@
          <p style="margin-top: 15px;"><strong>How many Special Assignment cards did you use this turn?</strong></p>
          <p style="color: var(--text-secondary); font-size: 0.9rem;">Count the SA cards you assigned to your characters during Assignment phase.</p>
          
-         <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: center;">
+         <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: center; flex-wrap: wrap;">
            ${[0,1,2,3,4].map(n => `
              <button class="btn sa-count-btn" data-count="${n}" style="min-width: 50px;">${n}</button>
            `).join('')}
@@ -5380,7 +5380,7 @@
          ${opticoReminder}
          <p><strong>How many Action Points does this Character have?</strong></p>
          <p style="color: var(--text-secondary); font-size: 0.9rem;">Include the slot's AP modifier and the Character's base AP.</p>
-         <div class="ap-selector" style="display: flex; gap: 10px; margin-top: 20px; justify-content: center;">
+         <div class="ap-selector" style="display: flex; gap: 10px; margin-top: 20px; justify-content: center; flex-wrap: wrap;">
            ${[1,2,3,4,5].map(ap => `
              <button class="btn ap-btn" data-ap="${ap}" style="min-width: 50px;">${ap} AP</button>
            `).join('')}
@@ -5842,7 +5842,7 @@
          ${opticoReminder}
          <p style="margin-top: 15px;"><strong>How many Action Points does this Character have?</strong></p>
          <p style="color: var(--text-secondary); font-size: 0.9rem;">Include the slot's AP modifier and the Character's base AP.</p>
-         <div class="ap-selector" style="display: flex; gap: 10px; margin-top: 20px; justify-content: center;">
+         <div class="ap-selector" style="display: flex; gap: 10px; margin-top: 20px; justify-content: center; flex-wrap: wrap;">
            ${[1,2,3,4,5].map(ap => `
              <button class="btn ap-btn" data-ap="${ap}" style="min-width: 50px;">${ap} AP</button>
            `).join('')}
@@ -6105,7 +6105,7 @@
          ${opticoReminder}
          <p><strong>How many Action Points does this Character have?</strong></p>
          <p style="color: var(--text-secondary); font-size: 0.9rem;">Include the slot's AP modifier and the Character's base AP.</p>
-         <div class="ap-selector" style="display: flex; gap: 10px; margin-top: 20px; justify-content: center;">
+         <div class="ap-selector" style="display: flex; gap: 10px; margin-top: 20px; justify-content: center; flex-wrap: wrap;">
            ${[1,2,3,4,5].map(ap => `
              <button class="btn ap-btn" data-ap="${ap}" style="min-width: 50px;">${ap} AP</button>
            `).join('')}
@@ -6259,7 +6259,7 @@
       ];
       
       const pilesHtml = `
-        <div style="display: flex; justify-content: center; gap: 10px; margin: 20px 0;">
+        <div style="display: flex; justify-content: center; gap: 10px; margin: 20px 0; flex-wrap: wrap;">
           ${piles.map(pile => {
             const isDrawing = drawCounts[pile.key] > 0;
             const count = drawCounts[pile.key] || 0;
@@ -6456,7 +6456,7 @@
          ${opticoReminder}
          ${exceptionBox("Ignore the +1/−1 AP slot modifier for the Heir. Use only the Character's base AP.")}
          <p style="margin: 15px 0;"><strong>How many Action Points does this Character have?</strong></p>
-         <div class="ap-selector" style="display: flex; gap: 10px; margin-top: 20px; justify-content: center;">
+         <div class="ap-selector" style="display: flex; gap: 10px; margin-top: 20px; justify-content: center; flex-wrap: wrap;">
            ${[1,2,3].map(ap => `
              <button class="btn ap-btn" data-ap="${ap}" style="min-width: 50px;">${ap} AP</button>
            `).join('')}
@@ -7163,7 +7163,7 @@
       
       // Build visual representation of 5 slots
       const cardSlotsHtml = `
-        <div style="display: flex; justify-content: center; gap: 8px; margin: 20px 0;">
+        <div style="display: flex; justify-content: center; gap: 8px; margin: 20px 0; flex-wrap: wrap;">
           ${[1,2,3,4,5].map(i => {
             const hasCard = i <= cardCount;
             
@@ -7291,7 +7291,7 @@
       
       // Build visual representation showing the single card highlighted
       const cardSlotsHtml = `
-        <div style="display: flex; justify-content: center; gap: 8px; margin: 20px 0;">
+        <div style="display: flex; justify-content: center; gap: 8px; margin: 20px 0; flex-wrap: wrap;">
           ${[1,2,3,4,5].map(i => {
             const hasCard = i <= cardCount;
             const isSelectedCard = i === cardSlot;
@@ -7421,7 +7421,7 @@
       
       // Build visual representation of card slots showing current one highlighted
       const cardSlotsHtml = `
-        <div style="display: flex; justify-content: center; gap: 8px; margin: 20px 0;">
+        <div style="display: flex; justify-content: center; gap: 8px; margin: 20px 0; flex-wrap: wrap;">
           ${[1,2,3,4,5].map(i => {
             const hasCard = i <= cardCount;
             const isCurrentCard = i === currentSlot;
@@ -8109,7 +8109,7 @@
     // Helper function to build card slots visual
     function buildCardSlotsVisual(cardCount, selectedSlots, winningCard) {
       return `
-        <div style="display: flex; justify-content: center; gap: 8px; margin: 20px 0;">
+        <div style="display: flex; justify-content: center; gap: 8px; margin: 20px 0; flex-wrap: wrap;">
           ${[1,2,3,4,5].map(i => {
             const hasCard = i <= cardCount;
             const isWinningCard = i === winningCard;
