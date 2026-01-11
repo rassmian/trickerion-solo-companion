@@ -28,7 +28,7 @@ Visit: https://rassmian.github.io/trickerion-solo-companion/
 
 - Trickerion base game (physical copy)
 - Modern web browser (Chrome, Firefox, Safari, Edge)
-- The app works on desktop and mobile (but has not yet been tested or optimised for mobile)
+- The app works on desktop and mobile
 
 ## Debug Mode
 
@@ -52,4 +52,4 @@ Trickerion: Legends of Illusion is © Mindclash Games. All rights reserved.
 
 ## Version
 
-Current: **v0.9-beta**
+Current: **v0.9.7-beta**
