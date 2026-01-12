@@ -52,4 +52,4 @@ Trickerion: Legends of Illusion is © Mindclash Games. All rights reserved.
 
 ## Version
 
-Current: **v0.9.7-beta**
+Current: **v0.10.0-beta**
