@@ -415,6 +415,14 @@
       .action-content [style*="grid-template-columns: 1fr 1fr 1fr"] {
         grid-template-columns: 1fr !important;
       }
+      /* Reduce spacing in turn summary box */
+      .turn-summary-box {
+        padding: 12px !important;
+        margin-bottom: 12px !important;
+      }
+      .turn-summary-box > div {
+        gap: 8px !important;
+      }
     }
 
     /* Sidebar - Heir State */
@@ -1048,7 +1056,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.9.7-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.10.0-beta</p>
       <button class="restart-btn hidden" id="restart-btn">↺ New Game</button>
     </header>
 
@@ -4448,13 +4456,9 @@
       } else {
         content = `${boardAction("Rearrange Initiative Order based on Fame (lower Fame goes first)")}
                    
-                   <p style="margin-top: 15px; color: var(--text-secondary);">If tied, reverse the previous order of tied players.</p>
+                   <p style="margin-top: 10px; color: var(--text-secondary);">If tied, reverse the previous order of tied players.</p>
                    
-                   <div style="background: var(--bg-card); padding: 15px; border-radius: 6px; margin: 15px 0;">
-                     <p><strong>Current Heir Fame:</strong> ${gameState.heir.fame}</p>
-                   </div>
-                   
-                   <p style="color: var(--text-muted); font-size: 0.9rem;">The Heir may occupy the 1st or 3rd slot in a 2-player game, just like a human opponent.</p>`;
+                   <p style="margin-top: 10px;"><strong>Current Heir Fame:</strong> ${gameState.heir.fame}</p>`;
       }
       
       setActionContent(
@@ -4486,7 +4490,6 @@
          <div style="background: var(--bg-card); border: 1px solid var(--border); padding: 12px 15px; margin: 15px 0; border-radius: 6px;">
            <p style="color: var(--text-secondary); margin-bottom: 8px;"><strong>Your turn to Advertise:</strong></p>
            <p style="color: var(--text-secondary); font-size: 0.9rem;">Pay Coins equal to your Initiative position (1-4) to gain 2 Fame.</p>
-           <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 6px;">If advertising: Place your Poster card above your Initiative marker.</p>
          </div>`,
         [{ text: 'Continue to Assignment', action: () => advancePhase() }]
       );
@@ -4589,10 +4592,6 @@
       
       content += boardAction("Assign standard Assignment cards to the Heir's Characters, left-to-right, matching the Plan card's locations");
       
-      content += infoBox("Do NOT use Special Assignment cards unless the location is marked as a Special Assignment on the Plan card. Skip any Special Assignment location if the Heir doesn't have a matching card.");
-      
-      content += `<p style="margin-top: 15px; color: var(--text-muted); font-size: 0.9rem; font-style: italic;">Note: The Heir may have more or fewer Characters than locations shown. Ignore any excess either way.</p>`;
-      
       setActionContent(
         `Turn ${gameState.currentTurn} — Assignment`,
         content,
@@ -4607,8 +4606,7 @@
         
         setActionContent(
           `Turn ${gameState.currentTurn} — Assignment`,
-          `${infoBox("On Turn 1, the Heir always uses a <strong>Set Up</strong> card and starts in <strong>Busy</strong> stance.")}
-           <p>No need to check the Plan card type — proceed with assignment.</p>`,
+          `${infoBox("On Turn 1, the Heir always uses a <strong>Set Up</strong> card and starts in <strong>Busy</strong> stance.")}`,
           [{ text: 'Continue →', action: () => setPlanCardAndStance('setup') }]
         );
         return;
@@ -4671,7 +4669,7 @@
         `<div style="text-align: center; padding: 20px 0;">
            <div style="font-size: 1.4rem; color: var(--amber); margin-bottom: 20px;">✦ Turn ${gameState.currentTurn} Setup Complete ✦</div>
            
-           <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 20px; text-align: left;">
+           <div class="turn-summary-box" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 20px; text-align: left;">
              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                <div>
                  <div style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 4px;">Plan Card</div>
@@ -4928,7 +4926,7 @@
       }
       
       // Add rotation button for when player visits Dark Alley
-      const rotationButton = `<div style="margin-top: 15px; text-align: center;">
+      const rotationButton = `<div style="margin-top: 10px; text-align: center;">
         <button class="btn" id="player-rotated-prophecy-btn" style="background: transparent; border: 1px solid var(--prophecy); color: var(--prophecy); font-size: 0.85rem; padding: 8px 16px;">
           🔮 I Rotated Prophecies at Dark Alley
         </button>
@@ -4949,9 +4947,9 @@
          ${prophecyReminder}
          <div style="background: var(--bg-card); padding: 15px; border-radius: 6px; margin: 15px 0;">
            <p style="color: var(--text-secondary); font-size: 0.9rem;">Heir has placed <strong>${gameState.heirPlacementsEndedEarly ? gameState.heirActualPlacements : heirPlaced}</strong> of <strong>${heirCharacterCount}</strong> characters this turn.${gameState.heirPlacementsEndedEarly ? ' <span style="color: var(--text-muted);">(ended early)</span>' : ''}</p>
-           ${heirRemaining > 0 
-             ? `<p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 5px;">After you place, it will be the Heir's turn.</p>`
-             : `<p style="color: var(--amber); font-size: 0.9rem; margin-top: 5px;">The Heir has placed all their characters. Continue placing yours until done.</p>`
+           ${heirRemaining === 0 
+             ? `<p style="color: var(--amber); font-size: 0.9rem; margin-top: 5px;">The Heir has placed all their characters. Continue placing yours until done.</p>`
+             : ''
            }
          </div>
          ${rotationButton}
@@ -5041,9 +5039,7 @@
       
       setActionContent(
         `Turn ${gameState.currentTurn} — Shared Links`,
-        `<p><strong>Check for Shards from YOUR Link placements</strong></p>
-         
-         ${infoBox("When you create a Link over a Shard symbol with one of the Heir's tricks, <strong>both you AND the Heir</strong> receive 1 Shard.")}
+        `${infoBox("When you create a Link over a Shard symbol with one of the Heir's tricks, <strong>both you AND the Heir</strong> receive 1 Shard.")}
          
          <p style="margin-top: 15px;">How many Links did you just create with the Heir's tricks over Shard symbols?</p>
          
@@ -5160,17 +5156,14 @@
          ${exceptionBox("Theater is NOT contested if the only character remaining to place there (for either side) is a Magician.")}
          ${exceptionBox("Workshop is NEVER contested.")}
          
-         <div style="background: var(--bg-card); border: 1px solid var(--border); padding: 12px 15px; margin: 15px 0; border-radius: 6px;">
-           <p style="font-weight: 600; margin-bottom: 8px; color: var(--text-secondary);">📍 Heir Character Placement Order:</p>
-           <ul style="margin: 0 0 0 20px; color: var(--text-secondary); font-size: 0.9rem;">
-             <li><strong>Downtown:</strong> Left to right (higher ⚡ first)</li>
-             <li><strong>Theater:</strong> Left to right, <strong>except Magician always last</strong></li>
-           </ul>
-         </div>
-         
          <details style="margin-top: 15px; color: var(--text-muted);">
            <summary style="cursor: pointer; color: var(--text-secondary);">Other Heir Rules & Definitions</summary>
            <div style="margin-top: 12px; font-size: 0.9rem;">
+             <p style="margin-bottom: 8px;"><strong>📍 Heir Character Placement Order:</strong></p>
+             <ul style="margin-left: 20px; margin-bottom: 12px;">
+               <li><strong>Downtown:</strong> Left to right (higher ⚡ first)</li>
+               <li><strong>Theater:</strong> Left to right, <strong>except Magician always last</strong></li>
+             </ul>
              <p style="margin-bottom: 8px;"><strong>Contested Location:</strong> Both you AND the Heir have at least one character assigned but NOT YET PLACED there.</p>
              <p style="margin-bottom: 8px;"><strong>Other Rules:</strong></p>
              <ul style="margin-left: 20px;">
@@ -5860,8 +5853,7 @@
       
       setActionContent(
         `Turn ${gameState.currentTurn} — Downtown Actions`,
-        `<div style="margin-bottom: 20px;">${instructionsHtml}</div>
-         <p style="color: var(--text-muted); font-size: 0.9rem;">Perform these actions in order. For each action, set the used die to X.</p>`,
+        `<div style="margin-bottom: 20px;">${instructionsHtml}</div>`,
         [
           { text: 'Done — Continue Placement', action: () => startPlaceCharactersSequence() }
         ]
@@ -5935,7 +5927,6 @@
         `<p>The Heir can order up to <strong>${actionPoints} components</strong>.</p>
          <p style="margin-top: 10px;"><strong>Heir's Shopping List:</strong> ${shoppingList.map(c => formatComponentWithTier(c)).join(', ')}</p>
          <p style="margin-top: 15px;"><strong>Which components from the Shopping List are currently available in the Market?</strong></p>
-         <p style="color: var(--text-secondary); font-size: 0.9rem;">Check the Market board (including Quick Order slot). Select all that are available.</p>
          
          <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 20px; max-width: 500px; margin-left: auto; margin-right: auto;">
            ${shoppingList.map((component, index) => {
@@ -6347,8 +6338,6 @@
          <p style="margin: 15px 0;">The Heir draws <strong>${cardCount} Special Assignment card${cardCount > 1 ? 's' : ''}</strong>.</p>
          
          ${pilesHtml}
-         
-         <p style="text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;"><em>Draw from highlighted pile(s) — left to right matches board layout</em></p>
          
          ${boardAction(`Draw ${cardCount} SA card${cardCount > 1 ? 's' : ''} from the highlighted pile${Object.keys(drawCounts).length > 1 ? 's' : ''}`)}
          
@@ -6990,8 +6979,15 @@
             const playerActionEl = $('#theater-player-shard-action');
             if (playerActionEl) {
               if (shardLinks > 0) {
+                // Calculate player shards (same p19 bonus applies to player)
+                let playerShardGain = shardLinks;
+                if (isExtraShard) {
+                  playerShardGain += 1;
+                }
+                // Check for p20 Fame bonus
+                const p20Bonus = isShardsGiveFame ? ' and <strong>+2 Fame</strong>' : '';
                 playerActionEl.classList.remove('hidden');
-                playerActionEl.innerHTML = `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);"><strong>You</strong> also receive <strong>${shardLinks}</strong> Shard(s) from linking with the Heir!</span></div>`;
+                playerActionEl.innerHTML = `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);"><strong>You</strong> also receive <strong>${playerShardGain}</strong> Shard(s)${p20Bonus} from linking with the Heir!</span></div>`;
               } else {
                 playerActionEl.classList.add('hidden');
               }
@@ -8646,7 +8642,7 @@
       setActionContent(
         `Turn ${gameState.currentTurn} — End Turn (SA Cards)`,
         `<p><strong>Did the Heir use a Special Assignment card this turn?</strong></p>
-         <p style="color: var(--text-secondary); margin: 10px 0;">Check the Plan card - if any location showed this icon <span style="display: inline-block; width: 14px; height: 18px; border: 2px solid var(--text-secondary); position: relative; vertical-align: middle; margin: 0 3px;"><span style="position: absolute; width: 100%; height: 2px; background: var(--text-secondary); top: 50%; left: 0;"></span></span>, the Heir used an SA card there.</p>
+         
          
          <div style="background: var(--bg-card); padding: 15px; border-radius: 6px; margin: 15px 0;">
            <p style="margin-bottom: 10px;"><strong>Current SA Cards:</strong></p>
@@ -8794,7 +8790,7 @@
       setActionContent(
         `Turn ${gameState.currentTurn} — End Turn (SA Cards)`,
         `<p><strong>Did the Heir use a Special Assignment card this turn?</strong></p>
-         <p style="color: var(--text-secondary); margin: 10px 0;">Check the Plan card - if any location showed this icon <span style="display: inline-block; width: 14px; height: 18px; border: 2px solid var(--text-secondary); position: relative; vertical-align: middle; margin: 0 3px;"><span style="position: absolute; width: 100%; height: 2px; background: var(--text-secondary); top: 50%; left: 0;"></span></span>, the Heir used an SA card there.</p>
+         
          
          <div style="background: var(--bg-card); padding: 15px; border-radius: 6px; margin: 15px 0;">
            <p style="margin-bottom: 10px;"><strong>Current SA Cards:</strong></p>
@@ -9143,7 +9139,7 @@
       setActionContent(
         `Turn 7 — Final End Turn (SA Cards)`,
         `<p><strong>Did the Heir use a Special Assignment card this turn?</strong></p>
-         <p style="color: var(--text-secondary); margin: 10px 0;">Check the Plan card - if any location showed this icon <span style="display: inline-block; width: 14px; height: 18px; border: 2px solid var(--text-secondary); position: relative; vertical-align: middle; margin: 0 3px;"><span style="position: absolute; width: 100%; height: 2px; background: var(--text-secondary); top: 50%; left: 0;"></span></span>, the Heir used an SA card there.</p>
+         
          
          <div style="background: var(--bg-card); padding: 15px; border-radius: 6px; margin: 15px 0;">
            <p style="margin-bottom: 10px;"><strong>Current SA Cards:</strong></p>
