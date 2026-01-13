@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Voice Tech Spike</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #eee;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      min-height: 100vh;
+      text-align: center;
+    }
+    
+    .screen.active {
+      display: flex;
+    }
+    
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 16px;
+      color: #d4a847;
+    }
+    
+    p {
+      font-size: 1.1rem;
+      color: #aaa;
+      margin-bottom: 24px;
+      max-width: 300px;
+      line-height: 1.5;
+    }
+    
+    .giant-btn {
+      width: 100%;
+      max-width: 320px;
+      padding: 24px 32px;
+      font-size: 1.4rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform 0.1s, background 0.2s;
+      margin: 8px 0;
+    }
+    
+    .giant-btn:active {
+      transform: scale(0.98);
+    }
+    
+    .giant-btn.primary {
+      background: #d4a847;
+      color: #1a1a2e;
+    }
+    
+    .giant-btn.secondary {
+      background: #333;
+      color: #aaa;
+    }
+    
+    .giant-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    /* Status indicator */
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 24px;
+      background: #252540;
+      border-radius: 8px;
+      margin-bottom: 32px;
+      font-size: 1rem;
+    }
+    
+    .status-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #666;
+    }
+    
+    .status-dot.listening {
+      background: #4caf50;
+      animation: pulse 1s infinite;
+    }
+    
+    .status-dot.speaking {
+      background: #2196f3;
+      animation: pulse 0.5s infinite;
+    }
+    
+    .status-dot.error {
+      background: #f44336;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    /* Question display */
+    .question {
+      font-size: 1.5rem;
+      color: #fff;
+      margin-bottom: 16px;
+    }
+    
+    /* Response display */
+    .response {
+      font-size: 2rem;
+      color: #d4a847;
+      min-height: 60px;
+      margin: 16px 0;
+    }
+    
+    /* Heard text */
+    .heard {
+      font-size: 0.9rem;
+      color: #666;
+      margin-top: 8px;
+      min-height: 24px;
+    }
+    
+    /* Touch fallback hint */
+    .touch-hint {
+      font-size: 0.85rem;
+      color: #666;
+      margin-top: 24px;
+    }
+    
+    /* Option buttons for fallback */
+    .options {
+      display: flex;
+      gap: 16px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    .option-btn {
+      padding: 16px 32px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      border: 2px solid #444;
+      background: transparent;
+      color: #eee;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .option-btn:active {
+      background: #d4a847;
+      border-color: #d4a847;
+      color: #1a1a2e;
+    }
+    
+    /* Summary list */
+    .summary-list {
+      text-align: left;
+      background: #252540;
+      padding: 24px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+      width: 100%;
+      max-width: 320px;
+    }
+    
+    .summary-list li {
+      padding: 8px 0;
+      border-bottom: 1px solid #333;
+      list-style: none;
+    }
+    
+    .summary-list li:last-child {
+      border-bottom: none;
+    }
+    
+    .summary-list .label {
+      color: #888;
+      font-size: 0.85rem;
+    }
+    
+    .summary-list .value {
+      color: #d4a847;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    
+    /* Error message */
+    .error-msg {
+      background: rgba(244, 67, 54, 0.2);
+      border: 1px solid #f44336;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+      max-width: 320px;
+    }
+    
+    /* Mic indicator */
+    .mic-icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Screen 1: Welcome -->
+  <div class="screen active" id="screen-welcome">
+    <div class="mic-icon">🎤</div>
+    <h1>Voice Tech Spike</h1>
+    <p>This demo tests voice input and text-to-speech for the Pro Mode feature.</p>
+    <button class="giant-btn primary" onclick="requestMicAndStart()">ENABLE VOICE & START</button>
+    <button class="giant-btn secondary" onclick="startTouchOnly()">Continue without voice</button>
+  </div>
+
+  <!-- Screen 2: Yes/No Question -->
+  <div class="screen" id="screen-yesno">
+    <div class="status">
+      <div class="status-dot" id="yesno-status"></div>
+      <span id="yesno-status-text">Waiting...</span>
+    </div>
+    <div class="question">Is it sunny outside?</div>
+    <div class="response" id="yesno-response">—</div>
+    <div class="heard" id="yesno-heard"></div>
+    <div class="options">
+      <button class="option-btn" onclick="manualAnswer('yesno', 'Yes')">YES</button>
+      <button class="option-btn" onclick="manualAnswer('yesno', 'No')">NO</button>
+    </div>
+    <div class="touch-hint">or tap a button above</div>
+  </div>
+
+  <!-- Screen 3: Number Question -->
+  <div class="screen" id="screen-number">
+    <div class="status">
+      <div class="status-dot" id="number-status"></div>
+      <span id="number-status-text">Waiting...</span>
+    </div>
+    <div class="question">Pick a number from 1 to 5</div>
+    <div class="response" id="number-response">—</div>
+    <div class="heard" id="number-heard"></div>
+    <div class="options">
+      <button class="option-btn" onclick="manualAnswer('number', '1')">1</button>
+      <button class="option-btn" onclick="manualAnswer('number', '2')">2</button>
+      <button class="option-btn" onclick="manualAnswer('number', '3')">3</button>
+      <button class="option-btn" onclick="manualAnswer('number', '4')">4</button>
+      <button class="option-btn" onclick="manualAnswer('number', '5')">5</button>
+    </div>
+    <div class="touch-hint">or tap a number above</div>
+  </div>
+
+  <!-- Screen 4: Keyword Mode (Player Turn) -->
+  <div class="screen" id="screen-keyword">
+    <div class="status">
+      <div class="status-dot" id="keyword-status"></div>
+      <span id="keyword-status-text">Waiting...</span>
+    </div>
+    <div class="mic-icon">👤</div>
+    <h1>YOUR TURN</h1>
+    <p>Pretend to do something on the board, then say "Done" or "Next" when ready.</p>
+    <div class="heard" id="keyword-heard"></div>
+    <button class="giant-btn primary" onclick="manualAdvance()">DONE</button>
+    <div class="touch-hint">🎤 Say "done", "next", or "ready"</div>
+  </div>
+
+  <!-- Screen 5: Summary -->
+  <div class="screen" id="screen-summary">
+    <h1>✅ Demo Complete</h1>
+    <ul class="summary-list">
+      <li>
+        <div class="label">Sunny outside?</div>
+        <div class="value" id="summary-yesno">—</div>
+      </li>
+      <li>
+        <div class="label">Number picked</div>
+        <div class="value" id="summary-number">—</div>
+      </li>
+      <li>
+        <div class="label">Voice mode</div>
+        <div class="value" id="summary-mode">—</div>
+      </li>
+    </ul>
+    <button class="giant-btn primary" onclick="restart()">RESTART DEMO</button>
+  </div>
+
+  <!-- Screen: Mic Error -->
+  <div class="screen" id="screen-error">
+    <h1>🎤 Microphone Error</h1>
+    <div class="error-msg" id="error-message">
+      Could not access microphone.
+    </div>
+    <p>You can still use the demo with touch controls.</p>
+    <button class="giant-btn primary" onclick="startTouchOnly()">CONTINUE WITH TOUCH</button>
+    <button class="giant-btn secondary" onclick="restart()">TRY AGAIN</button>
+  </div>
+
+  <script>
+    // ============================================
+    // STATE
+    // ============================================
+    
+    let voiceEnabled = false;
+    let recognition = null;
+    let currentScreen = 'welcome';
+    let isListening = false;
+    let isSpeaking = false;
+    let screenHandler = null; // Current screen's result handler
+    
+    const answers = {
+      yesno: null,
+      number: null
+    };
+    
+    // ============================================
+    // SPEECH SYNTHESIS (TTS)
+    // ============================================
+    
+    function speak(text, onEnd) {
+      if (!('speechSynthesis' in window)) {
+        console.warn('TTS not supported');
+        if (onEnd) setTimeout(onEnd, 500);
+        return;
+      }
+      
+      // Cancel any ongoing speech
+      speechSynthesis.cancel();
+      isSpeaking = true;
+      updateStatusDot();
+      
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+      utterance.volume = 1.0;
+      
+      utterance.onend = () => {
+        console.log('TTS finished:', text);
+        isSpeaking = false;
+        updateStatusDot();
+        if (onEnd) onEnd();
+      };
+      
+      utterance.onerror = (e) => {
+        console.error('TTS error:', e);
+        isSpeaking = false;
+        updateStatusDot();
+        if (onEnd) onEnd();
+      };
+      
+      speechSynthesis.speak(utterance);
+    }
+    
+    // ============================================
+    // SPEECH RECOGNITION - SINGLE CONTINUOUS SESSION
+    // ============================================
+    
+    function setupRecognition() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      
+      if (!SpeechRecognition) {
+        console.warn('Speech recognition not supported');
+        return null;
+      }
+      
+      const rec = new SpeechRecognition();
+      rec.continuous = true;  // Keep listening
+      rec.interimResults = true;
+      rec.lang = 'en-US';
+      
+      rec.onstart = () => {
+        console.log('Recognition started');
+        isListening = true;
+        updateStatusDot();
+        
+        // Resolve initial start promise if waiting
+        if (rec._initialStartResolve) {
+          rec._initialStartResolve();
+          rec._initialStartResolve = null;
+        }
+      };
+      
+      rec.onresult = (event) => {
+        // Ignore results while TTS is speaking
+        if (isSpeaking) return;
+        
+        const result = event.results[event.results.length - 1];
+        const transcript = result[0].transcript.toLowerCase().trim();
+        const isFinal = result.isFinal;
+        
+        console.log(`Heard (final=${isFinal}): "${transcript}"`);
+        
+        // Update heard display for current screen
+        updateHeardDisplay(transcript);
+        
+        // Pass to current screen handler
+        if (screenHandler) {
+          screenHandler(transcript, isFinal);
+        }
+      };
+      
+      rec.onerror = (event) => {
+        console.error('Recognition error:', event.error);
+        
+        // Reject initial start promise if waiting
+        if (rec._initialStartReject && event.error === 'not-allowed') {
+          rec._initialStartReject(new Error('Microphone permission denied'));
+          rec._initialStartResolve = null;
+          rec._initialStartReject = null;
+          return;
+        }
+        
+        // Handle recoverable errors
+        if (event.error === 'no-speech' || event.error === 'aborted') {
+          // Will auto-restart via onend
+        } else if (event.error === 'not-allowed') {
+          voiceEnabled = false;
+          updateStatusDot();
+          setStatusText('Mic permission denied');
+        } else {
+          setStatusText(`Error: ${event.error}`);
+        }
+      };
+      
+      rec.onend = () => {
+        console.log('Recognition ended');
+        isListening = false;
+        
+        // Auto-restart if voice is still enabled and not on welcome/summary/error screen
+        if (voiceEnabled && !['welcome', 'summary', 'error'].includes(currentScreen)) {
+          console.log('Auto-restarting recognition...');
+          setTimeout(() => {
+            try {
+              rec.start();
+            } catch (e) {
+              console.log('Could not restart:', e.message);
+            }
+          }, 100);
+        } else {
+          updateStatusDot();
+        }
+      };
+      
+      return rec;
+    }
+    
+    function startRecognition() {
+      if (!recognition || !voiceEnabled) return;
+      
+      if (!isListening) {
+        try {
+          recognition.start();
+        } catch (e) {
+          console.log('Recognition start error:', e.message);
+        }
+      }
+    }
+    
+    function stopRecognition() {
+      if (recognition && isListening) {
+        try {
+          recognition.stop();
+        } catch (e) {
+          console.log('Recognition stop error:', e.message);
+        }
+      }
+    }
+    
+    // ============================================
+    // UI HELPERS
+    // ============================================
+    
+    function updateStatusDot() {
+      const dotId = `${currentScreen}-status`;
+      const dot = document.getElementById(dotId);
+      if (!dot) return;
+      
+      if (isSpeaking) {
+        dot.className = 'status-dot speaking';
+      } else if (isListening) {
+        dot.className = 'status-dot listening';
+      } else {
+        dot.className = 'status-dot';
+      }
+    }
+    
+    function setStatusText(text) {
+      const textId = `${currentScreen}-status-text`;
+      const el = document.getElementById(textId);
+      if (el) el.textContent = text;
+    }
+    
+    function updateHeardDisplay(transcript) {
+      const heardId = `${currentScreen}-heard`;
+      const el = document.getElementById(heardId);
+      if (el) el.textContent = `Heard: "${transcript}"`;
+    }
+    
+    // ============================================
+    // PARSERS
+    // ============================================
+    
+    function parseYesNo(transcript) {
+      if (transcript.includes('yes') || transcript.includes('yeah') || transcript.includes('yep') || transcript.includes('yup')) {
+        return 'Yes';
+      }
+      if (transcript.includes('no') || transcript.includes('nope') || transcript.includes('nah')) {
+        return 'No';
+      }
+      return null;
+    }
+    
+    function parseNumber(transcript) {
+      const wordMap = {
+        'one': 1, 'won': 1,
+        'two': 2, 'to': 2, 'too': 2,
+        'three': 3, 'free': 3,
+        'four': 4, 'for': 4,
+        'five': 5
+      };
+      
+      // Check word numbers
+      for (const [word, num] of Object.entries(wordMap)) {
+        if (transcript.includes(word)) {
+          return num.toString();
+        }
+      }
+      
+      // Check digit numbers
+      for (let i = 1; i <= 5; i++) {
+        if (transcript.includes(i.toString())) {
+          return i.toString();
+        }
+      }
+      
+      return null;
+    }
+    
+    function parseKeyword(transcript) {
+      const keywords = ['done', 'next', 'ready', 'continue'];
+      for (const keyword of keywords) {
+        if (transcript.includes(keyword)) {
+          return keyword;
+        }
+      }
+      return null;
+    }
+    
+    // ============================================
+    // SCREEN NAVIGATION
+    // ============================================
+    
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(`screen-${screenId}`).classList.add('active');
+      currentScreen = screenId;
+      screenHandler = null;
+      updateStatusDot();
+    }
+    
+    // ============================================
+    // SCREEN HANDLERS
+    // ============================================
+    
+    function startYesNoScreen() {
+      showScreen('yesno');
+      setStatusText('Speaking...');
+      updateStatusDot();
+      
+      speak('Is it sunny outside?', () => {
+        setStatusText(voiceEnabled ? 'Listening...' : 'Tap a button');
+        updateStatusDot();
+        
+        // Set up handler for this screen
+        screenHandler = (transcript, isFinal) => {
+          const answer = parseYesNo(transcript);
+          if (answer) {
+            screenHandler = null; // Prevent double-firing
+            answers.yesno = answer;
+            document.getElementById('yesno-response').textContent = answer;
+            setStatusText('Got it!');
+            
+            speak(answer, () => {
+              setTimeout(() => startNumberScreen(), 500);
+            });
+          }
+        };
+        
+        // Recognition already running from welcome screen
+      });
+    }
+    
+    function startNumberScreen() {
+      showScreen('number');
+      setStatusText('Speaking...');
+      updateStatusDot();
+      
+      speak('Pick a number from 1 to 5', () => {
+        setStatusText(voiceEnabled ? 'Listening...' : 'Tap a number');
+        updateStatusDot();
+        
+        screenHandler = (transcript, isFinal) => {
+          const answer = parseNumber(transcript);
+          if (answer) {
+            screenHandler = null;
+            answers.number = answer;
+            document.getElementById('number-response').textContent = answer;
+            setStatusText('Got it!');
+            
+            speak(answer, () => {
+              setTimeout(() => startKeywordScreen(), 500);
+            });
+          }
+        };
+        
+        // Recognition already running
+      });
+    }
+    
+    function startKeywordScreen() {
+      showScreen('keyword');
+      setStatusText('Speaking...');
+      updateStatusDot();
+      
+      speak('Your turn. Say done when ready.', () => {
+        setStatusText(voiceEnabled ? 'Listening for keywords...' : 'Tap DONE when ready');
+        updateStatusDot();
+        
+        screenHandler = (transcript, isFinal) => {
+          const keyword = parseKeyword(transcript);
+          if (keyword) {
+            screenHandler = null;
+            setStatusText(`Heard "${keyword}"!`);
+            
+            speak('Got it!', () => {
+              setTimeout(() => showSummary(), 300);
+            });
+          }
+        };
+        
+        // Recognition already running
+      });
+    }
+    
+    function showSummary() {
+      stopRecognition();
+      showScreen('summary');
+      
+      document.getElementById('summary-yesno').textContent = answers.yesno || '(skipped)';
+      document.getElementById('summary-number').textContent = answers.number || '(skipped)';
+      document.getElementById('summary-mode').textContent = voiceEnabled ? 'Enabled ✓' : 'Touch only';
+      
+      const yesnoText = answers.yesno ? (answers.yesno === 'Yes' ? 'yes' : 'no') : 'nothing';
+      const numberText = answers.number || 'nothing';
+      
+      speak(`Demo complete. You said ${yesnoText}, and picked ${numberText}.`);
+    }
+    
+    // ============================================
+    // MANUAL (TOUCH) HANDLERS
+    // ============================================
+    
+    function manualAnswer(screen, answer) {
+      screenHandler = null; // Disable voice handler
+      
+      if (screen === 'yesno') {
+        answers.yesno = answer;
+        document.getElementById('yesno-response').textContent = answer;
+        setStatusText('Got it!');
+        setTimeout(() => startNumberScreen(), 500);
+      } else if (screen === 'number') {
+        answers.number = answer;
+        document.getElementById('number-response').textContent = answer;
+        setStatusText('Got it!');
+        setTimeout(() => startKeywordScreen(), 500);
+      }
+    }
+    
+    function manualAdvance() {
+      screenHandler = null;
+      setStatusText('Button pressed!');
+      setTimeout(() => showSummary(), 300);
+    }
+    
+    // ============================================
+    // INIT
+    // ============================================
+    
+    async function requestMicAndStart() {
+      const btn = document.querySelector('#screen-welcome .giant-btn.primary');
+      const originalText = btn.textContent;
+      
+      try {
+        btn.textContent = 'Requesting mic...';
+        btn.disabled = true;
+        
+        // Setup recognition
+        recognition = setupRecognition();
+        
+        if (!recognition) {
+          throw new Error('Speech recognition not supported in this browser');
+        }
+        
+        // Start recognition and wait for it to actually start (this triggers permission)
+        await new Promise((resolve, reject) => {
+          let resolved = false;
+          
+          const timeout = setTimeout(() => {
+            if (!resolved) {
+              reject(new Error('Microphone request timed out'));
+            }
+          }, 10000);
+          
+          // Fallback: if onstart doesn't fire but no error after 2s, assume it's working
+          const fallbackTimeout = setTimeout(() => {
+            if (!resolved) {
+              console.log('onstart did not fire, but no error - assuming success');
+              resolved = true;
+              clearTimeout(timeout);
+              resolve();
+            }
+          }, 2000);
+          
+          recognition._initialStartResolve = () => {
+            if (!resolved) {
+              resolved = true;
+              clearTimeout(timeout);
+              clearTimeout(fallbackTimeout);
+              resolve();
+            }
+          };
+          recognition._initialStartReject = (err) => {
+            if (!resolved) {
+              resolved = true;
+              clearTimeout(timeout);
+              clearTimeout(fallbackTimeout);
+              reject(err);
+            }
+          };
+          
+          console.log('Starting recognition...');
+          recognition.start();
+        });
+        
+        btn.textContent = 'Ready!';
+        voiceEnabled = true;
+        isListening = true; // Assume listening even if onstart didn't fire
+        console.log('Voice enabled and listening!');
+        
+        // Brief pause to show "Ready!" then proceed
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        // Start the demo - recognition is already running
+        startYesNoScreen();
+        
+      } catch (err) {
+        console.error('Setup error:', err);
+        
+        btn.textContent = originalText;
+        btn.disabled = false;
+        
+        let message = err.message || 'Could not set up voice recognition.';
+        
+        document.getElementById('error-message').textContent = message;
+        showScreen('error');
+      }
+    }
+    
+    function startTouchOnly() {
+      voiceEnabled = false;
+      recognition = null;
+      console.log('Starting in touch-only mode');
+      startYesNoScreen();
+    }
+    
+    function restart() {
+      answers.yesno = null;
+      answers.number = null;
+      screenHandler = null;
+      
+      stopRecognition();
+      voiceEnabled = false;
+      
+      // Reset all displays
+      document.getElementById('yesno-response').textContent = '—';
+      document.getElementById('yesno-heard').textContent = '';
+      document.getElementById('number-response').textContent = '—';
+      document.getElementById('number-heard').textContent = '';
+      document.getElementById('keyword-heard').textContent = '';
+      
+      showScreen('welcome');
+    }
+    
+    // Cancel speech on page unload
+    window.addEventListener('beforeunload', () => {
+      stopRecognition();
+      if ('speechSynthesis' in window) {
+        speechSynthesis.cancel();
+      }
+    });
+  </script>
+</body>
+</html>
