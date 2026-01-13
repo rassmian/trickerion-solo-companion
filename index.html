@@ -1056,7 +1056,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.10.0-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.10.1-beta</p>
       <button class="restart-btn hidden" id="restart-btn">↺ New Game</button>
     </header>
 
@@ -1176,14 +1176,6 @@
                 <button class="btn-randomize" id="quick-randomize-trick-btn" disabled>🎲 Random</button>
               </div>
               
-              <!-- Engineer question - always shown -->
-              <div id="quick-engineer-trick-question" style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 12px 15px; margin-bottom: 15px; border-radius: 0 4px 4px 0;">
-                <p style="color: var(--text-secondary); margin-bottom: 10px;">Did you take one of these tricks with your Engineer bonus?</p>
-                <div id="quick-engineer-trick-radios" style="display: flex; flex-direction: column; gap: 8px;">
-                  <!-- Populated by JavaScript -->
-                </div>
-              </div>
-              
               <p id="quick-heir-trick-instruction" style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 6px;">Select one of the 3 eligible Level 1 tricks:</p>
               <div class="option-grid" id="quick-starting-trick-options"></div>
             </div>
@@ -1248,7 +1240,7 @@
             
             <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Fill the Market Row Buy area with one of each starting component: Wood, Metal, Glass, and Fabric</span></div>
             
-            <div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ TIP:</span> Fabric + Glass on top row, Metal + Wood on bottom row</div>
+
             
             <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Create the Performance deck using <strong>solo Performance cards</strong> — stack face-down from top to bottom: 2× Riverside Theater, 2× Grand Magorian, 2× Magnus Pantheon. Place next to the Theater</span></div>
             
@@ -1309,7 +1301,7 @@
               <span style="color: var(--info); font-weight: 600;">ℹ️ NOTE:</span> <span style="color: var(--text-secondary);">Specialist Bonuses:</span>
               <ul style="margin: 8px 0 0 20px; color: var(--text-secondary);">
                 <li><strong>Manager:</strong> Additional Component(s) worth up to 2 Coins, placed on the Manager's Board Extension</li>
-                <li><strong>Engineer:</strong> A Level 1 Trick of your choice (after selecting starting Trick), placed on the Engineer's Board Extension</li>
+                <li><strong>Engineer:</strong> A Level 1 Trick of your choice (after all starting Tricks are selected), placed on the Engineer's Board Extension</li>
                 <li><strong>Assistant:</strong> An additional Apprentice, placed on the Assistant's Board Extension</li>
               </ul>
             </div>
@@ -1521,14 +1513,6 @@
             <div class="section-header">
               <h2><span class="step-number">6</span> Heir's Starting Trick</h2>
               <button class="btn-randomize" id="randomize-trick-btn" disabled>🎲 Randomize</button>
-            </div>
-            
-            <!-- Engineer question - always shown -->
-            <div id="engineer-trick-question" style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 12px 15px; margin-bottom: 15px; border-radius: 0 4px 4px 0;">
-              <p style="color: var(--text-secondary); margin-bottom: 10px;">Did you take one of these tricks with your Engineer bonus?</p>
-              <div id="engineer-trick-radios" style="display: flex; flex-direction: column; gap: 8px;">
-                <!-- Populated by JavaScript -->
-              </div>
             </div>
             
             <p id="heir-trick-instruction" style="color: var(--text-secondary); margin-bottom: 15px;">Shuffle the following 3 Level 1 Tricks from the Heir's Favorite category (excluding the one requiring only 2 Basic Components of the same type). Draw one randomly:</p>
@@ -2720,7 +2704,6 @@
     function populateStartingTrickOptions() {
       const container = $('#starting-trick-options');
       const instructionEl = $('#heir-trick-instruction');
-      const engineerRadios = $('#engineer-trick-radios');
       
       if (!container) return;
       container.innerHTML = '';
@@ -2731,91 +2714,15 @@
       }
 
       const school = gameState.heirMagician.school;
-      const allEligibleTricks = getEligibleStartingTricks(school);
-      
-      // Always populate radio buttons for engineer question
-      if (engineerRadios) {
-        let radiosHtml = `
-          <label style="display: flex; align-items: center; gap: 10px; padding: 8px; background: var(--bg-card); border-radius: 4px; cursor: pointer;">
-            <input type="radio" name="engineer-took-trick" value="none" checked>
-            <span>No, I didn't take any of these</span>
-          </label>`;
-        
-        allEligibleTricks.forEach(trick => {
-          radiosHtml += `
-            <label style="display: flex; align-items: center; gap: 10px; padding: 8px; background: var(--bg-card); border-radius: 4px; cursor: pointer;">
-              <input type="radio" name="engineer-took-trick" value="${trick.id}">
-              <span>${trick.name}</span>
-            </label>`;
-        });
-        
-        engineerRadios.innerHTML = radiosHtml;
-        
-        // Add change handlers
-        engineerRadios.querySelectorAll('input[type="radio"]').forEach(radio => {
-          radio.addEventListener('change', () => {
-            // Update player's tracked tricks based on selection
-            const selectedTrickId = radio.value;
-            
-            // Remove any previously tracked engineer bonus trick from heir's school
-            gameState.player.tricks = gameState.player.tricks.filter(t => 
-              !(t.school === school && t.level === 1 && t.engineerBonus)
-            );
-            
-            // If a trick was selected (not "none"), add it to player's tricks
-            if (selectedTrickId !== 'none') {
-              const trick = allEligibleTricks.find(t => t.id === selectedTrickId);
-              if (trick) {
-                gameState.player.tricks.push({
-                  ...trick,
-                  school: school,
-                  level: 1,
-                  engineerBonus: true // Flag to identify this trick
-                });
-              }
-            }
-            
-            updateHeirStartingTrickDisplay();
-            updatePlayerTricksDisplay();
-          });
-        });
-      }
-      
-      // Initial display
-      updateHeirStartingTrickDisplay();
-    }
-    
-    function updateHeirStartingTrickDisplay() {
-      const container = $('#starting-trick-options');
-      const instructionEl = $('#heir-trick-instruction');
-      
-      if (!container || !gameState.heirMagician) return;
-      
-      const school = gameState.heirMagician.school;
-      const allEligibleTricks = getEligibleStartingTricks(school);
-      
-      // Check which trick (if any) the player took with Engineer
-      const selectedRadio = $('input[name="engineer-took-trick"]:checked');
-      const takenTrickId = selectedRadio ? selectedRadio.value : 'none';
-      
-      // Filter out the taken trick
-      const availableTricks = takenTrickId === 'none' 
-        ? allEligibleTricks 
-        : allEligibleTricks.filter(t => t.id !== takenTrickId);
+      const eligibleTricks = getEligibleStartingTricks(school);
       
       // Update instruction text
       if (instructionEl) {
-        if (availableTricks.length === 1) {
-          instructionEl.textContent = `There is only 1 Level 1 Trick available from the Heir's Favorite category:`;
-        } else {
-          instructionEl.textContent = `Shuffle the following ${availableTricks.length} Level 1 Tricks from the Heir's Favorite category (excluding the one requiring only 2 Basic Components of the same type). Draw one randomly:`;
-        }
+        instructionEl.textContent = `Shuffle the following ${eligibleTricks.length} Level 1 Tricks from the Heir's Favorite category (excluding the one requiring only 2 Basic Components of the same type). Draw one randomly:`;
       }
       
-      // Clear and repopulate trick options
-      container.innerHTML = '';
-      
-      availableTricks.forEach(trick => {
+      // Populate trick options
+      eligibleTricks.forEach(trick => {
         const card = document.createElement('div');
         card.className = 'option-card';
         card.dataset.school = school;
@@ -2827,11 +2734,6 @@
         card.addEventListener('click', () => selectStartingTrick(trick, school));
         container.appendChild(card);
       });
-      
-      // If only 1 trick available, auto-select it
-      if (availableTricks.length === 1) {
-        selectStartingTrick(availableTricks[0], school);
-      }
     }
 
     function updateSetupSummary() {
@@ -3224,97 +3126,20 @@
     function populateQuickStartingTrickOptions() {
       const container = $('#quick-starting-trick-options');
       const instructionEl = $('#quick-heir-trick-instruction');
-      const engineerRadios = $('#quick-engineer-trick-radios');
       
       if (!container || !gameState.heirMagician) return;
       container.innerHTML = '';
       
       const school = gameState.heirMagician.school;
-      const allEligibleTricks = getEligibleStartingTricks(school);
-      
-      // Always populate radio buttons for engineer question
-      if (engineerRadios) {
-        let radiosHtml = `
-          <label style="display: flex; align-items: center; gap: 10px; padding: 8px; background: var(--bg-card); border-radius: 4px; cursor: pointer;">
-            <input type="radio" name="quick-engineer-took-trick" value="none" checked>
-            <span>No, I didn't take any of these</span>
-          </label>`;
-        
-        allEligibleTricks.forEach(trick => {
-          radiosHtml += `
-            <label style="display: flex; align-items: center; gap: 10px; padding: 8px; background: var(--bg-card); border-radius: 4px; cursor: pointer;">
-              <input type="radio" name="quick-engineer-took-trick" value="${trick.id}">
-              <span>${trick.name}</span>
-            </label>`;
-        });
-        
-        engineerRadios.innerHTML = radiosHtml;
-        
-        // Add change handlers
-        engineerRadios.querySelectorAll('input[type="radio"]').forEach(radio => {
-          radio.addEventListener('change', () => {
-            // Update player's tracked tricks based on selection
-            const selectedTrickId = radio.value;
-            
-            // Remove any previously tracked engineer bonus trick from heir's school
-            gameState.player.tricks = gameState.player.tricks.filter(t => 
-              !(t.school === school && t.level === 1 && t.engineerBonus)
-            );
-            
-            // If a trick was selected (not "none"), add it to player's tricks
-            if (selectedTrickId !== 'none') {
-              const trick = allEligibleTricks.find(t => t.id === selectedTrickId);
-              if (trick) {
-                gameState.player.tricks.push({
-                  ...trick,
-                  school: school,
-                  level: 1,
-                  engineerBonus: true // Flag to identify this trick
-                });
-              }
-            }
-            
-            updateQuickHeirStartingTrickDisplay();
-            updatePlayerTricksDisplay();
-          });
-        });
-      }
-      
-      // Initial display
-      updateQuickHeirStartingTrickDisplay();
-    }
-    
-    function updateQuickHeirStartingTrickDisplay() {
-      const container = $('#quick-starting-trick-options');
-      const instructionEl = $('#quick-heir-trick-instruction');
-      
-      if (!container || !gameState.heirMagician) return;
-      
-      const school = gameState.heirMagician.school;
-      const allEligibleTricks = getEligibleStartingTricks(school);
-      
-      // Check which trick (if any) the player took with Engineer
-      const selectedRadio = $('input[name="quick-engineer-took-trick"]:checked');
-      const takenTrickId = selectedRadio ? selectedRadio.value : 'none';
-      
-      // Filter out the taken trick
-      const availableTricks = takenTrickId === 'none' 
-        ? allEligibleTricks 
-        : allEligibleTricks.filter(t => t.id !== takenTrickId);
+      const eligibleTricks = getEligibleStartingTricks(school);
       
       // Update instruction text
       if (instructionEl) {
-        if (availableTricks.length === 1) {
-          instructionEl.textContent = `There is only 1 eligible Level 1 trick available:`;
-        } else {
-          instructionEl.textContent = `Select one of the ${availableTricks.length} eligible Level 1 tricks:`;
-        }
+        instructionEl.textContent = `Select one of the ${eligibleTricks.length} eligible Level 1 tricks:`;
       }
       
-      // Clear and repopulate trick options
-      container.innerHTML = '';
-      
-      availableTricks.forEach(trick => {
+      // Populate trick options
+      eligibleTricks.forEach(trick => {
         const card = document.createElement('div');
         card.className = 'option-card';
         card.dataset.trick = trick.id;
@@ -3325,11 +3150,6 @@
         card.addEventListener('click', () => quickSelectStartingTrick(trick, school));
         container.appendChild(card);
       });
-      
-      // If only 1 trick available, auto-select it
-      if (availableTricks.length === 1) {
-        quickSelectStartingTrick(availableTricks[0], school);
-      }
     }
     
     function updateQuickSetupSummary() {
@@ -3392,6 +3212,8 @@
         <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Heir's Trick: <strong>${trick.name}</strong> with <strong>${trickMarkers} Trick marker(s)</strong> (Prepared)</span></div>
         ${elektraNote}
         
+        <div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ NOTE:</span> If you chose the Engineer as your specialist, choose a Level 1 Trick and place it on the Engineer's Board Extension. Mark it with a Symbol Marker.</div>
+        
         <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Shopping List: <strong>${shoppingList}</strong></span></div>
       `;
     }
@@ -3449,6 +3271,7 @@
       trickContainer.innerHTML = `
         <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place <strong>${trick.name}</strong> on the leftmost Trick slot of the Heir's board with <strong>${markers} Trick marker(s)</strong> — it starts <strong>Prepared</strong></span></div>
         ${elektraNote}
+        <div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ NOTE:</span> If you chose the Engineer as your specialist, choose a Level 1 Trick and place it on the Engineer's Board Extension. Mark it with a Symbol Marker.</div>
       `;
       
       const components = Object.keys(trick.components).map(c => c.charAt(0).toUpperCase() + c.slice(1)).join(', ');
