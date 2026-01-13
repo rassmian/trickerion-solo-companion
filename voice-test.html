@@ -444,19 +444,22 @@
       rec.onend = () => {
         console.log('Recognition ended');
         isListening = false;
+        updateStatusDot();
         
         // Auto-restart if voice is still enabled and not on welcome/summary/error screen
+        // Use longer delay on mobile to reduce Android's start/stop beeping
         if (voiceEnabled && !['welcome', 'summary', 'error'].includes(currentScreen)) {
-          console.log('Auto-restarting recognition...');
+          console.log('Will restart recognition in 3s...');
           setTimeout(() => {
-            try {
-              rec.start();
-            } catch (e) {
-              console.log('Could not restart:', e.message);
+            if (voiceEnabled && !['welcome', 'summary', 'error'].includes(currentScreen)) {
+              console.log('Restarting recognition...');
+              try {
+                rec.start();
+              } catch (e) {
+                console.log('Could not restart:', e.message);
+              }
             }
-          }, 100);
-        } else {
-          updateStatusDot();
+          }, 3000);
         }
       };
       
@@ -592,6 +595,9 @@
         
         // Set up handler for this screen
         screenHandler = (transcript, isFinal) => {
+          // Only act on final results to avoid false triggers
+          if (!isFinal) return;
+          
           const answer = parseYesNo(transcript);
           if (answer) {
             screenHandler = null; // Prevent double-firing
@@ -619,6 +625,9 @@
         updateStatusDot();
         
         screenHandler = (transcript, isFinal) => {
+          // Only act on final results to avoid false triggers
+          if (!isFinal) return;
+          
           const answer = parseNumber(transcript);
           if (answer) {
             screenHandler = null;
@@ -646,6 +655,9 @@
         updateStatusDot();
         
         screenHandler = (transcript, isFinal) => {
+          // Only act on final results to avoid false triggers
+          if (!isFinal) return;
+          
           const keyword = parseKeyword(transcript);
           if (keyword) {
             screenHandler = null;
