@@ -1056,7 +1056,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.10.1-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.11.0-beta</p>
       <button class="restart-btn hidden" id="restart-btn">↺ New Game</button>
     </header>
 
@@ -1227,8 +1227,56 @@
           </div>
         </div>
 
-        <!-- PAGE 1: Board Setup -->
+        <!-- PAGE 1: Expansion Selection -->
         <div class="setup-page hidden" id="setup-page-1">
+          <div class="setup-section">
+            <h2><span class="step-number">1</span> Select Expansion</h2>
+            <div class="option-grid" id="expansion-options">
+              <div class="option-card selected" data-expansion="base">
+                <div class="title">Base Game + Dark Alley</div>
+                <div class="description">Core solo experience with 7 turns and 5 character slots</div>
+              </div>
+              <div class="option-card disabled" data-expansion="academy">
+                <div class="title">With Academy</div>
+                <div class="description coming-soon">Coming Soon</div>
+                <div class="description">Adds Protégé, 6th character slot, Classrooms, Practice Rooms</div>
+              </div>
+              <div class="option-card" data-expansion="dawn">
+                <div class="title">With Dawn of Technology</div>
+                <div class="description">Adds Contraptions and Signature Tricks</div>
+              </div>
+              <div class="option-card disabled" data-expansion="arcane">
+                <div class="title">With Arcane Arts</div>
+                <div class="description coming-soon">Coming Soon</div>
+                <div class="description">Adds Familiars, Arcane cards, and new tricks</div>
+              </div>
+            </div>
+            
+            <!-- Dawn of Technology Optional Rules (shown when DoT is selected) -->
+            <div id="dawn-options" class="hidden" style="margin-top: 20px; padding: 15px; background: var(--bg-card); border-radius: 6px; border: 1px solid var(--border);">
+              <h3 style="color: var(--amber); margin-bottom: 10px; font-size: 1rem;">Dawn of Technology Options</h3>
+              <div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin-bottom: 15px; border-radius: 0 4px 4px 0;">
+                <span style="color: var(--info); font-weight: 600;">ℹ️ NOTE:</span> 
+                <span style="color: var(--text-secondary);">The Heir does not build Contraptions or acquire Signature Tricks. The Heir starts with 1 Shard instead of 0.</span>
+              </div>
+              <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
+                <input type="checkbox" id="dawn-challenge-rule" style="margin-top: 4px; width: 18px; height: 18px; cursor: pointer;">
+                <div>
+                  <div style="color: var(--text-primary); font-weight: 500;">Optional Challenge Rule</div>
+                  <div style="color: var(--text-muted); font-size: 0.85rem;">At end of turn, Heir gains 1 Fame per Contraption you did NOT reactivate, and 1 Coin per empty Contraption slot. If neither applies, Heir gains 1 Shard.</div>
+                </div>
+              </label>
+            </div>
+            
+            <div class="setup-nav">
+              <button class="btn" onclick="showSetupPage(0)">← Back</button>
+              <button class="btn" onclick="showSetupPage(2)">Continue →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- PAGE 2: Board Setup -->
+        <div class="setup-page hidden" id="setup-page-2">
           <div class="setup-section">
             <h2 style="color: var(--amber); margin-bottom: 20px;">📋 Board Setup</h2>
             
@@ -1236,7 +1284,7 @@
             
             <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Separate Trick cards into four decks by category (Mechanical, Spiritual, Escape, Optical) and place them face-up at Dahlgaard's Residence in Downtown</span></div>
             
-            <div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ NOTE:</span> Leave the Dawn of Technology tricks in the box (3 per category)</div>
+            <div id="dot-tricks-note" style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ NOTE:</span> <span id="dot-tricks-note-text">Leave the Dawn of Technology tricks in the box (3 per category)</span></div>
             
             <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Fill the Market Row Buy area with one of each starting component: Wood, Metal, Glass, and Fabric</span></div>
             
@@ -1250,37 +1298,10 @@
             
             <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Shuffle each Special Assignment deck by location and place face-down on the Dark Alley slots</span></div>
             
-            <div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ NOTE:</span> Remove Academy and Dawn of Technology Special Assignment cards</div>
+            <div id="dot-sa-note" style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ NOTE:</span> <span id="dot-sa-note-text">Remove Academy and Dawn of Technology Special Assignment cards</span></div>
             
             <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place the Trickerion Stone token on space I of the Turn Counter track</span></div>
             
-            <div class="setup-nav">
-              <button class="btn" onclick="showSetupPage(0)">← Back</button>
-              <button class="btn" onclick="showSetupPage(2)">Continue →</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- PAGE 2: Expansion Selection -->
-        <div class="setup-page hidden" id="setup-page-2">
-          <div class="setup-section">
-            <h2><span class="step-number">1</span> Select Expansion</h2>
-            <div class="option-grid" id="expansion-options">
-              <div class="option-card selected" data-expansion="base">
-                <div class="title">Base Game + Dark Alley</div>
-                <div class="description">Core solo experience with 7 turns and 5 character slots</div>
-              </div>
-              <div class="option-card disabled" data-expansion="academy">
-                <div class="title">With Academy</div>
-                <div class="description coming-soon">Coming Soon</div>
-                <div class="description">Adds Protégé, 6th character slot, Classrooms, Practice Rooms</div>
-              </div>
-              <div class="option-card disabled" data-expansion="dawn">
-                <div class="title">With Dawn of Technology</div>
-                <div class="description coming-soon">Coming Soon</div>
-                <div class="description">Adds Contraptions and Signature Tricks</div>
-              </div>
-            </div>
             <div class="setup-nav">
               <button class="btn" onclick="showSetupPage(1)">← Back</button>
               <button class="btn" onclick="showSetupPage(3)">Continue →</button>
@@ -1544,7 +1565,7 @@
             
             <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place your Magician on <strong>Initiative 1</strong>, the Heir's Magician on <strong>Initiative 3</strong></span></div>
             
-            <div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ REMINDER:</span> The Heir starts with <strong>0 Coins</strong> and <strong>0 Shards</strong></div>
+            <div id="heir-starting-resources-reminder" style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ REMINDER:</span> The Heir starts with <strong>0 Coins</strong> and <strong id="heir-starting-shards">0 Shards</strong></div>
             
             <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Take the Heir's permanent Assignment cards: 2× Theater, 1× Workshop, 1× Market Row, 1× Downtown, 1× Dark Alley</span></div>
             
@@ -2359,7 +2380,7 @@
       // Without Academy, limit is 5 characters; with Academy it's 6
       const apprenticeCount = getHeirApprenticeCount();
       const totalChars = getHeirTotalCharacterCount();
-      const charLimit = gameState.expansion === 'academy' ? 6 : 5;
+      const charLimit = gameState.expansions.academy ? 6 : 5;
       if (canUseDie() && apprenticeCount < 4 && totalChars <= charLimit) {
         // Check if apprentice die shows apprentice (not X or used)
         if (availableDice.apprentice === 'apprentice') {
@@ -2536,7 +2557,12 @@
 
     let gameState = {
       // Setup
-      expansion: 'base', // 'base' or 'academy' (academy not yet implemented)
+      expansions: {
+        academy: false,
+        dawn: false,
+        arcane: false,
+        dawnChallengeRule: false
+      },
       difficulty: null,
       playerSchool: null,
       playerMagician: null,
@@ -2851,6 +2877,22 @@
     
     function updateSetupPageContent(pageNum) {
       // Update dynamic content on certain pages
+      if (pageNum === 2) {
+        // Update DoT notes based on expansion selection
+        const dotTricksNote = $('#dot-tricks-note-text');
+        const dotSANote = $('#dot-sa-note-text');
+        
+        if (gameState.expansions.dawn) {
+          // DoT is selected - include the content
+          if (dotTricksNote) dotTricksNote.textContent = 'Include the Dawn of Technology Signature Tricks (3 per category)';
+          if (dotSANote) dotSANote.textContent = 'Remove Academy Special Assignment cards (keep Dawn of Technology SA cards)';
+        } else {
+          // Base game - exclude DoT content
+          if (dotTricksNote) dotTricksNote.textContent = 'Leave the Dawn of Technology tricks in the box (3 per category)';
+          if (dotSANote) dotSANote.textContent = 'Remove Academy and Dawn of Technology Special Assignment cards';
+        }
+      }
+      
       if (pageNum === 6) {
         // Filter heir school options - disable player's school (solo rule p.3, point 4)
         updateHeirSchoolOptions();
@@ -3253,6 +3295,12 @@
     }
     
     function updateFinalHeirSetup() {
+      // Update starting shards display based on DoT expansion
+      const shardText = $('#heir-starting-shards');
+      if (shardText) {
+        shardText.textContent = gameState.expansions.dawn ? '1 Shard' : '0 Shards';
+      }
+      
       const trickContainer = $('#heir-trick-placement');
       const shoppingContainer = $('#setup-heir-shopping-list');
       
@@ -4051,7 +4099,7 @@
       gameState.currentPhaseIndex = 0;
       gameState.heir.fame = 5;
       gameState.heir.coins = 0;
-      gameState.heir.shards = 0;
+      gameState.heir.shards = gameState.expansions.dawn ? 1 : 0; // DoT: Heir starts with 1 Shard
       gameState.heir.stance = null;
       
       // Show restart button
@@ -8213,6 +8261,100 @@
     }
 
     function handleEndTurnPhase() {
+      // Dawn of Technology: Optional challenge rule - ask before normal End Turn
+      if (gameState.expansions.dawnChallengeRule) {
+        showDawnChallengeRuleInput();
+        return;
+      }
+      
+      // Normal End Turn flow
+      continueToEndTurn();
+    }
+    
+    function showDawnChallengeRuleInput() {
+      const boardAction = (text) => `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${text}</span></div>`;
+      const infoBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ INFO:</span> ${text}</div>`;
+      
+      setActionContent(
+        `Turn ${gameState.currentTurn} — Dawn of Technology Challenge`,
+        `<div style="background: rgba(212, 168, 71, 0.1); border: 1px solid var(--amber); padding: 12px; border-radius: 6px; margin-bottom: 15px;">
+           <p style="color: var(--amber); font-weight: 600; margin-bottom: 8px;">⚙ Dawn of Technology — Challenge Rule</p>
+           <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0;">The Heir gains resources based on your Contraption usage this turn.</p>
+         </div>
+         
+         <div style="background: var(--bg-card); padding: 15px; border-radius: 6px; margin: 15px 0;">
+           <div style="margin-bottom: 15px;">
+             <label style="display: block; margin-bottom: 5px; color: var(--text-secondary);">How many Contraptions did you <strong>NOT</strong> reactivate this turn?</label>
+             <input type="number" id="dawn-unreactivated" value="0" min="0" max="4" style="width: 100px; padding: 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-main); color: var(--text-primary);">
+             <span style="color: var(--text-muted); font-size: 0.85rem; margin-left: 10px;">(Heir gains 1 Fame each)</span>
+           </div>
+           
+           <div style="margin-bottom: 15px;">
+             <label style="display: block; margin-bottom: 5px; color: var(--text-secondary);">How many <strong>empty</strong> Contraption slots do you have?</label>
+             <input type="number" id="dawn-empty-slots" value="0" min="0" max="4" style="width: 100px; padding: 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-main); color: var(--text-primary);">
+             <span style="color: var(--text-muted); font-size: 0.85rem; margin-left: 10px;">(Heir gains 1 Coin each)</span>
+           </div>
+         </div>
+         
+         ${infoBox("If the Heir gains neither Fame nor Coins from this rule, it gains 1 Shard instead.")}
+         
+         <div id="dawn-result-preview" style="background: var(--bg-card); padding: 12px; border-radius: 6px; border: 1px solid var(--border);"></div>`,
+        [{ text: 'Apply & Continue', action: applyDawnChallengeRule }]
+      );
+      
+      // Update preview on input change
+      setTimeout(() => {
+        const updatePreview = () => {
+          const unreactivated = Math.max(0, parseInt($('#dawn-unreactivated')?.value) || 0);
+          const emptySlots = Math.max(0, parseInt($('#dawn-empty-slots')?.value) || 0);
+          const preview = $('#dawn-result-preview');
+          
+          if (preview) {
+            let resultText = '';
+            if (unreactivated > 0 || emptySlots > 0) {
+              const parts = [];
+              if (unreactivated > 0) parts.push(`<strong>+${unreactivated}★ Fame</strong>`);
+              if (emptySlots > 0) parts.push(`<strong>+${emptySlots} Coins</strong>`);
+              resultText = `Heir gains: ${parts.join(' and ')}`;
+            } else {
+              resultText = `Heir gains: <strong>+1 Shard</strong> (neither Fame nor Coins apply)`;
+            }
+            preview.innerHTML = `<p style="margin: 0; color: var(--text-secondary);">Result: ${resultText}</p>`;
+          }
+        };
+        
+        $('#dawn-unreactivated')?.addEventListener('input', updatePreview);
+        $('#dawn-empty-slots')?.addEventListener('input', updatePreview);
+        updatePreview(); // Initial preview
+      }, 0);
+    }
+    
+    function applyDawnChallengeRule() {
+      const unreactivated = Math.max(0, parseInt($('#dawn-unreactivated')?.value) || 0);
+      const emptySlots = Math.max(0, parseInt($('#dawn-empty-slots')?.value) || 0);
+      
+      if (unreactivated > 0 || emptySlots > 0) {
+        // Apply Fame and Coins
+        gameState.heir.fame += unreactivated;
+        gameState.heir.coins += emptySlots;
+      } else {
+        // Neither applies - gain 1 Shard
+        gameState.heir.shards += 1;
+        
+        // Check p19 (Extra Shard) and p20 (Shards Give Fame)
+        if (gameState.activeProphecy?.id === 'p19') {
+          gameState.heir.shards += 1;
+        }
+        if (gameState.activeProphecy?.id === 'p20') {
+          gameState.heir.fame += 2;
+        }
+      }
+      
+      updateGameDisplay();
+      continueToEndTurn();
+    }
+    
+    function continueToEndTurn() {
       // Turn 7 has a streamlined End Turn (no setup for next turn)
       if (gameState.currentTurn === 7) {
         showEndTurnFinalTurn();
@@ -9370,18 +9512,46 @@
     // ============================================
 
     document.addEventListener('DOMContentLoaded', () => {
-      // Expansion selection (only base is clickable for now)
+      // Expansion selection (base always on, others toggle on/off)
       $$('#expansion-options .option-card').forEach(card => {
         card.addEventListener('click', () => {
+          const expansion = card.dataset.expansion;
+          // Base is always selected, can't toggle
+          if (expansion === 'base') return;
+          // Disabled cards (Coming Soon) can't be clicked
           if (card.classList.contains('disabled')) return;
-          $$('#expansion-options .option-card').forEach(c => c.classList.remove('selected'));
-          card.classList.add('selected');
-          gameState.expansion = card.dataset.expansion;
+          
+          // Toggle selection
+          card.classList.toggle('selected');
+          gameState.expansions[expansion] = card.classList.contains('selected');
+          
+          // Show/hide Dawn of Technology options
+          const dawnOptions = $('#dawn-options');
+          if (dawnOptions) {
+            if (gameState.expansions.dawn) {
+              dawnOptions.classList.remove('hidden');
+            } else {
+              dawnOptions.classList.add('hidden');
+              // Reset challenge rule when DoT is deselected
+              const checkbox = $('#dawn-challenge-rule');
+              if (checkbox) checkbox.checked = false;
+              gameState.expansions.dawnChallengeRule = false;
+            }
+          }
+          
           // Show setup instructions after expansion is selected
           const setupSection = $('#board-setup-section');
           if (setupSection) setupSection.style.display = 'block';
         });
       });
+      
+      // Dawn of Technology challenge rule checkbox
+      const dawnChallengeCheckbox = $('#dawn-challenge-rule');
+      if (dawnChallengeCheckbox) {
+        dawnChallengeCheckbox.addEventListener('change', (e) => {
+          gameState.expansions.dawnChallengeRule = e.target.checked;
+        });
+      }
       
       // Show setup section on load if expansion is pre-selected (base game)
       const preselectedExpansion = $('#expansion-options .option-card.selected');
@@ -9451,7 +9621,12 @@
     function restartGame() {
       try {
         // Reset game state
-        gameState.expansion = 'base';
+        gameState.expansions = {
+          academy: false,
+          dawn: false,
+          arcane: false,
+          dawnChallengeRule: false
+        };
         gameState.difficulty = null;
         gameState.playerSchool = null;
         gameState.playerMagician = null;
@@ -9491,6 +9666,13 @@
         $$('#expansion-options .option-card').forEach(c => c.classList.remove('selected'));
         const baseExpansion = $('#expansion-options .option-card[data-expansion="base"]');
         if (baseExpansion) baseExpansion.classList.add('selected');
+        
+        // Reset Dawn of Technology options
+        const dawnOptions = $('#dawn-options');
+        if (dawnOptions) dawnOptions.classList.add('hidden');
+        const dawnCheckbox = $('#dawn-challenge-rule');
+        if (dawnCheckbox) dawnCheckbox.checked = false;
+        
         $$('#difficulty-options .option-card').forEach(c => c.classList.remove('selected'));
         $$('#player-school-options .option-card').forEach(c => c.classList.remove('selected'));
         $$('#player-magician-options .option-card').forEach(c => c.classList.remove('selected'));
