@@ -1056,7 +1056,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.11.0-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.11.2-beta</p>
       <button class="restart-btn hidden" id="restart-btn">↺ New Game</button>
     </header>
 
@@ -1562,6 +1562,8 @@
             </div>
             
             <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place the Heir's Fame marker on <strong>5 Fame</strong></span></div>
+            
+            <div id="dot-shard-board-action" class="hidden" style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Give the Heir <strong>1 Shard</strong> (Dawn of Technology)</span></div>
             
             <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place your Magician on <strong>Initiative 1</strong>, the Heir's Magician on <strong>Initiative 3</strong></span></div>
             
@@ -2835,7 +2837,9 @@
           ${boardAction('Place the Heir\'s Fame marker on <strong>5</strong> on the Fame track')}
         </li>
         <li>You are first in Initiative Order (start with 10 Coins)</li>
-        <li>The Heir starts with <strong>5 Fame</strong>, 0 Coins and 0 Shards</li>
+        <li>The Heir starts with <strong>5 Fame</strong>, 0 Coins and <strong>${gameState.expansions.dawn ? '1 Shard' : '0 Shards'}</strong>
+          ${gameState.expansions.dawn ? boardAction('Give the Heir <strong>1 Shard</strong> (Dawn of Technology)') : ''}
+        </li>
         <li>Remove certain Prophecies before setting up (see solo rulebook p.4, step 13)</li>
         <li>Create the Heir's Plan deck as described in the rulebook</li>
       `;
@@ -3299,6 +3303,16 @@
       const shardText = $('#heir-starting-shards');
       if (shardText) {
         shardText.textContent = gameState.expansions.dawn ? '1 Shard' : '0 Shards';
+      }
+      
+      // Show/hide DoT shard board action
+      const dotShardAction = $('#dot-shard-board-action');
+      if (dotShardAction) {
+        if (gameState.expansions.dawn) {
+          dotShardAction.classList.remove('hidden');
+        } else {
+          dotShardAction.classList.add('hidden');
+        }
       }
       
       const trickContainer = $('#heir-trick-placement');
@@ -8272,8 +8286,16 @@
     }
     
     function showDawnChallengeRuleInput() {
-      const boardAction = (text) => `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${text}</span></div>`;
+      const boardAction = (text, id) => `<div id="${id}" style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${text}</span></div>`;
       const infoBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ INFO:</span> ${text}</div>`;
+      
+      // Store selected values
+      let selectedUnreactivated = 0;
+      let selectedEmptySlots = 0;
+      
+      const currentFame = gameState.heir.fame;
+      const currentCoins = gameState.heir.coins;
+      const currentShards = gameState.heir.shards;
       
       setActionContent(
         `Turn ${gameState.currentTurn} — Dawn of Technology Challenge`,
@@ -8283,56 +8305,90 @@
          </div>
          
          <div style="background: var(--bg-card); padding: 15px; border-radius: 6px; margin: 15px 0;">
-           <div style="margin-bottom: 15px;">
-             <label style="display: block; margin-bottom: 5px; color: var(--text-secondary);">How many Contraptions did you <strong>NOT</strong> reactivate this turn?</label>
-             <input type="number" id="dawn-unreactivated" value="0" min="0" max="4" style="width: 100px; padding: 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-main); color: var(--text-primary);">
-             <span style="color: var(--text-muted); font-size: 0.85rem; margin-left: 10px;">(Heir gains 1 Fame each)</span>
+           <div style="margin-bottom: 20px;">
+             <p style="margin-bottom: 8px; color: var(--text-secondary);">How many Contraptions did you <strong>NOT</strong> reactivate this turn?</p>
+             <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+               ${[0,1,2,3,4].map(n => `<button class="btn dawn-unreactivated-btn${n === 0 ? ' btn-selected' : ''}" data-count="${n}" style="min-width: 50px;">${n}</button>`).join('')}
+             </div>
            </div>
            
-           <div style="margin-bottom: 15px;">
-             <label style="display: block; margin-bottom: 5px; color: var(--text-secondary);">How many <strong>empty</strong> Contraption slots do you have?</label>
-             <input type="number" id="dawn-empty-slots" value="0" min="0" max="4" style="width: 100px; padding: 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-main); color: var(--text-primary);">
-             <span style="color: var(--text-muted); font-size: 0.85rem; margin-left: 10px;">(Heir gains 1 Coin each)</span>
+           <div>
+             <p style="margin-bottom: 8px; color: var(--text-secondary);">How many <strong>empty</strong> Contraption slots do you have?</p>
+             <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+               ${[0,1,2,3,4].map(n => `<button class="btn dawn-empty-btn${n === 0 ? ' btn-selected' : ''}" data-count="${n}" style="min-width: 50px;">${n}</button>`).join('')}
+             </div>
            </div>
          </div>
          
          ${infoBox("If the Heir gains neither Fame nor Coins from this rule, it gains 1 Shard instead.")}
          
-         <div id="dawn-result-preview" style="background: var(--bg-card); padding: 12px; border-radius: 6px; border: 1px solid var(--border);"></div>`,
-        [{ text: 'Apply & Continue', action: applyDawnChallengeRule }]
+         <div id="dawn-board-actions">
+           ${boardAction(`No change to Heir's resources`, 'dawn-board-action-result')}
+         </div>`,
+        [{ text: 'Apply & Continue', action: () => applyDawnChallengeRule(selectedUnreactivated, selectedEmptySlots), id: 'dawn-continue-btn' }]
       );
       
-      // Update preview on input change
       setTimeout(() => {
-        const updatePreview = () => {
-          const unreactivated = Math.max(0, parseInt($('#dawn-unreactivated')?.value) || 0);
-          const emptySlots = Math.max(0, parseInt($('#dawn-empty-slots')?.value) || 0);
-          const preview = $('#dawn-result-preview');
+        const updateBoardAction = () => {
+          const actionDiv = $('#dawn-board-action-result');
+          if (!actionDiv) return;
           
-          if (preview) {
-            let resultText = '';
-            if (unreactivated > 0 || emptySlots > 0) {
-              const parts = [];
-              if (unreactivated > 0) parts.push(`<strong>+${unreactivated}★ Fame</strong>`);
-              if (emptySlots > 0) parts.push(`<strong>+${emptySlots} Coins</strong>`);
-              resultText = `Heir gains: ${parts.join(' and ')}`;
-            } else {
-              resultText = `Heir gains: <strong>+1 Shard</strong> (neither Fame nor Coins apply)`;
+          let actionText = '';
+          if (selectedUnreactivated > 0 || selectedEmptySlots > 0) {
+            const parts = [];
+            if (selectedUnreactivated > 0) {
+              parts.push(`Update Heir's Fame (${currentFame}★ → ${currentFame + selectedUnreactivated}★)`);
             }
-            preview.innerHTML = `<p style="margin: 0; color: var(--text-secondary);">Result: ${resultText}</p>`;
+            if (selectedEmptySlots > 0) {
+              parts.push(`Update Heir's Coins (${currentCoins} → ${currentCoins + selectedEmptySlots})`);
+            }
+            actionText = parts.join('</span></div><div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">');
+          } else {
+            // Check for p19/p20 effects on shard gain
+            const isExtraShard = gameState.activeProphecy?.id === 'p19';
+            const isShardsGiveFame = gameState.activeProphecy?.id === 'p20';
+            const shardGain = 1 + (isExtraShard ? 1 : 0);
+            const fameGain = isShardsGiveFame ? 2 : 0;
+            
+            let shardText = `Update Heir's Shards (${currentShards} → ${currentShards + shardGain})`;
+            if (isExtraShard) shardText += ' <span style="color: var(--amber);">(+1 from p19)</span>';
+            
+            if (fameGain > 0) {
+              actionText = shardText + '</span></div><div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">' + 
+                `Update Heir's Fame (${currentFame}★ → ${currentFame + fameGain}★) <span style="color: var(--amber);">(p20 Shards Give Fame)</span>`;
+            } else {
+              actionText = shardText;
+            }
           }
+          
+          actionDiv.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${actionText}</span>`;
         };
         
-        $('#dawn-unreactivated')?.addEventListener('input', updatePreview);
-        $('#dawn-empty-slots')?.addEventListener('input', updatePreview);
-        updatePreview(); // Initial preview
+        // Unreactivated buttons
+        $$('.dawn-unreactivated-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            $$('.dawn-unreactivated-btn').forEach(b => b.classList.remove('btn-selected'));
+            btn.classList.add('btn-selected');
+            selectedUnreactivated = parseInt(btn.dataset.count);
+            updateBoardAction();
+          });
+        });
+        
+        // Empty slots buttons
+        $$('.dawn-empty-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            $$('.dawn-empty-btn').forEach(b => b.classList.remove('btn-selected'));
+            btn.classList.add('btn-selected');
+            selectedEmptySlots = parseInt(btn.dataset.count);
+            updateBoardAction();
+          });
+        });
+        
+        updateBoardAction(); // Initial state
       }, 0);
     }
     
-    function applyDawnChallengeRule() {
-      const unreactivated = Math.max(0, parseInt($('#dawn-unreactivated')?.value) || 0);
-      const emptySlots = Math.max(0, parseInt($('#dawn-empty-slots')?.value) || 0);
-      
+    function applyDawnChallengeRule(unreactivated, emptySlots) {
       if (unreactivated > 0 || emptySlots > 0) {
         // Apply Fame and Coins
         gameState.heir.fame += unreactivated;
