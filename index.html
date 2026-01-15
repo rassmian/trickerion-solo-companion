@@ -1135,7 +1135,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.13.1-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.13.2-beta</p>
       <button class="restart-btn hidden" id="restart-btn">↺ New Game</button>
     </header>
 
@@ -2695,6 +2695,76 @@
     }
 
     // ============================================
+    // UI HELPER FUNCTIONS
+    // ============================================
+
+    // Callout boxes for different message types
+    const boardAction = (text, id = '') => {
+      const idAttr = id ? `id="${id}"` : '';
+      return `<div ${idAttr} style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${text}</span></div>`;
+    };
+
+    const infoBox = (text, label = 'INFO') => {
+      return `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ ${label}:</span> ${text}</div>`;
+    };
+
+    const noteBox = (text) => infoBox(text, 'NOTE');
+
+    const magicianAbilityBox = (text) => {
+      return `<div style="background: rgba(180, 100, 200, 0.15); border-left: 3px solid #a6c; padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: #a6c; font-weight: 600;">✨ MAGICIAN ABILITY:</span> ${text}</div>`;
+    };
+
+    const magicianBox = (text) => {
+      return `<div style="background: rgba(180, 100, 200, 0.15); border-left: 3px solid #a6c; padding: 4px 12px; margin: 4px 0; border-radius: 0 4px 4px 0;"><span style="color: #a6c; font-weight: 600;">✨</span> ${text}</div>`;
+    };
+
+    // Stepper input for touch-friendly number entry
+    const createStepper = (id, initialValue) => {
+      const isZero = initialValue === 0;
+      return `
+        <div class="stepper-container">
+          <button type="button" class="stepper-btn stepper-minus" data-target="${id}" ${isZero ? 'disabled' : ''}>−</button>
+          <span id="${id}" class="stepper-value" data-value="${initialValue}">${initialValue}</span>
+          <button type="button" class="stepper-btn stepper-plus" data-target="${id}">+</button>
+        </div>
+      `;
+    };
+
+    // Attach stepper button event listeners (call after setActionContent)
+    const attachStepperListeners = (onChange = null) => {
+      setTimeout(() => {
+        document.querySelectorAll('.stepper-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const targetId = e.currentTarget.dataset.target;
+            const valueEl = document.getElementById(targetId);
+            if (!valueEl) return;
+            
+            let currentValue = parseInt(valueEl.dataset.value) || 0;
+            
+            if (e.currentTarget.classList.contains('stepper-plus')) {
+              currentValue++;
+            } else if (e.currentTarget.classList.contains('stepper-minus')) {
+              currentValue = Math.max(0, currentValue - 1);
+            }
+            
+            valueEl.dataset.value = currentValue;
+            valueEl.textContent = currentValue;
+            
+            // Update minus button disabled state
+            const container = valueEl.closest('.stepper-container');
+            const minusBtn = container?.querySelector('.stepper-minus');
+            if (minusBtn) {
+              minusBtn.disabled = currentValue === 0;
+            }
+            
+            // Call optional onChange callback
+            if (onChange) onChange();
+          });
+        });
+      }, 0);
+    };
+
+    // ============================================
     // GAME STATE
     // ============================================
 
@@ -2938,9 +3008,7 @@
         return `<img src="assets/images/characters/${char}.png" alt="${char}" style="width: 28px; height: 28px; vertical-align: middle;">`;
       }).join(' → ');
       
-      const boardAction = (text) => `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${text}</span></div>`;
       
-      const magicianAbilityBox = (text) => `<div style="background: rgba(180, 100, 200, 0.15); border-left: 3px solid #a6c; padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: #a6c; font-weight: 600;">✨ MAGICIAN ABILITY:</span> ${text}</div>`;
       
       // Check for Elektra's marker reduction
       const isElektra = gameState.heirMagician?.id === 'elektra';
@@ -4495,7 +4563,6 @@
       const isFirstTurn = gameState.currentTurn === 1;
       const turnNumber = gameState.currentTurn;
       
-      const boardAction = (text) => `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${text}</span></div>`;
       
       let content = boardAction('Roll all 6 Downtown dice and place them on the Downtown board area');
       
@@ -4538,8 +4605,6 @@
     }
 
     function handleInitiativePhase() {
-      const boardAction = (text) => `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${text}</span></div>`;
-      const infoBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ INFO:</span> ${text}</div>`;
       
       let content = '';
       
@@ -4570,7 +4635,6 @@
       updateHeirStance();
       
       const prophecyReminder = getProphecyReminderHtml('advertise');
-      const boardAction = (text) => `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${text}</span></div>`;
       
       setActionContent(
         `Turn ${gameState.currentTurn} — Advertise`,
@@ -4619,8 +4683,6 @@
         gameState.heir.stance = newStance;
         updateGameDisplay();
         
-        const boardAction = (text) => `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${text}</span></div>`;
-        
         const stanceColor = newStance === 'ready' ? 'var(--success)' : 'var(--warning)';
         const slotDirection = newStance === 'ready' ? 'UP to top slot' : 'DOWN to bottom slot';
         
@@ -4656,8 +4718,6 @@
 
     function handleAssignmentPhase() {
       const isFirstTurn = gameState.currentTurn === 1;
-      const boardAction = (text) => `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${text}</span></div>`;
-      const infoBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ INFO:</span> ${text}</div>`;
       
       const prophecyReminder = getProphecyReminderHtml('assignment');
       
@@ -4694,7 +4754,6 @@
     function showPlanCardReveal() {
       // Turn 1: Always Setup card / Busy stance (no choice needed)
       if (gameState.currentTurn === 1) {
-        const infoBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ INFO:</span> ${text}</div>`;
         
         setActionContent(
           `Turn ${gameState.currentTurn} — Assignment`,
@@ -4898,7 +4957,6 @@
     }
     
     function showOpticoSACardQuestion() {
-      const magicianAbilityBox = (text) => `<div style="background: rgba(180, 100, 200, 0.15); border-left: 3px solid #a6c; padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: #a6c; font-weight: 600;">✨ MAGICIAN ABILITY:</span> ${text}</div>`;
       
       setActionContent(
         `Turn ${gameState.currentTurn} — Place Characters`,
@@ -4939,7 +4997,6 @@
     }
     
     function showInitiativeCheck() {
-      const infoBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ INFO:</span> ${text}</div>`;
       
       const prophecyReminder = getProphecyReminderHtml('place-characters');
       
@@ -5083,8 +5140,6 @@
     
     function showSharedLinksFromPlayerTurn() {
       // Same as showPlayerLinksWithHeirTricks but returns to Player Turn screen
-      const infoBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ INFO:</span> ${text}</div>`;
-      const boardAction = (text) => `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${text}</span></div>`;
       
       const prophecyReminder = getProphecyReminderHtml('performance');
       
@@ -5176,9 +5231,7 @@
 
     function showStanceCheck() {
       // Re-check stance after an Heir action that could have changed it
-      const infoBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ INFO:</span> ${text}</div>`;
       
-      const boardAction = (text) => `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${text}</span></div>`;
       
       setActionContent(
         `Turn ${gameState.currentTurn} — Place Characters`,
@@ -5215,7 +5268,6 @@
       // Check for contested locations
       const exceptionBox = (text) => `<div style="background: var(--exception-bg); border-left: 3px solid var(--exception); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--exception); font-weight: 600;">⚠️ EXCEPTION:</span> ${text}</div>`;
       
-      const infoBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ REMINDER:</span> ${text}</div>`;
       
       const heirTurnBox = (text) => `<div style="background: rgba(212, 168, 71, 0.15); border: 2px solid var(--amber); padding: 15px; margin: 15px 0; border-radius: 8px; text-align: center;"><span style="color: var(--amber); font-weight: 600; font-size: 1.1rem;">🎭 HEIR'S TURN</span><p style="margin-top: 8px; color: var(--text-primary);">${text}</p></div>`;
       
@@ -5395,8 +5447,6 @@
     }
     
     function showGentlemanMagicianCheck(location, continueFunc) {
-      const magicianAbilityBox = (text) => `<div style="background: rgba(180, 100, 200, 0.15); border-left: 3px solid #a6c; padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: #a6c; font-weight: 600;">✨ MAGICIAN ABILITY:</span> ${text}</div>`;
-      const boardAction = (text) => `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${text}</span></div>`;
       
       const trickCount = gameState.heir.tricks.length;
       const previousFame = gameState.heir.fame;
@@ -5440,7 +5490,6 @@
         return;
       }
       
-      const magicianAbilityBox = (text) => `<div style="background: rgba(180, 100, 200, 0.15); border-left: 3px solid #a6c; padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: #a6c; font-weight: 600;">✨ MAGICIAN ABILITY:</span> ${text}</div>`;
       
       const locationName = location.charAt(0).toUpperCase() + location.slice(1).replace('-', ' ');
       
@@ -5485,7 +5534,6 @@
         return;
       }
       
-      const magicianAbilityBox = (text) => `<div style="background: rgba(180, 100, 200, 0.15); border-left: 3px solid #a6c; padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: #a6c; font-weight: 600;">✨ MAGICIAN ABILITY:</span> ${text}</div>`;
       
       const locationName = location.charAt(0).toUpperCase() + location.slice(1).replace('-', ' ');
       
@@ -5867,7 +5915,6 @@
     }
     
     function showDowntownTrickPlacement(newTrick, level) {
-      const boardAction = (text) => `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${text}</span></div>`;
       
       // Get components for shopping list
       const newComponentTypes = getUniqueComponentTypes(newTrick.components);
@@ -6374,7 +6421,6 @@
     }
 
     function showDarkAlleyCardDraw(actionPoints, cardCount) {
-      const boardAction = (text) => `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${text}</span></div>`;
       
       // Calculate which cards to draw based on fewest owned + priority
       const cardsToDraw = calculateSACardsToDraw(cardCount);
@@ -6517,9 +6563,7 @@
     }
 
     function showTheaterMagician() {
-      const boardAction = (text) => `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${text}</span></div>`;
       
-      const infoBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ INFO:</span> ${text}</div>`;
       
       const stance = gameState.heir.stance;
       const dayPreference = stance === 'ready' ? 'earliest available day' : 'latest available day';
@@ -6639,8 +6683,6 @@
       }
       // Turns 1-2: No removal warning needed (no cards removed yet)
       
-      const boardAction = (text) => `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${text}</span></div>`;
-      const magicianAbilityBox = (text) => `<div style="background: rgba(180, 100, 200, 0.15); border-left: 3px solid #a6c; padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: #a6c; font-weight: 600;">✨ MAGICIAN ABILITY:</span> ${text}</div>`;
       
       // Check for Master of Chains - first trick can be oriented freely
       const isChains = gameState.heirMagician?.id === 'chains';
@@ -6731,17 +6773,12 @@
     }
 
     function showTheaterMarkerSkip(actionPoints, totalMarkers, currentMarker) {
-      const boardAction = (text) => `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${text}</span></div>`;
-      
-      const infoBox = `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;">
-        <span style="color: var(--info); font-weight: 600;">ℹ️ INFO:</span> This Trick cannot be legally placed. Skip it and try the next Trick.
-      </div>`;
       
       setActionContent(
         `Turn ${gameState.currentTurn} — Theater (Marker ${currentMarker} of ${totalMarkers})`,
         `<p><strong>Trick Cannot Be Placed</strong></p>
          
-         ${infoBox}
+         ${infoBox("This Trick cannot be legally placed. Skip it and try the next Trick.")}
          
          ${boardAction("Move to the next Trick on the Heir board (left to right) that has markers")}
          
@@ -6784,7 +6821,6 @@
     }
 
     function showTheaterMarkerDoPlacement(actionPoints, totalMarkers, currentMarker, hasLink, priorityType) {
-      const boardAction = (text) => `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${text}</span></div>`;
       
       const exceptionBox = (text) => `<div style="background: var(--exception-bg); border-left: 3px solid var(--exception); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--exception); font-weight: 600;">⚠️ EXCEPTION:</span> ${text}</div>`;
       
@@ -6928,36 +6964,20 @@
            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
              <div>
                <p style="margin-bottom: 10px;">⭐ Links created</p>
-               <div class="option-grid" style="grid-template-columns: repeat(4, 1fr);">
-                 <div class="option-card theater-links-btn" data-links="0">
-                   <div class="title">0</div>
-                 </div>
-                 <div class="option-card theater-links-btn selected" data-links="1">
-                   <div class="title">1</div>
-                 </div>
-                 <div class="option-card theater-links-btn" data-links="2">
-                   <div class="title">2</div>
-                 </div>
-                 <div class="option-card theater-links-btn" data-links="3">
-                   <div class="title">3</div>
-                 </div>
+               <div style="display: flex; gap: 8px;">
+                 <button class="btn theater-links-btn" data-links="0">0</button>
+                 <button class="btn theater-links-btn btn-selected" data-links="1">1</button>
+                 <button class="btn theater-links-btn" data-links="2">2</button>
+                 <button class="btn theater-links-btn" data-links="3">3</button>
                </div>
              </div>
              <div>
                <p style="margin-bottom: 10px;">💎 Shard-space links</p>
-               <div class="option-grid" style="grid-template-columns: repeat(4, 1fr);">
-                 <div class="option-card theater-shards-btn selected" data-shards="0">
-                   <div class="title">0</div>
-                 </div>
-                 <div class="option-card theater-shards-btn" data-shards="1">
-                   <div class="title">1</div>
-                 </div>
-                 <div class="option-card theater-shards-btn" data-shards="2">
-                   <div class="title">2</div>
-                 </div>
-                 <div class="option-card theater-shards-btn" data-shards="3">
-                   <div class="title">3</div>
-                 </div>
+               <div style="display: flex; gap: 8px;">
+                 <button class="btn theater-shards-btn btn-selected" data-shards="0">0</button>
+                 <button class="btn theater-shards-btn" data-shards="1">1</button>
+                 <button class="btn theater-shards-btn" data-shards="2">2</button>
+                 <button class="btn theater-shards-btn" data-shards="3">3</button>
                </div>
              </div>
            </div>
@@ -6980,8 +7000,8 @@
           { text: markersRemaining > 0 ? `Continue to Marker ${currentMarker + 1}` : 'Done — All Markers Placed', action: () => {
             // Get selected values from option cards
             const levelCard = document.querySelector('.theater-level-btn.selected');
-            const linksCard = document.querySelector('.theater-links-btn.selected');
-            const shardsCard = document.querySelector('.theater-shards-btn.selected');
+            const linksCard = document.querySelector('.theater-links-btn.btn-selected');
+            const shardsCard = document.querySelector('.theater-shards-btn.btn-selected');
             const schoolCard = document.querySelector('.theater-school-btn[data-value="yes"].selected');
             
             const level = levelCard ? parseInt(levelCard.dataset.level) : 1;
@@ -7029,8 +7049,8 @@
       setTimeout(() => {
         const updateBoardAction = () => {
           const levelCard = document.querySelector('.theater-level-btn.selected');
-          const linksCard = document.querySelector('.theater-links-btn.selected');
-          const shardsCard = document.querySelector('.theater-shards-btn.selected');
+          const linksCard = document.querySelector('.theater-links-btn.btn-selected');
+          const shardsCard = document.querySelector('.theater-shards-btn.btn-selected');
           const schoolCard = document.querySelector('.theater-school-btn[data-value="yes"].selected');
           
           const level = levelCard ? parseInt(levelCard.dataset.level) : 1;
@@ -7096,20 +7116,20 @@
           });
         });
         
-        // Links cards
-        $$('.theater-links-btn').forEach(card => {
-          card.addEventListener('click', () => {
-            $$('.theater-links-btn').forEach(c => c.classList.remove('selected'));
-            card.classList.add('selected');
+        // Links buttons
+        $$('.theater-links-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            $$('.theater-links-btn').forEach(b => b.classList.remove('btn-selected'));
+            btn.classList.add('btn-selected');
             updateBoardAction();
           });
         });
         
-        // Shards cards
-        $$('.theater-shards-btn').forEach(card => {
-          card.addEventListener('click', () => {
-            $$('.theater-shards-btn').forEach(c => c.classList.remove('selected'));
-            card.classList.add('selected');
+        // Shards buttons
+        $$('.theater-shards-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            $$('.theater-shards-btn').forEach(b => b.classList.remove('btn-selected'));
+            btn.classList.add('btn-selected');
             updateBoardAction();
           });
         });
@@ -7126,9 +7146,6 @@
     }
 
     function showTheaterPlacementComplete(actionPoints, totalMarkers, markersPlaced) {
-      const infoBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;">
-        <span style="color: var(--info); font-weight: 600;">ℹ️ INFO:</span> ${text}
-      </div>`;
       
       // Check for Master of Chains' ability (informational - already used during placement)
       const isChains = gameState.heirMagician?.id === 'chains';
@@ -7162,9 +7179,7 @@
     // ============================================
 
     function showWorkshopActions() {
-      const boardAction = (text) => `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${text}</span></div>`;
       
-      const infoBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ INFO:</span> ${text}</div>`;
       
       setActionContent(
         `Turn ${gameState.currentTurn} — Workshop`,
@@ -7187,8 +7202,6 @@
     }
     
     function showPerformanceStart() {
-      const infoBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ INFO:</span> ${text}</div>`;
-      const magicianAbilityBox = (text) => `<div style="background: rgba(180, 100, 200, 0.15); border-left: 3px solid #a6c; padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: #a6c; font-weight: 600;">✨ MAGICIAN ABILITY:</span> ${text}</div>`;
       
       const prophecyReminder = getProphecyReminderHtml('performance');
       
@@ -7255,9 +7268,6 @@
     }
     
     function showHeirPerformingCheck() {
-      const infoBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ INFO:</span> ${text}</div>`;
-      const boardAction = (text) => `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${text}</span></div>`;
-      const noteBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ NOTE:</span> ${text}</div>`;
       
       // Default to heir-first if not set (safer - will ask about player)
       const isHeirFirst = !gameState.performanceOrder || gameState.performanceOrder === 'heir-first';
@@ -7801,21 +7811,8 @@
         playerHasTricksOnCard: heirPerformanceTempData.playerHasTricksOnCard || false
       };
       
-      const infoBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ INFO:</span> ${text}</div>`;
-      const noteBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ NOTE:</span> ${text}</div>`;
-      const magicianAbilityBox = (text) => `<div style="background: rgba(180, 100, 200, 0.15); border-left: 3px solid #a6c; padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: #a6c; font-weight: 600;">✨ MAGICIAN ABILITY:</span> ${text}</div>`;
       
       // Stepper helper function
-      const createStepper = (id, initialValue) => {
-        const isZero = initialValue === 0;
-        return `
-        <div class="stepper-container">
-          <button type="button" class="stepper-btn stepper-minus" data-target="${id}" ${isZero ? 'disabled' : ''}>−</button>
-          <span id="${id}" class="stepper-value" data-value="${initialValue}">${initialValue}</span>
-          <button type="button" class="stepper-btn stepper-plus" data-target="${id}">+</button>
-        </div>
-      `;
-      };
       
       const isElektra = gameState.heirMagician?.id === 'elektra';
       
@@ -7944,20 +7941,8 @@
     }
     
     function showHeirPerformanceStep2_CardBonus() {
-      const infoBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ INFO:</span> ${text}</div>`;
-      const magicianAbilityBox = (text) => `<div style="background: rgba(180, 100, 200, 0.15); border-left: 3px solid #a6c; padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: #a6c; font-weight: 600;">✨ MAGICIAN ABILITY:</span> ${text}</div>`;
       
       // Stepper helper function
-      const createStepper = (id, initialValue) => {
-        const isZero = initialValue === 0;
-        return `
-        <div class="stepper-container">
-          <button type="button" class="stepper-btn stepper-minus" data-target="${id}" ${isZero ? 'disabled' : ''}>−</button>
-          <span id="${id}" class="stepper-value" data-value="${initialValue}">${initialValue}</span>
-          <button type="button" class="stepper-btn stepper-plus" data-target="${id}">+</button>
-        </div>
-      `;
-      };
       
       const winningCard = heirPerformanceTempData.winningCard;
       const isRedLotus = gameState.heirMagician?.id === 'redlotus';
@@ -8069,8 +8054,6 @@
     }
     
     function showHeirPerformanceStep3_FinalTotals() {
-      const boardAction = (text) => `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${text}</span></div>`;
-      const magicianBox = (text) => `<div style="background: rgba(180, 100, 200, 0.15); border-left: 3px solid #a6c; padding: 4px 12px; margin: 4px 0; border-radius: 0 4px 4px 0;"><span style="color: #a6c; font-weight: 600;">✨</span> ${text}</div>`;
       
       const data = heirPerformanceTempData;
       const winningCard = data.winningCard;
@@ -8394,8 +8377,6 @@
     }
     
     function askIfPlayerPerforming() {
-      const infoBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ INFO:</span> ${text}</div>`;
-      const boardAction = (text) => `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${text}</span></div>`;
       
       setActionContent(
         `Turn ${gameState.currentTurn} — Performance (Your Turn)`,
@@ -8411,21 +8392,8 @@
     
     function showPlayerPerformanceScreen() {
       // Consolidated screen for when player performs
-      const infoBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ INFO:</span> ${text}</div>`;
-      const noteBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ NOTE:</span> ${text}</div>`;
-      const boardAction = (text) => `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${text}</span></div>`;
       
       // Stepper helper function
-      const createStepper = (id, initialValue) => {
-        const isZero = initialValue === 0;
-        return `
-        <div class="stepper-container">
-          <button type="button" class="stepper-btn stepper-minus" data-target="${id}" ${isZero ? 'disabled' : ''}>−</button>
-          <span id="${id}" class="stepper-value" data-value="${initialValue}">${initialValue}</span>
-          <button type="button" class="stepper-btn stepper-plus" data-target="${id}">+</button>
-        </div>
-      `;
-      };
       
       const prophecyReminder = getProphecyReminderHtml('performance');
       const isPlayerFirst = gameState.performanceOrder === 'player-first';
@@ -8572,8 +8540,6 @@
     
     function showHeirPerformingCheckAfterPlayer() {
       // After player performed and shared tricks handled, now check if Heir is performing
-      const infoBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ INFO:</span> ${text}</div>`;
-      const noteBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ NOTE:</span> ${text}</div>`;
       
       setActionContent(
         `Turn ${gameState.currentTurn} — Performance (Heir)`,
@@ -8601,8 +8567,6 @@
     }
     
     function showDawnChallengeRuleInput() {
-      const boardAction = (text, id) => `<div id="${id}" style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${text}</span></div>`;
-      const infoBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ INFO:</span> ${text}</div>`;
       
       // Store selected values
       let selectedUnreactivated = 0;
@@ -8740,9 +8704,6 @@
     
     function showEndTurnPartOne() {
       // Steps 1-3, then ask about removed card
-      const boardAction = (text) => `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${text}</span></div>`;
-      const infoBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ INFO:</span> ${text}</div>`;
-      const noteBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ NOTE:</span> ${text}</div>`;
       
       // Capture pending characters before processing
       const newCharacters = [...gameState.heir.pendingCharacters];
@@ -8838,20 +8799,6 @@
     }
     
     function showRemovedCardYields() {
-      const boardAction = (text) => `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${text}</span></div>`;
-      const infoBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ INFO:</span> ${text}</div>`;
-      
-      // Stepper helper function
-      const createStepper = (id, initialValue) => {
-        const isZero = initialValue === 0;
-        return `
-        <div class="stepper-container">
-          <button type="button" class="stepper-btn stepper-minus" data-target="${id}" ${isZero ? 'disabled' : ''}>−</button>
-          <span id="${id}" class="stepper-value" data-value="${initialValue}">${initialValue}</span>
-          <button type="button" class="stepper-btn stepper-plus" data-target="${id}">+</button>
-        </div>
-      `;
-      };
       
       // p19 and p20 apply "any time" shards received - mapped to 'end-turn' phase
       // Note: p16 (Coins As Fame) does NOT apply here - it only affects Performance phase
@@ -9074,8 +9021,6 @@
     }
     
     function showEndTurnPartTwoFinal() {
-      const boardAction = (text) => `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${text}</span></div>`;
-      const noteBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ NOTE:</span> ${text}</div>`;
       
       let content = '';
       
@@ -9223,9 +9168,6 @@
     
     function showEndTurnFullFinal() {
       // For Turns 1-2, no card is removed, so show full End Turn in one screen
-      const boardAction = (text) => `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${text}</span></div>`;
-      const infoBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ INFO:</span> ${text}</div>`;
-      const noteBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ NOTE:</span> ${text}</div>`;
       
       // Capture pending characters before processing
       const newCharacters = [...gameState.heir.pendingCharacters];
@@ -9327,9 +9269,6 @@
     // ============================================
     
     function showEndTurnFinalTurn() {
-      const boardAction = (text) => `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${text}</span></div>`;
-      const infoBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ INFO:</span> ${text}</div>`;
-      const noteBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ NOTE:</span> ${text}</div>`;
       
       // Heir coin conversion
       const famePerSet = gameState.difficulty === 'easy' ? 2 : 3;
@@ -9387,20 +9326,6 @@
     }
     
     function showRemovedCardYieldsFinalTurn() {
-      const boardAction = (text) => `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${text}</span></div>`;
-      const infoBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ INFO:</span> ${text}</div>`;
-      
-      // Stepper helper function
-      const createStepper = (id, initialValue) => {
-        const isZero = initialValue === 0;
-        return `
-        <div class="stepper-container">
-          <button type="button" class="stepper-btn stepper-minus" data-target="${id}" ${isZero ? 'disabled' : ''}>−</button>
-          <span id="${id}" class="stepper-value" data-value="${initialValue}">${initialValue}</span>
-          <button type="button" class="stepper-btn stepper-plus" data-target="${id}">+</button>
-        </div>
-      `;
-      };
       
       // p19 and p20 apply "any time" shards received
       const prophecyReminder = getProphecyReminderHtml('end-turn');
@@ -9601,8 +9526,6 @@
     }
     
     function showEndTurnFinalTurnFinal() {
-      const boardAction = (text) => `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${text}</span></div>`;
-      const noteBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ NOTE:</span> ${text}</div>`;
       
       let content = '';
       
@@ -9658,19 +9581,6 @@
     };
     
     function showEndGameStep1_TricksOnCards() {
-      const infoBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ INFO:</span> ${text}</div>`;
-      
-      // Stepper helper function
-      const createStepper = (id, initialValue) => {
-        const isZero = initialValue === 0;
-        return `
-        <div class="stepper-container">
-          <button type="button" class="stepper-btn stepper-minus" data-target="${id}" ${isZero ? 'disabled' : ''}>−</button>
-          <span id="${id}" class="stepper-value" data-value="${initialValue}">${initialValue}</span>
-          <button type="button" class="stepper-btn stepper-plus" data-target="${id}">+</button>
-        </div>
-      `;
-      };
       
       // Standard prophecy reminder (p19, p20 mapped to 'end-game')
       const prophecyReminder = getProphecyReminderHtml('end-game');
@@ -9769,8 +9679,6 @@
     }
     
     function showEndGameStep2_FinalTotals() {
-      const boardAction = (text) => `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${text}</span></div>`;
-      const noteBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ NOTE:</span> ${text}</div>`;
       
       // Get difficulty bonuses
       const l3Bonus = gameState.difficulty === 'easy' ? 5 : (gameState.difficulty === 'normal' ? 7 : 10);
@@ -9934,7 +9842,6 @@
     }
     
     function showEndGameStep3_PlayerGuide(heirFinalFame) {
-      const infoBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ INFO:</span> ${text}</div>`;
       
       setActionContent(
         'End Game — Your Score',
