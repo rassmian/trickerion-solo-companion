@@ -424,8 +424,8 @@
         padding: 15px;
       }
       /* Force inline grids to stack on mobile */
-      .action-content [style*="grid-template-columns: 1fr 1fr"]:not(.stepper-grid),
-      .action-content [style*="grid-template-columns: 1fr 1fr 1fr"]:not(.stepper-grid) {
+      .action-content [style*="grid-template-columns: 1fr 1fr"]:not(.stepper-grid):not(.bonus-grid),
+      .action-content [style*="grid-template-columns: 1fr 1fr 1fr"]:not(.stepper-grid):not(.bonus-grid) {
         grid-template-columns: 1fr !important;
       }
       /* Reduce spacing in turn summary box */
@@ -454,6 +454,7 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
+      width: fit-content;
     }
     .stepper-btn {
       width: 44px;
@@ -1133,7 +1134,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.13.0-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.13.1-beta</p>
       <button class="restart-btn hidden" id="restart-btn">↺ New Game</button>
     </header>
 
@@ -1145,7 +1146,7 @@
         <!-- PAGE 0: Setup Mode Selection -->
         <div class="setup-page" id="setup-page-0">
           <div class="setup-section" style="text-align: center;">
-            <h2 style="color: var(--amber); margin-bottom: 10px;">Welcome to Trickerion Solo</h2>
+            <h2 style="color: var(--amber); margin-bottom: 10px; justify-content: center;">Welcome to Trickerion Solo</h2>
             <p style="color: var(--text-secondary); margin-bottom: 30px;">Choose your setup experience:</p>
             
             <div class="option-grid" style="max-width: 500px; margin: 0 auto;">
@@ -4195,8 +4196,57 @@
         });
         
         item.addEventListener('click', () => {
-          selectProphecy(item.dataset.prophecyId);
+          const isMobile = window.matchMedia('(hover: none)').matches;
+          
+          if (isMobile) {
+            // Show confirmation screen on mobile
+            showProphecyConfirmation(
+              item.dataset.prophecyId,
+              item.dataset.prophecyName,
+              item.dataset.prophecyDesc,
+              item.querySelector('img').src
+            );
+          } else {
+            // Desktop: select immediately
+            selectProphecy(item.dataset.prophecyId);
+          }
         });
+      });
+    }
+    
+    function showProphecyConfirmation(prophecyId, name, description, imgSrc) {
+      // Create confirmation overlay
+      const confirmModal = document.createElement('div');
+      confirmModal.className = 'modal-overlay';
+      confirmModal.id = 'prophecy-confirm-modal';
+      confirmModal.style.cssText = 'z-index: 1001;'; // Above the prophecy modal
+      confirmModal.innerHTML = `
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+          <div class="modal-header" style="justify-content: center;">
+            <h3 style="font-family: 'Cinzel', serif; color: var(--amber);">Confirm Prophecy</h3>
+          </div>
+          <div class="modal-body" style="padding: 20px;">
+            <img src="${imgSrc}" alt="${name}" style="width: 120px; height: 120px; border-radius: 8px; margin-bottom: 15px; border: 2px solid var(--amber);">
+            <h4 style="color: var(--text-primary); margin-bottom: 10px; font-size: 1.2rem;">${name}</h4>
+            <p style="color: var(--text-secondary); line-height: 1.5; font-size: 0.95rem;">${description}</p>
+          </div>
+          <div class="modal-footer" style="display: flex; gap: 10px; justify-content: center; padding: 15px 20px;">
+            <button class="btn" id="prophecy-back-btn" style="flex: 1;">← Choose Different</button>
+            <button class="btn" id="prophecy-confirm-btn" style="flex: 1; background: var(--amber); color: var(--bg-dark);">Confirm ✓</button>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(confirmModal);
+      
+      // Button handlers
+      $('#prophecy-back-btn').addEventListener('click', () => {
+        confirmModal.remove();
+      });
+      
+      $('#prophecy-confirm-btn').addEventListener('click', () => {
+        confirmModal.remove();
+        selectProphecy(prophecyId);
       });
     }
 
@@ -7599,7 +7649,7 @@
            <p style="margin-bottom: 15px;"><strong>What's the Performance card bonus?</strong></p>
            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 6px;">Look at the bottom of the card and select the matching bonus:</p>
            
-           <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">
+           <div class="bonus-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px;">
              <button class="btn bonus-btn" data-fame="1" data-shards="0" data-coins="0">1★</button>
              <button class="btn bonus-btn" data-fame="2" data-shards="0" data-coins="0">2★</button>
              <button class="btn bonus-btn" data-fame="3" data-shards="0" data-coins="0">3★</button>
@@ -7917,8 +7967,8 @@
         redLotusHtml = `
           ${magicianAbilityBox(`<strong>Red Lotus:</strong> The Heir gets <strong>+1 Fame</strong> for each of YOUR Tricks on its selected Performance card.`)}
           
-          <div style="margin: 15px 0; text-align: center;">
-            <label style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; color: #a6c;">
+          <div style="margin: 15px 0;">
+            <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: #a6c;">
               <span style="font-size: 1.3rem;">✨</span> Your Tricks on card ${winningCard}
             </label>
             ${createStepper('red-lotus-tricks', heirPerformanceTempData.redLotusTricks)}
@@ -9641,7 +9691,7 @@
          <div style="background: var(--bg-card); padding: 15px; border-radius: 6px; margin: 15px 0;">
            <p style="margin-bottom: 15px; color: var(--text-secondary);">Count the Heir's Trick markers remaining on Performance cards and sum their yields:</p>
            
-           <div style="margin-bottom: 15px; text-align: center;">
+           <div style="margin-bottom: 15px;">
              <label style="display: block; margin-bottom: 8px; color: var(--text-secondary);">Number of Trick markers on Performance cards:</label>
              ${createStepper('endgame-trick-count', prevCount)}
            </div>
