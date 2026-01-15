@@ -1056,7 +1056,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.12.0-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.12.1-beta</p>
       <button class="restart-btn hidden" id="restart-btn">↺ New Game</button>
     </header>
 
@@ -7673,6 +7673,18 @@
       const noteBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ NOTE:</span> ${text}</div>`;
       const magicianAbilityBox = (text) => `<div style="background: rgba(180, 100, 200, 0.15); border-left: 3px solid #a6c; padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: #a6c; font-weight: 600;">✨ MAGICIAN ABILITY:</span> ${text}</div>`;
       
+      // Stepper helper function
+      const createStepper = (id, initialValue) => {
+        const isZero = initialValue === 0;
+        return `
+        <div class="stepper-container" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <button type="button" class="stepper-btn stepper-minus" data-target="${id}" ${isZero ? 'disabled' : ''} style="width: 44px; height: 44px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-primary); font-size: 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: ${isZero ? '0.4' : '1'};">−</button>
+          <span id="${id}" class="stepper-value" data-value="${initialValue}" style="min-width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: var(--bg-main); border: 1px solid var(--border); border-radius: 4px; font-size: 1.1rem; font-weight: 600; color: var(--text-primary);">${initialValue}</span>
+          <button type="button" class="stepper-btn stepper-plus" data-target="${id}" style="width: 44px; height: 44px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-primary); font-size: 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center;">+</button>
+        </div>
+      `;
+      };
+      
       const isElektra = gameState.heirMagician?.id === 'elektra';
       
       // Build card visual
@@ -7693,17 +7705,17 @@
           <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
             <div style="text-align: center;">
               <label style="display: block; margin-bottom: 8px; font-weight: 600;">Level 1</label>
-              <input type="number" id="elektra-level1" value="${heirPerformanceTempData.trickCountsByLevel.level1}" min="0" max="10" style="width: 60px; padding: 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-main); color: var(--text-primary); font-size: 1.1rem; text-align: center;">
+              ${createStepper('elektra-level1', heirPerformanceTempData.trickCountsByLevel.level1)}
               <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 5px;">+1 each</p>
             </div>
             <div style="text-align: center;">
               <label style="display: block; margin-bottom: 8px; font-weight: 600;">Level 2</label>
-              <input type="number" id="elektra-level2" value="${heirPerformanceTempData.trickCountsByLevel.level2}" min="0" max="10" style="width: 60px; padding: 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-main); color: var(--text-primary); font-size: 1.1rem; text-align: center;">
+              ${createStepper('elektra-level2', heirPerformanceTempData.trickCountsByLevel.level2)}
               <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 5px;">+2 each</p>
             </div>
             <div style="text-align: center;">
               <label style="display: block; margin-bottom: 8px; font-weight: 600;">Level 3</label>
-              <input type="number" id="elektra-level3" value="${heirPerformanceTempData.trickCountsByLevel.level3}" min="0" max="10" style="width: 60px; padding: 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-main); color: var(--text-primary); font-size: 1.1rem; text-align: center;">
+              ${createStepper('elektra-level3', heirPerformanceTempData.trickCountsByLevel.level3)}
               <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 5px;">+3 each</p>
             </div>
           </div>
@@ -7719,23 +7731,23 @@
       
       inputHtml += `
         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
-          <div>
-            <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: var(--text-secondary);">
+          <div style="text-align: center;">
+            <label style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; color: var(--text-secondary);">
               <span style="font-size: 1.3rem;">★</span> Fame
             </label>
-            <input type="number" id="trick-yield-fame" value="${heirPerformanceTempData.trickYields.fame}" min="0" max="50" style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-main); color: var(--text-primary); font-size: 1.1rem; text-align: center;">
+            ${createStepper('trick-yield-fame', heirPerformanceTempData.trickYields.fame)}
           </div>
-          <div>
-            <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: var(--text-secondary);">
+          <div style="text-align: center;">
+            <label style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; color: var(--text-secondary);">
               <span style="font-size: 1.3rem;">🪙</span> Coins
             </label>
-            <input type="number" id="trick-yield-coins" value="${heirPerformanceTempData.trickYields.coins}" min="0" max="50" style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-main); color: var(--text-primary); font-size: 1.1rem; text-align: center;">
+            ${createStepper('trick-yield-coins', heirPerformanceTempData.trickYields.coins)}
           </div>
-          <div>
-            <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: var(--text-secondary);">
+          <div style="text-align: center;">
+            <label style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; color: var(--text-secondary);">
               <span style="font-size: 1.3rem;">💎</span> Shards
             </label>
-            <input type="number" id="trick-yield-shards" value="${heirPerformanceTempData.trickYields.shards}" min="0" max="10" style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-main); color: var(--text-primary); font-size: 1.1rem; text-align: center;">
+            ${createStepper('trick-yield-shards', heirPerformanceTempData.trickYields.shards)}
           </div>
         </div>
       `;
@@ -7749,18 +7761,18 @@
          ${inputHtml}`,
         [
           { text: 'Continue →', action: () => {
-            // Save inputs
+            // Save inputs from stepper values
             heirPerformanceTempData.trickYields = {
-              fame: parseInt($('#trick-yield-fame')?.value) || 0,
-              coins: parseInt($('#trick-yield-coins')?.value) || 0,
-              shards: parseInt($('#trick-yield-shards')?.value) || 0
+              fame: parseInt($('#trick-yield-fame')?.dataset?.value) || 0,
+              coins: parseInt($('#trick-yield-coins')?.dataset?.value) || 0,
+              shards: parseInt($('#trick-yield-shards')?.dataset?.value) || 0
             };
             
             if (isElektra) {
               heirPerformanceTempData.trickCountsByLevel = {
-                level1: parseInt($('#elektra-level1')?.value) || 0,
-                level2: parseInt($('#elektra-level2')?.value) || 0,
-                level3: parseInt($('#elektra-level3')?.value) || 0
+                level1: parseInt($('#elektra-level1')?.dataset?.value) || 0,
+                level2: parseInt($('#elektra-level2')?.dataset?.value) || 0,
+                level3: parseInt($('#elektra-level3')?.dataset?.value) || 0
               };
             }
             
@@ -7768,6 +7780,36 @@
           }}
         ]
       );
+      
+      // Attach stepper event listeners
+      setTimeout(() => {
+        document.querySelectorAll('.stepper-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const targetId = e.currentTarget.dataset.target;
+            const valueEl = document.getElementById(targetId);
+            if (!valueEl) return;
+            
+            let currentValue = parseInt(valueEl.dataset.value) || 0;
+            
+            if (e.currentTarget.classList.contains('stepper-plus')) {
+              currentValue++;
+            } else if (e.currentTarget.classList.contains('stepper-minus')) {
+              currentValue = Math.max(0, currentValue - 1);
+            }
+            
+            valueEl.dataset.value = currentValue;
+            valueEl.textContent = currentValue;
+            
+            // Update minus button disabled state
+            const container = valueEl.closest('.stepper-container');
+            const minusBtn = container?.querySelector('.stepper-minus');
+            if (minusBtn) {
+              minusBtn.disabled = currentValue === 0;
+              minusBtn.style.opacity = currentValue === 0 ? '0.4' : '1';
+            }
+          });
+        });
+      }, 0);
     }
     
     function showHeirPerformanceStep2_CardBonus() {
