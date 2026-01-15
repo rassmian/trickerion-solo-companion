@@ -7702,7 +7702,7 @@
           <p style="margin: 15px 0;"><strong>How many Heir Tricks were performed at each level?</strong></p>
           <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;">Count only the Heir's Tricks on card ${winningCard}.</p>
           
-          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px 30px; margin-bottom: 20px;">
             <div style="text-align: center;">
               <label style="display: block; margin-bottom: 8px; font-weight: 600;">Level 1</label>
               ${createStepper('elektra-level1', heirPerformanceTempData.trickCountsByLevel.level1)}
@@ -7713,7 +7713,7 @@
               ${createStepper('elektra-level2', heirPerformanceTempData.trickCountsByLevel.level2)}
               <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 5px;">+2 each</p>
             </div>
-            <div style="text-align: center;">
+            <div style="text-align: center; grid-column: 1 / -1;">
               <label style="display: block; margin-bottom: 8px; font-weight: 600;">Level 3</label>
               ${createStepper('elektra-level3', heirPerformanceTempData.trickCountsByLevel.level3)}
               <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 5px;">+3 each</p>
@@ -7730,7 +7730,7 @@
       }
       
       inputHtml += `
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px 30px;">
           <div style="text-align: center;">
             <label style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; color: var(--text-secondary);">
               <span style="font-size: 1.3rem;">★</span> Fame
@@ -7743,7 +7743,7 @@
             </label>
             ${createStepper('trick-yield-coins', heirPerformanceTempData.trickYields.coins)}
           </div>
-          <div style="text-align: center;">
+          <div style="text-align: center; grid-column: 1 / -1;">
             <label style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; color: var(--text-secondary);">
               <span style="font-size: 1.3rem;">💎</span> Shards
             </label>
