@@ -4199,6 +4199,10 @@
           const isMobile = window.matchMedia('(hover: none)').matches;
           
           if (isMobile) {
+            // Hide tooltip if visible
+            const tooltip = $('#prophecy-tooltip');
+            if (tooltip) tooltip.style.display = 'none';
+            
             // Show confirmation screen on mobile
             showProphecyConfirmation(
               item.dataset.prophecyId,
@@ -4226,7 +4230,7 @@
             <h3 style="font-family: 'Cinzel', serif; color: var(--amber);">Confirm Prophecy</h3>
           </div>
           <div class="modal-body" style="padding: 20px;">
-            <img src="${imgSrc}" alt="${name}" style="width: 120px; height: 120px; border-radius: 8px; margin-bottom: 15px; border: 2px solid var(--amber);">
+            <img src="${imgSrc}" alt="${name}" style="width: 120px; height: 120px; border-radius: 8px; margin-bottom: 15px;">
             <h4 style="color: var(--text-primary); margin-bottom: 10px; font-size: 1.2rem;">${name}</h4>
             <p style="color: var(--text-secondary); line-height: 1.5; font-size: 0.95rem;">${description}</p>
           </div>
