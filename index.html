@@ -411,8 +411,8 @@
         padding: 15px;
       }
       /* Force inline grids to stack on mobile */
-      .action-content [style*="grid-template-columns: 1fr 1fr"],
-      .action-content [style*="grid-template-columns: 1fr 1fr 1fr"] {
+      .action-content [style*="grid-template-columns: 1fr 1fr"]:not(.stepper-grid),
+      .action-content [style*="grid-template-columns: 1fr 1fr 1fr"]:not(.stepper-grid) {
         grid-template-columns: 1fr !important;
       }
       /* Reduce spacing in turn summary box */
@@ -1056,7 +1056,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.12.1-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.12.2-beta</p>
       <button class="restart-btn hidden" id="restart-btn">↺ New Game</button>
     </header>
 
@@ -7702,7 +7702,7 @@
           <p style="margin: 15px 0;"><strong>How many Heir Tricks were performed at each level?</strong></p>
           <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;">Count only the Heir's Tricks on card ${winningCard}.</p>
           
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px 30px; margin-bottom: 20px;">
+          <div class="stepper-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px 30px; margin-bottom: 20px;">
             <div style="text-align: center;">
               <label style="display: block; margin-bottom: 8px; font-weight: 600;">Level 1</label>
               ${createStepper('elektra-level1', heirPerformanceTempData.trickCountsByLevel.level1)}
@@ -7730,7 +7730,7 @@
       }
       
       inputHtml += `
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px 30px;">
+        <div class="stepper-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px 30px;">
           <div style="text-align: center;">
             <label style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; color: var(--text-secondary);">
               <span style="font-size: 1.3rem;">★</span> Fame
