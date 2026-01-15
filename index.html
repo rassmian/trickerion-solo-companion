@@ -205,9 +205,11 @@
       transition: all 0.2s ease;
     }
 
-    .btn-randomize:hover:not(:disabled) {
-      background: rgba(212, 168, 71, 0.15);
-      border-color: var(--amber);
+    @media (hover: hover) {
+      .btn-randomize:hover:not(:disabled) {
+        background: rgba(212, 168, 71, 0.15);
+        border-color: var(--amber);
+      }
     }
 
     .btn-randomize:disabled {
@@ -231,9 +233,11 @@
       text-align: center;
     }
 
-    .option-card:hover {
-      border-color: var(--amber-dark);
-      background: var(--bg-card-hover);
+    @media (hover: hover) {
+      .option-card:hover {
+        border-color: var(--amber-dark);
+        background: var(--bg-card-hover);
+      }
     }
 
     .option-card.selected {
@@ -261,9 +265,11 @@
       position: relative;
     }
 
-    .option-card.disabled:hover {
-      border-color: var(--border);
-      background: var(--bg-dark);
+    @media (hover: hover) {
+      .option-card.disabled:hover {
+        border-color: var(--border);
+        background: var(--bg-dark);
+      }
     }
 
     .option-card .coming-soon {
@@ -299,9 +305,14 @@
       opacity: 0.85;
     }
 
-    .option-card:hover .school-icon,
     .option-card.selected .school-icon {
       opacity: 1;
+    }
+
+    @media (hover: hover) {
+      .option-card:hover .school-icon {
+        opacity: 1;
+      }
     }
 
     .option-card[data-school="mechanical"] .school-icon { color: var(--mechanical); }
@@ -351,21 +362,23 @@
       letter-spacing: 0.05em;
     }
 
-    .btn:hover {
-      background: var(--amber);
-      color: var(--bg-dark);
-      box-shadow: 0 0 25px rgba(212, 168, 71, 0.3);
+    @media (hover: hover) {
+      .btn:hover {
+        background: var(--amber);
+        color: var(--bg-dark);
+        box-shadow: 0 0 25px rgba(212, 168, 71, 0.3);
+      }
+
+      .btn:disabled:hover {
+        background: transparent;
+        color: var(--amber);
+        box-shadow: none;
+      }
     }
 
     .btn:disabled {
       opacity: 0.4;
       cursor: not-allowed;
-    }
-
-    .btn:disabled:hover {
-      background: transparent;
-      color: var(--amber);
-      box-shadow: none;
     }
 
     .btn-selected {
@@ -423,6 +436,64 @@
       .turn-summary-box > div {
         gap: 8px !important;
       }
+    }
+
+    /* Stepper Buttons */
+    .stepper-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 15px 30px;
+    }
+    @media (max-width: 600px) {
+      .stepper-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .stepper-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .stepper-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-primary);
+      font-size: 1.5rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    }
+    @media (hover: hover) {
+      .stepper-btn:hover:not(:disabled) {
+        background: var(--bg-main);
+        border-color: var(--accent);
+      }
+    }
+    .stepper-btn:active:not(:disabled) {
+      transform: scale(0.95);
+    }
+    .stepper-btn:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+    .stepper-value {
+      min-width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-main);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
     }
 
     /* Sidebar - Heir State */
@@ -859,9 +930,11 @@
       transition: all 0.2s ease;
     }
 
-    .restart-btn:hover {
-      border-color: var(--amber-dark);
-      color: var(--amber);
+    @media (hover: hover) {
+      .restart-btn:hover {
+        border-color: var(--amber-dark);
+        color: var(--amber);
+      }
     }
 
     .restart-btn.hidden {
@@ -928,8 +1001,10 @@
       line-height: 1;
     }
 
-    .modal-close:hover {
-      color: var(--text-primary);
+    @media (hover: hover) {
+      .modal-close:hover {
+        color: var(--text-primary);
+      }
     }
 
     .modal-body {
@@ -1011,9 +1086,11 @@
       background: var(--bg-card);
     }
 
-    .prophecy-item:hover {
-      border-color: var(--amber);
-      transform: scale(1.05);
+    @media (hover: hover) {
+      .prophecy-item:hover {
+        border-color: var(--amber);
+        transform: scale(1.05);
+      }
     }
 
     .prophecy-item img {
@@ -1056,7 +1133,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.12.2-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.12.3-beta</p>
       <button class="restart-btn hidden" id="restart-btn">↺ New Game</button>
     </header>
 
@@ -7677,10 +7754,10 @@
       const createStepper = (id, initialValue) => {
         const isZero = initialValue === 0;
         return `
-        <div class="stepper-container" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-          <button type="button" class="stepper-btn stepper-minus" data-target="${id}" ${isZero ? 'disabled' : ''} style="width: 44px; height: 44px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-primary); font-size: 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: ${isZero ? '0.4' : '1'};">−</button>
-          <span id="${id}" class="stepper-value" data-value="${initialValue}" style="min-width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: var(--bg-main); border: 1px solid var(--border); border-radius: 4px; font-size: 1.1rem; font-weight: 600; color: var(--text-primary);">${initialValue}</span>
-          <button type="button" class="stepper-btn stepper-plus" data-target="${id}" style="width: 44px; height: 44px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-primary); font-size: 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center;">+</button>
+        <div class="stepper-container">
+          <button type="button" class="stepper-btn stepper-minus" data-target="${id}" ${isZero ? 'disabled' : ''}>−</button>
+          <span id="${id}" class="stepper-value" data-value="${initialValue}">${initialValue}</span>
+          <button type="button" class="stepper-btn stepper-plus" data-target="${id}">+</button>
         </div>
       `;
       };
@@ -7702,7 +7779,7 @@
           <p style="margin: 15px 0;"><strong>How many Heir Tricks were performed at each level?</strong></p>
           <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;">Count only the Heir's Tricks on card ${winningCard}.</p>
           
-          <div class="stepper-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px 30px; margin-bottom: 20px;">
+          <div class="stepper-grid" style="margin-bottom: 20px;">
             <div style="text-align: center;">
               <label style="display: block; margin-bottom: 8px; font-weight: 600;">Level 1</label>
               ${createStepper('elektra-level1', heirPerformanceTempData.trickCountsByLevel.level1)}
@@ -7713,7 +7790,7 @@
               ${createStepper('elektra-level2', heirPerformanceTempData.trickCountsByLevel.level2)}
               <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 5px;">+2 each</p>
             </div>
-            <div style="text-align: center; grid-column: 1 / -1;">
+            <div style="text-align: center;">
               <label style="display: block; margin-bottom: 8px; font-weight: 600;">Level 3</label>
               ${createStepper('elektra-level3', heirPerformanceTempData.trickCountsByLevel.level3)}
               <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 5px;">+3 each</p>
@@ -7730,7 +7807,7 @@
       }
       
       inputHtml += `
-        <div class="stepper-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px 30px;">
+        <div class="stepper-grid">
           <div style="text-align: center;">
             <label style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; color: var(--text-secondary);">
               <span style="font-size: 1.3rem;">★</span> Fame
@@ -7743,7 +7820,7 @@
             </label>
             ${createStepper('trick-yield-coins', heirPerformanceTempData.trickYields.coins)}
           </div>
-          <div style="text-align: center; grid-column: 1 / -1;">
+          <div style="text-align: center;">
             <label style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; color: var(--text-secondary);">
               <span style="font-size: 1.3rem;">💎</span> Shards
             </label>
@@ -7805,7 +7882,6 @@
             const minusBtn = container?.querySelector('.stepper-minus');
             if (minusBtn) {
               minusBtn.disabled = currentValue === 0;
-              minusBtn.style.opacity = currentValue === 0 ? '0.4' : '1';
             }
           });
         });
