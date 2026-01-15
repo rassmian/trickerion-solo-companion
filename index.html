@@ -1133,7 +1133,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.12.3-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.13.0-beta</p>
       <button class="restart-btn hidden" id="restart-btn">↺ New Game</button>
     </header>
 
@@ -7892,6 +7892,18 @@
       const infoBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ INFO:</span> ${text}</div>`;
       const magicianAbilityBox = (text) => `<div style="background: rgba(180, 100, 200, 0.15); border-left: 3px solid #a6c; padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: #a6c; font-weight: 600;">✨ MAGICIAN ABILITY:</span> ${text}</div>`;
       
+      // Stepper helper function
+      const createStepper = (id, initialValue) => {
+        const isZero = initialValue === 0;
+        return `
+        <div class="stepper-container">
+          <button type="button" class="stepper-btn stepper-minus" data-target="${id}" ${isZero ? 'disabled' : ''}>−</button>
+          <span id="${id}" class="stepper-value" data-value="${initialValue}">${initialValue}</span>
+          <button type="button" class="stepper-btn stepper-plus" data-target="${id}">+</button>
+        </div>
+      `;
+      };
+      
       const winningCard = heirPerformanceTempData.winningCard;
       const isRedLotus = gameState.heirMagician?.id === 'redlotus';
       
@@ -7905,11 +7917,11 @@
         redLotusHtml = `
           ${magicianAbilityBox(`<strong>Red Lotus:</strong> The Heir gets <strong>+1 Fame</strong> for each of YOUR Tricks on its selected Performance card.`)}
           
-          <div style="margin: 15px 0;">
-            <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: #a6c;">
+          <div style="margin: 15px 0; text-align: center;">
+            <label style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; color: #a6c;">
               <span style="font-size: 1.3rem;">✨</span> Your Tricks on card ${winningCard}
             </label>
-            <input type="number" id="red-lotus-tricks" value="${heirPerformanceTempData.redLotusTricks}" min="0" max="10" style="width: 100px; padding: 10px; border-radius: 4px; border: 1px solid #a6c; background: var(--bg-main); color: var(--text-primary); font-size: 1.1rem; text-align: center;">
+            ${createStepper('red-lotus-tricks', heirPerformanceTempData.redLotusTricks)}
           </div>
         `;
       }
@@ -7921,24 +7933,24 @@
          <p style="margin: 15px 0;"><strong>Enter the Performance Card Bonus:</strong></p>
          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;">This is the bonus printed at the bottom of Performance card ${winningCard}.</p>
          
-         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
-           <div>
-             <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: var(--text-secondary);">
+         <div class="stepper-grid">
+           <div style="text-align: center;">
+             <label style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; color: var(--text-secondary);">
                <span style="font-size: 1.3rem;">★</span> Fame
              </label>
-             <input type="number" id="card-bonus-fame" value="${heirPerformanceTempData.cardBonus.fame}" min="0" max="20" style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-main); color: var(--text-primary); font-size: 1.1rem; text-align: center;">
+             ${createStepper('card-bonus-fame', heirPerformanceTempData.cardBonus.fame)}
            </div>
-           <div>
-             <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: var(--text-secondary);">
+           <div style="text-align: center;">
+             <label style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; color: var(--text-secondary);">
                <span style="font-size: 1.3rem;">🪙</span> Coins
              </label>
-             <input type="number" id="card-bonus-coins" value="${heirPerformanceTempData.cardBonus.coins}" min="0" max="20" style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-main); color: var(--text-primary); font-size: 1.1rem; text-align: center;">
+             ${createStepper('card-bonus-coins', heirPerformanceTempData.cardBonus.coins)}
            </div>
-           <div>
-             <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: var(--text-secondary);">
+           <div style="text-align: center;">
+             <label style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; color: var(--text-secondary);">
                <span style="font-size: 1.3rem;">💎</span> Shards
              </label>
-             <input type="number" id="card-bonus-shards" value="${heirPerformanceTempData.cardBonus.shards}" min="0" max="5" style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-main); color: var(--text-primary); font-size: 1.1rem; text-align: center;">
+             ${createStepper('card-bonus-shards', heirPerformanceTempData.cardBonus.shards)}
            </div>
          </div>
          
@@ -7947,29 +7959,58 @@
           { text: '← Back', action: () => {
             // Save current inputs before going back
             heirPerformanceTempData.cardBonus = {
-              fame: parseInt($('#card-bonus-fame')?.value) || 0,
-              coins: parseInt($('#card-bonus-coins')?.value) || 0,
-              shards: parseInt($('#card-bonus-shards')?.value) || 0
+              fame: parseInt($('#card-bonus-fame')?.dataset?.value) || 0,
+              coins: parseInt($('#card-bonus-coins')?.dataset?.value) || 0,
+              shards: parseInt($('#card-bonus-shards')?.dataset?.value) || 0
             };
             if (isRedLotus) {
-              heirPerformanceTempData.redLotusTricks = parseInt($('#red-lotus-tricks')?.value) || 0;
+              heirPerformanceTempData.redLotusTricks = parseInt($('#red-lotus-tricks')?.dataset?.value) || 0;
             }
             showHeirPerformanceStep1_TrickYields(heirPerformanceTempData.winningCard, heirPerformanceTempData.results);
           }},
           { text: 'Continue →', action: () => {
             // Save inputs
             heirPerformanceTempData.cardBonus = {
-              fame: parseInt($('#card-bonus-fame')?.value) || 0,
-              coins: parseInt($('#card-bonus-coins')?.value) || 0,
-              shards: parseInt($('#card-bonus-shards')?.value) || 0
+              fame: parseInt($('#card-bonus-fame')?.dataset?.value) || 0,
+              coins: parseInt($('#card-bonus-coins')?.dataset?.value) || 0,
+              shards: parseInt($('#card-bonus-shards')?.dataset?.value) || 0
             };
             if (isRedLotus) {
-              heirPerformanceTempData.redLotusTricks = parseInt($('#red-lotus-tricks')?.value) || 0;
+              heirPerformanceTempData.redLotusTricks = parseInt($('#red-lotus-tricks')?.dataset?.value) || 0;
             }
             showHeirPerformanceStep3_FinalTotals();
           }}
         ]
       );
+      
+      // Attach stepper event listeners
+      setTimeout(() => {
+        document.querySelectorAll('.stepper-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const targetId = e.currentTarget.dataset.target;
+            const valueEl = document.getElementById(targetId);
+            if (!valueEl) return;
+            
+            let currentValue = parseInt(valueEl.dataset.value) || 0;
+            
+            if (e.currentTarget.classList.contains('stepper-plus')) {
+              currentValue++;
+            } else if (e.currentTarget.classList.contains('stepper-minus')) {
+              currentValue = Math.max(0, currentValue - 1);
+            }
+            
+            valueEl.dataset.value = currentValue;
+            valueEl.textContent = currentValue;
+            
+            // Update minus button disabled state
+            const container = valueEl.closest('.stepper-container');
+            const minusBtn = container?.querySelector('.stepper-minus');
+            if (minusBtn) {
+              minusBtn.disabled = currentValue === 0;
+            }
+          });
+        });
+      }, 0);
     }
     
     function showHeirPerformanceStep3_FinalTotals() {
@@ -8319,6 +8360,18 @@
       const noteBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ NOTE:</span> ${text}</div>`;
       const boardAction = (text) => `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${text}</span></div>`;
       
+      // Stepper helper function
+      const createStepper = (id, initialValue) => {
+        const isZero = initialValue === 0;
+        return `
+        <div class="stepper-container">
+          <button type="button" class="stepper-btn stepper-minus" data-target="${id}" ${isZero ? 'disabled' : ''}>−</button>
+          <span id="${id}" class="stepper-value" data-value="${initialValue}">${initialValue}</span>
+          <button type="button" class="stepper-btn stepper-plus" data-target="${id}">+</button>
+        </div>
+      `;
+      };
+      
       const prophecyReminder = getProphecyReminderHtml('performance');
       const isPlayerFirst = gameState.performanceOrder === 'player-first';
       
@@ -8329,9 +8382,9 @@
       
       // Shared calculation function
       const calculatePlayerPerfGains = () => {
-        let fame = Math.max(0, parseInt($('#heir-player-perf-fame')?.value) || 0);
-        let coins = Math.max(0, parseInt($('#heir-player-perf-coins')?.value) || 0);
-        let shards = Math.max(0, parseInt($('#heir-player-perf-shards')?.value) || 0);
+        let fame = Math.max(0, parseInt($('#heir-player-perf-fame')?.dataset?.value) || 0);
+        let coins = Math.max(0, parseInt($('#heir-player-perf-coins')?.dataset?.value) || 0);
+        let shards = Math.max(0, parseInt($('#heir-player-perf-shards')?.dataset?.value) || 0);
         
         // Apply p16 (Coins As Fame) - convert all coins to fame
         if (isCoinsAsFame && coins > 0) {
@@ -8365,13 +8418,6 @@
         }
       };
       
-      // Sanitize input to prevent negative values
-      const sanitizeInput = (e) => {
-        const val = parseInt(e.target.value);
-        if (val < 0) e.target.value = 0;
-        updatePlayerPerfBoardAction();
-      };
-      
       // Current values for initial display
       const currentFame = gameState.heir.fame;
       const currentCoins = gameState.heir.coins;
@@ -8388,24 +8434,24 @@
          <div style="background: var(--bg-card); padding: 15px; border-radius: 6px; margin: 15px 0;">
            <p style="margin-bottom: 15px; color: var(--text-secondary); font-size: 0.9rem;"><strong>Heir's Yields from your performed card:</strong></p>
            
-           <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
-             <div>
-               <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: var(--text-secondary);">
+           <div class="stepper-grid">
+             <div style="text-align: center;">
+               <label style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; color: var(--text-secondary);">
                  <span style="font-size: 1.3rem;">★</span> Fame
                </label>
-               <input type="number" id="heir-player-perf-fame" value="0" min="0" max="30" style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-main); color: var(--text-primary); font-size: 1.1rem; text-align: center;">
+               ${createStepper('heir-player-perf-fame', 0)}
              </div>
-             <div>
-               <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: var(--text-secondary);">
+             <div style="text-align: center;">
+               <label style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; color: var(--text-secondary);">
                  <span style="font-size: 1.3rem;">🪙</span> Coins
                </label>
-               <input type="number" id="heir-player-perf-coins" value="0" min="0" max="30" style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-main); color: var(--text-primary); font-size: 1.1rem; text-align: center;">
+               ${createStepper('heir-player-perf-coins', 0)}
              </div>
-             <div>
-               <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: var(--text-secondary);">
+             <div style="text-align: center;">
+               <label style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; color: var(--text-secondary);">
                  <span style="font-size: 1.3rem;">💎</span> Shards
                </label>
-               <input type="number" id="heir-player-perf-shards" value="0" min="0" max="10" style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-main); color: var(--text-primary); font-size: 1.1rem; text-align: center;">
+               ${createStepper('heir-player-perf-shards', 0)}
              </div>
            </div>
          </div>
@@ -8436,14 +8482,35 @@
         ]
       );
       
-      // Add input listeners for dynamic board action update
+      // Attach stepper event listeners
       setTimeout(() => {
-        const inputs = ['#heir-player-perf-fame', '#heir-player-perf-coins', '#heir-player-perf-shards'];
-        inputs.forEach(selector => {
-          const input = $(selector);
-          if (input) {
-            input.addEventListener('input', sanitizeInput);
-          }
+        document.querySelectorAll('.stepper-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const targetId = e.currentTarget.dataset.target;
+            const valueEl = document.getElementById(targetId);
+            if (!valueEl) return;
+            
+            let currentValue = parseInt(valueEl.dataset.value) || 0;
+            
+            if (e.currentTarget.classList.contains('stepper-plus')) {
+              currentValue++;
+            } else if (e.currentTarget.classList.contains('stepper-minus')) {
+              currentValue = Math.max(0, currentValue - 1);
+            }
+            
+            valueEl.dataset.value = currentValue;
+            valueEl.textContent = currentValue;
+            
+            // Update minus button disabled state
+            const container = valueEl.closest('.stepper-container');
+            const minusBtn = container?.querySelector('.stepper-minus');
+            if (minusBtn) {
+              minusBtn.disabled = currentValue === 0;
+            }
+            
+            // Update the dynamic board action text
+            updatePlayerPerfBoardAction();
+          });
         });
       }, 0);
     }
@@ -8719,6 +8786,18 @@
       const boardAction = (text) => `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${text}</span></div>`;
       const infoBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ INFO:</span> ${text}</div>`;
       
+      // Stepper helper function
+      const createStepper = (id, initialValue) => {
+        const isZero = initialValue === 0;
+        return `
+        <div class="stepper-container">
+          <button type="button" class="stepper-btn stepper-minus" data-target="${id}" ${isZero ? 'disabled' : ''}>−</button>
+          <span id="${id}" class="stepper-value" data-value="${initialValue}">${initialValue}</span>
+          <button type="button" class="stepper-btn stepper-plus" data-target="${id}">+</button>
+        </div>
+      `;
+      };
+      
       // p19 and p20 apply "any time" shards received - mapped to 'end-turn' phase
       // Note: p16 (Coins As Fame) does NOT apply here - it only affects Performance phase
       const prophecyReminder = getProphecyReminderHtml('end-turn');
@@ -8729,9 +8808,9 @@
       
       // Shared calculation function
       const calculateRemovedCardGains = () => {
-        let fame = Math.max(0, parseInt($('#removed-card-fame')?.value) || 0);
-        let coins = Math.max(0, parseInt($('#removed-card-coins')?.value) || 0);
-        let shards = Math.max(0, parseInt($('#removed-card-shards')?.value) || 0);
+        let fame = Math.max(0, parseInt($('#removed-card-fame')?.dataset?.value) || 0);
+        let coins = Math.max(0, parseInt($('#removed-card-coins')?.dataset?.value) || 0);
+        let shards = Math.max(0, parseInt($('#removed-card-shards')?.dataset?.value) || 0);
         
         // Add p19 bonus (Extra Shard) - +1 shard if any shards received
         if (isExtraShard && shards > 0) {
@@ -8759,13 +8838,6 @@
         }
       };
       
-      // Sanitize input to prevent negative values
-      const sanitizeInput = (e) => {
-        const val = parseInt(e.target.value);
-        if (val < 0) e.target.value = 0;
-        updateRemovedCardBoardAction();
-      };
-      
       // Current values for initial display
       const currentFame = gameState.heir.fame;
       const currentCoins = gameState.heir.coins;
@@ -8780,24 +8852,24 @@
          ${infoBox("<strong>Example:</strong> If Heir had 2 Tricks with yields of (3★, 2🪙) and (2★, 1🪙), total is 5★ and 3🪙, then subtract 2★ and 2🪙 = <strong>3★ Fame, 1🪙 Coin</strong>")}
          
          <div style="background: var(--bg-card); padding: 15px; border-radius: 6px; margin: 15px 0;">
-           <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
-             <div>
-               <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: var(--text-secondary);">
+           <div class="stepper-grid">
+             <div style="text-align: center;">
+               <label style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; color: var(--text-secondary);">
                  <span style="font-size: 1.3rem;">★</span> Fame (after -1 each)
                </label>
-               <input type="number" id="removed-card-fame" value="0" min="0" max="30" style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-main); color: var(--text-primary); font-size: 1.1rem; text-align: center;">
+               ${createStepper('removed-card-fame', 0)}
              </div>
-             <div>
-               <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: var(--text-secondary);">
+             <div style="text-align: center;">
+               <label style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; color: var(--text-secondary);">
                  <span style="font-size: 1.3rem;">🪙</span> Coins (after -1 each)
                </label>
-               <input type="number" id="removed-card-coins" value="0" min="0" max="30" style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-main); color: var(--text-primary); font-size: 1.1rem; text-align: center;">
+               ${createStepper('removed-card-coins', 0)}
              </div>
-             <div>
-               <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: var(--text-secondary);">
+             <div style="text-align: center;">
+               <label style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; color: var(--text-secondary);">
                  <span style="font-size: 1.3rem;">💎</span> Shards
                </label>
-               <input type="number" id="removed-card-shards" value="0" min="0" max="10" style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-main); color: var(--text-primary); font-size: 1.1rem; text-align: center;">
+               ${createStepper('removed-card-shards', 0)}
              </div>
            </div>
          </div>
@@ -8820,14 +8892,35 @@
         ]
       );
       
-      // Add input listeners for dynamic board action update
+      // Attach stepper event listeners
       setTimeout(() => {
-        const inputs = ['#removed-card-fame', '#removed-card-coins', '#removed-card-shards'];
-        inputs.forEach(selector => {
-          const input = $(selector);
-          if (input) {
-            input.addEventListener('input', sanitizeInput);
-          }
+        document.querySelectorAll('.stepper-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const targetId = e.currentTarget.dataset.target;
+            const valueEl = document.getElementById(targetId);
+            if (!valueEl) return;
+            
+            let currentValue = parseInt(valueEl.dataset.value) || 0;
+            
+            if (e.currentTarget.classList.contains('stepper-plus')) {
+              currentValue++;
+            } else if (e.currentTarget.classList.contains('stepper-minus')) {
+              currentValue = Math.max(0, currentValue - 1);
+            }
+            
+            valueEl.dataset.value = currentValue;
+            valueEl.textContent = currentValue;
+            
+            // Update minus button disabled state
+            const container = valueEl.closest('.stepper-container');
+            const minusBtn = container?.querySelector('.stepper-minus');
+            if (minusBtn) {
+              minusBtn.disabled = currentValue === 0;
+            }
+            
+            // Update the dynamic board action text
+            updateRemovedCardBoardAction();
+          });
         });
       }, 0);
     }
@@ -9242,6 +9335,18 @@
       const boardAction = (text) => `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${text}</span></div>`;
       const infoBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ INFO:</span> ${text}</div>`;
       
+      // Stepper helper function
+      const createStepper = (id, initialValue) => {
+        const isZero = initialValue === 0;
+        return `
+        <div class="stepper-container">
+          <button type="button" class="stepper-btn stepper-minus" data-target="${id}" ${isZero ? 'disabled' : ''}>−</button>
+          <span id="${id}" class="stepper-value" data-value="${initialValue}">${initialValue}</span>
+          <button type="button" class="stepper-btn stepper-plus" data-target="${id}">+</button>
+        </div>
+      `;
+      };
+      
       // p19 and p20 apply "any time" shards received
       const prophecyReminder = getProphecyReminderHtml('end-turn');
       
@@ -9250,9 +9355,9 @@
       
       // Shared calculation function
       const calculateRemovedCardGains = () => {
-        let fame = Math.max(0, parseInt($('#removed-card-fame-final')?.value) || 0);
-        let coins = Math.max(0, parseInt($('#removed-card-coins-final')?.value) || 0);
-        let shards = Math.max(0, parseInt($('#removed-card-shards-final')?.value) || 0);
+        let fame = Math.max(0, parseInt($('#removed-card-fame-final')?.dataset?.value) || 0);
+        let coins = Math.max(0, parseInt($('#removed-card-coins-final')?.dataset?.value) || 0);
+        let shards = Math.max(0, parseInt($('#removed-card-shards-final')?.dataset?.value) || 0);
         
         if (isExtraShard && shards > 0) shards += 1;
         if (isShardsGiveFame && shards > 0) fame += 2;
@@ -9273,12 +9378,6 @@
         }
       };
       
-      const sanitizeInput = (e) => {
-        const val = parseInt(e.target.value);
-        if (val < 0) e.target.value = 0;
-        updateRemovedCardBoardAction();
-      };
-      
       const currentFame = gameState.heir.fame;
       const currentCoins = gameState.heir.coins;
       const currentShards = gameState.heir.shards;
@@ -9292,18 +9391,24 @@
          ${infoBox("<strong>Example:</strong> If Heir had 2 Tricks with yields of (3★, 2🪙) and (2★, 1🪙), total is 5★ and 3🪙, then subtract 2★ and 2🪙 = <strong>3★ Fame, 1🪙 Coin</strong>")}
          
          <div style="background: var(--bg-card); padding: 15px; border-radius: 6px; margin: 15px 0;">
-           <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
-             <div>
-               <label style="display: block; margin-bottom: 5px;">⭐ Fame</label>
-               <input type="number" id="removed-card-fame-final" value="0" min="0" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-main); color: var(--text-primary);">
+           <div class="stepper-grid">
+             <div style="text-align: center;">
+               <label style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; color: var(--text-secondary);">
+                 <span style="font-size: 1.3rem;">★</span> Fame
+               </label>
+               ${createStepper('removed-card-fame-final', 0)}
              </div>
-             <div>
-               <label style="display: block; margin-bottom: 5px;">🪙 Coins</label>
-               <input type="number" id="removed-card-coins-final" value="0" min="0" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-main); color: var(--text-primary);">
+             <div style="text-align: center;">
+               <label style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; color: var(--text-secondary);">
+                 <span style="font-size: 1.3rem;">🪙</span> Coins
+               </label>
+               ${createStepper('removed-card-coins-final', 0)}
              </div>
-             <div>
-               <label style="display: block; margin-bottom: 5px;">💎 Shards</label>
-               <input type="number" id="removed-card-shards-final" value="0" min="0" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-main); color: var(--text-primary);">
+             <div style="text-align: center;">
+               <label style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; color: var(--text-secondary);">
+                 <span style="font-size: 1.3rem;">💎</span> Shards
+               </label>
+               ${createStepper('removed-card-shards-final', 0)}
              </div>
            </div>
          </div>
@@ -9323,9 +9428,35 @@
         ]
       );
       
+      // Attach stepper event listeners
       setTimeout(() => {
-        ['#removed-card-fame-final', '#removed-card-coins-final', '#removed-card-shards-final'].forEach(sel => {
-          $(sel)?.addEventListener('input', sanitizeInput);
+        document.querySelectorAll('.stepper-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const targetId = e.currentTarget.dataset.target;
+            const valueEl = document.getElementById(targetId);
+            if (!valueEl) return;
+            
+            let currentValue = parseInt(valueEl.dataset.value) || 0;
+            
+            if (e.currentTarget.classList.contains('stepper-plus')) {
+              currentValue++;
+            } else if (e.currentTarget.classList.contains('stepper-minus')) {
+              currentValue = Math.max(0, currentValue - 1);
+            }
+            
+            valueEl.dataset.value = currentValue;
+            valueEl.textContent = currentValue;
+            
+            // Update minus button disabled state
+            const container = valueEl.closest('.stepper-container');
+            const minusBtn = container?.querySelector('.stepper-minus');
+            if (minusBtn) {
+              minusBtn.disabled = currentValue === 0;
+            }
+            
+            // Update the dynamic board action text
+            updateRemovedCardBoardAction();
+          });
         });
       }, 0);
     }
@@ -9474,6 +9605,18 @@
     function showEndGameStep1_TricksOnCards() {
       const infoBox = (text) => `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ INFO:</span> ${text}</div>`;
       
+      // Stepper helper function
+      const createStepper = (id, initialValue) => {
+        const isZero = initialValue === 0;
+        return `
+        <div class="stepper-container">
+          <button type="button" class="stepper-btn stepper-minus" data-target="${id}" ${isZero ? 'disabled' : ''}>−</button>
+          <span id="${id}" class="stepper-value" data-value="${initialValue}">${initialValue}</span>
+          <button type="button" class="stepper-btn stepper-plus" data-target="${id}">+</button>
+        </div>
+      `;
+      };
+      
       // Standard prophecy reminder (p19, p20 mapped to 'end-game')
       const prophecyReminder = getProphecyReminderHtml('end-game');
       
@@ -9498,25 +9641,31 @@
          <div style="background: var(--bg-card); padding: 15px; border-radius: 6px; margin: 15px 0;">
            <p style="margin-bottom: 15px; color: var(--text-secondary);">Count the Heir's Trick markers remaining on Performance cards and sum their yields:</p>
            
-           <div style="margin-bottom: 15px;">
-             <label style="display: block; margin-bottom: 5px; color: var(--text-secondary);">Number of Trick markers on Performance cards:</label>
-             <input type="number" id="endgame-trick-count" value="${prevCount}" min="0" style="width: 100px; padding: 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-main); color: var(--text-primary);">
+           <div style="margin-bottom: 15px; text-align: center;">
+             <label style="display: block; margin-bottom: 8px; color: var(--text-secondary);">Number of Trick markers on Performance cards:</label>
+             ${createStepper('endgame-trick-count', prevCount)}
            </div>
            
            <p style="margin-bottom: 10px; color: var(--text-secondary); font-size: 0.9rem;">Total yields from those tricks (raw values from cards):</p>
            
-           <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
-             <div>
-               <label style="display: block; margin-bottom: 5px; color: var(--text-secondary);">★ Fame</label>
-               <input type="number" id="endgame-trick-fame" value="${prevFame}" min="0" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-main); color: var(--text-primary);">
+           <div class="stepper-grid">
+             <div style="text-align: center;">
+               <label style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; color: var(--text-secondary);">
+                 <span style="font-size: 1.3rem;">★</span> Fame
+               </label>
+               ${createStepper('endgame-trick-fame', prevFame)}
              </div>
-             <div>
-               <label style="display: block; margin-bottom: 5px; color: var(--text-secondary);">🪙 Coins</label>
-               <input type="number" id="endgame-trick-coins" value="${prevCoins}" min="0" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-main); color: var(--text-primary);">
+             <div style="text-align: center;">
+               <label style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; color: var(--text-secondary);">
+                 <span style="font-size: 1.3rem;">🪙</span> Coins
+               </label>
+               ${createStepper('endgame-trick-coins', prevCoins)}
              </div>
-             <div>
-               <label style="display: block; margin-bottom: 5px; color: var(--text-secondary);">💎 Shards</label>
-               <input type="number" id="endgame-trick-shards" value="${prevShards}" min="0" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-main); color: var(--text-primary);">
+             <div style="text-align: center;">
+               <label style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; color: var(--text-secondary);">
+                 <span style="font-size: 1.3rem;">💎</span> Shards
+               </label>
+               ${createStepper('endgame-trick-shards', prevShards)}
              </div>
            </div>
          </div>
@@ -9524,15 +9673,44 @@
          <p style="color: var(--text-muted); font-size: 0.85rem;">If no tricks remain on Performance cards, leave all values at 0.</p>`,
         [
           { text: 'Continue →', action: () => {
-            // Save inputs
-            endGameTempData.trickCount = parseInt($('#endgame-trick-count')?.value) || 0;
-            endGameTempData.trickFame = parseInt($('#endgame-trick-fame')?.value) || 0;
-            endGameTempData.trickCoins = parseInt($('#endgame-trick-coins')?.value) || 0;
-            endGameTempData.trickShards = parseInt($('#endgame-trick-shards')?.value) || 0;
+            // Save inputs from stepper values
+            endGameTempData.trickCount = parseInt($('#endgame-trick-count')?.dataset?.value) || 0;
+            endGameTempData.trickFame = parseInt($('#endgame-trick-fame')?.dataset?.value) || 0;
+            endGameTempData.trickCoins = parseInt($('#endgame-trick-coins')?.dataset?.value) || 0;
+            endGameTempData.trickShards = parseInt($('#endgame-trick-shards')?.dataset?.value) || 0;
             showEndGameStep2_FinalTotals();
           }}
         ]
       );
+      
+      // Attach stepper event listeners
+      setTimeout(() => {
+        document.querySelectorAll('.stepper-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const targetId = e.currentTarget.dataset.target;
+            const valueEl = document.getElementById(targetId);
+            if (!valueEl) return;
+            
+            let currentValue = parseInt(valueEl.dataset.value) || 0;
+            
+            if (e.currentTarget.classList.contains('stepper-plus')) {
+              currentValue++;
+            } else if (e.currentTarget.classList.contains('stepper-minus')) {
+              currentValue = Math.max(0, currentValue - 1);
+            }
+            
+            valueEl.dataset.value = currentValue;
+            valueEl.textContent = currentValue;
+            
+            // Update minus button disabled state
+            const container = valueEl.closest('.stepper-container');
+            const minusBtn = container?.querySelector('.stepper-minus');
+            if (minusBtn) {
+              minusBtn.disabled = currentValue === 0;
+            }
+          });
+        });
+      }, 0);
     }
     
     function showEndGameStep2_FinalTotals() {
