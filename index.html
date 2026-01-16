@@ -1135,7 +1135,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.13.2-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.14.0-beta</p>
       <button class="restart-btn hidden" id="restart-btn">↺ New Game</button>
     </header>
 
@@ -1179,6 +1179,8 @@
               
               <!-- Dawn of Technology options container - populated by JS -->
               <div id="quick-dawn-options-container"></div>
+              <!-- Academy options container - populated by JS -->
+              <div id="quick-academy-options-container"></div>
             </div>
             
             <!-- Your Magician -->
@@ -1246,15 +1248,15 @@
               <div class="option-grid" id="quick-difficulty-options">
                 <div class="option-card" data-difficulty="easy">
                   <div class="title">Easy</div>
-                  <div class="description">3 characters</div>
+                  <div class="description" id="quick-diff-easy-total">3 characters</div>
                 </div>
                 <div class="option-card" data-difficulty="normal">
                   <div class="title">Normal</div>
-                  <div class="description">4 characters</div>
+                  <div class="description" id="quick-diff-normal-total">4 characters</div>
                 </div>
                 <div class="option-card" data-difficulty="hard">
                   <div class="title">Hard</div>
-                  <div class="description">4 characters</div>
+                  <div class="description" id="quick-diff-hard-total">4 characters</div>
                 </div>
               </div>
             </div>
@@ -1291,9 +1293,9 @@
                   </ol>
                 </div>
                 
-                <div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 12px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ PROPHECY SETUP:</span> Remove these 3 tokens, shuffle remaining 24, draw 3 to Pending slots. No Active Prophecy on Turn 1.</div>
+                <div id="prophecy-setup-info" style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 12px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ PROPHECY SETUP:</span> Remove these 3 tokens, shuffle remaining 24, draw 3 to Pending slots. No Active Prophecy on Turn 1.</div>
                 
-                <div style="display: flex; justify-content: center; gap: 15px; margin: 10px 0 20px 0; flex-wrap: wrap;">
+                <div id="prophecy-removal-icons" style="display: flex; justify-content: center; gap: 15px; margin: 10px 0 20px 0; flex-wrap: wrap;">
                   <div style="text-align: center;">
                     <img src="assets/images/prophecies/p15.png" alt="Shared Yield Modifier" style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--danger);">
                     <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 3px;">Shared Yield</div>
@@ -1305,6 +1307,10 @@
                   <div style="text-align: center;">
                     <img src="assets/images/prophecies/p24.png" alt="Hidden Assignment" style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--danger);">
                     <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 3px;">Hidden Assign</div>
+                  </div>
+                  <div id="p31-removal-icon" class="hidden" style="text-align: center;">
+                    <img src="assets/images/prophecies/p31.png" alt="Skip Assignment" style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--danger);">
+                    <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 3px;">Skip Assign <span style="color: var(--amber);">(Academy)</span></div>
                   </div>
                 </div>
               </div>
@@ -1327,6 +1333,8 @@
             
             <!-- Dawn of Technology options container - populated by JS -->
             <div id="dawn-options-container"></div>
+            <!-- Academy options container - populated by JS -->
+            <div id="academy-options-container"></div>
             
             <div class="setup-nav">
               <button class="btn" onclick="showSetupPage(0)">← Back</button>
@@ -1389,7 +1397,7 @@
             
             <div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ NOTE:</span> Keep the remaining Specialist Board Extensions nearby — you may hire them during the game</div>
             
-            <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place your Magician disk and 1 Apprentice disk on their respective slots on your Player Board</span></div>
+            <div id="player-disks-instruction" style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place your Magician disk and 1 Apprentice disk on their respective slots on your Player Board</span></div>
             
             <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Take starting Components of your choice worth up to 2 Coins total — place them in your Workshop</span></div>
             
@@ -1397,13 +1405,16 @@
             
             <div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ NOTE:</span> Your Trick starts <strong>Prepared</strong> if you have the required Components</div>
             
-            <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Take your permanent Assignment cards: 2× Theater, 1× Workshop, 1× Market Row, 1× Downtown, 1× Dark Alley</span></div>
+            <div id="player-assignment-cards-instruction" style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Take your permanent Assignment cards: 2× Theater, 1× Workshop, 1× Market Row, 1× Downtown, 1× Dark Alley</span></div>
             
             <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Take all Trick and Symbol markers in your color</span></div>
             
-            <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place your Fame marker on <strong>5 Fame</strong></span></div>
+            <div id="player-fame-instruction" style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place your Fame marker on <strong>5 Fame</strong></span></div>
             
-            <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Take <strong>10 Coins</strong> and <strong>1 Shard</strong></span></div>
+            <div id="player-coins-instruction" style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Take <strong>10 Coins</strong> and <strong>1 Shard</strong></span></div>
+            
+            <!-- Academy-specific player setup note - populated by JS -->
+            <div id="academy-player-setup-note" class="hidden" style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ ACADEMY:</span> <span style="color: var(--text-secondary);">With Academy expansion, you start with <strong>3 Fame</strong> and <strong>12 Coins</strong> instead</span></div>
             
             <div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ NOTE:</span> Take the placement blockers from the box and keep them nearby for use during the game</div>
             
@@ -1461,7 +1472,7 @@
           <div class="setup-section">
             <h2 style="color: var(--amber); margin-bottom: 20px;">📋 Heir Setup</h2>
             
-            <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place the Heir's board (5-character side) near your play area</span></div>
+            <div id="heir-board-side-instruction" style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place the Heir's board (5-character side) near your play area</span></div>
             
             <div class="setup-nav">
               <button class="btn" onclick="showSetupPage(4)">← Back</button>
@@ -1539,18 +1550,18 @@
             <div class="option-grid" id="difficulty-options">
               <div class="option-card" data-difficulty="easy">
                 <div class="title">Easy</div>
-                <div class="description">Magician + 1 Specialist + 1 Apprentice</div>
-                <div class="description">(3 characters total)</div>
+                <div class="description" id="diff-easy-chars">Magician + 1 Specialist + 1 Apprentice</div>
+                <div class="description" id="diff-easy-total">(3 characters total)</div>
               </div>
               <div class="option-card" data-difficulty="normal">
                 <div class="title">Normal</div>
-                <div class="description">Magician + 1 Specialist + 2 Apprentices</div>
-                <div class="description">(4 characters total)</div>
+                <div class="description" id="diff-normal-chars">Magician + 1 Specialist + 2 Apprentices</div>
+                <div class="description" id="diff-normal-total">(4 characters total)</div>
               </div>
               <div class="option-card" data-difficulty="hard">
                 <div class="title">Hard</div>
-                <div class="description">Magician + 2 Specialists + 1 Apprentice</div>
-                <div class="description">(4 characters total)</div>
+                <div class="description" id="diff-hard-chars">Magician + 2 Specialists + 1 Apprentice</div>
+                <div class="description" id="diff-hard-total">(4 characters total)</div>
               </div>
             </div>
             
@@ -1629,7 +1640,7 @@
             
             <div id="heir-starting-resources-reminder" style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ REMINDER:</span> The Heir starts with <strong>0 Coins</strong> and <strong id="heir-starting-shards">0 Shards</strong></div>
             
-            <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Take the Heir's permanent Assignment cards: 2× Theater, 1× Workshop, 1× Market Row, 1× Downtown, 1× Dark Alley</span></div>
+            <div id="heir-assignment-cards-instruction" style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Take the Heir's permanent Assignment cards: 2× Theater, 1× Workshop, 1× Market Row, 1× Downtown, 1× Dark Alley</span></div>
             
             <div class="setup-nav">
               <button class="btn" onclick="showSetupPage(10)">← Back</button>
@@ -1643,14 +1654,14 @@
           <div class="setup-section">
             <h2 style="color: var(--amber); margin-bottom: 20px;">📋 Heir Setup (continued)</h2>
             
-            <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Build the Heir's Plan deck (7 cards total):</span></div>
+            <div id="plan-deck-title" style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Build the Heir's Plan deck (7 cards total):</span></div>
             
-            <div style="background: var(--bg-card); padding: 15px; border-radius: 6px; margin: 15px 0; border: 1px solid var(--border);">
+            <div id="plan-deck-instructions" style="background: var(--bg-card); padding: 15px; border-radius: 6px; margin: 15px 0; border: 1px solid var(--border);">
               <ol style="color: var(--text-secondary); line-height: 2; margin-left: 20px;">
                 <li>Randomly select 1 <strong>Perform</strong> card → place face-down on <strong>bottom</strong></li>
                 <li>Shuffle 1 Set Up + 2 Perform → place 2 face-down on top, <strong>remove 1 unseen</strong></li>
                 <li>Shuffle 2 Set Up + 1 Perform → place all 3 face-down on top</li>
-                <li>Place 1 remaining Set Up card face-down on <strong>top</strong>, remove the other unseen</li>
+                <li>Place remaining Set Up card face-down on <strong>top</strong></li>
               </ol>
             </div>
             
@@ -1668,9 +1679,9 @@
           <div class="setup-section">
             <h2 style="color: var(--amber); margin-bottom: 20px;">📋 Prophecy Setup</h2>
             
-            <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Remove these 3 Prophecy tokens from the game:</span></div>
+            <div id="full-prophecy-remove-instruction" style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Remove these 3 Prophecy tokens from the game:</span></div>
             
-            <div style="display: flex; justify-content: center; gap: 20px; margin: 15px 0; flex-wrap: wrap;">
+            <div id="full-prophecy-removal-icons" style="display: flex; justify-content: center; gap: 20px; margin: 15px 0; flex-wrap: wrap;">
               <div style="text-align: center;">
                 <img src="assets/images/prophecies/p15.png" alt="Shared Yield Modifier" style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--danger);">
                 <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px;">Shared Yield<br>Modifier</div>
@@ -1683,9 +1694,13 @@
                 <img src="assets/images/prophecies/p24.png" alt="Hidden Assignment" style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--danger);">
                 <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px;">Hidden<br>Assignment</div>
               </div>
+              <div id="full-p31-removal-icon" class="hidden" style="text-align: center;">
+                <img src="assets/images/prophecies/p31.png" alt="Skip Assignment" style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--danger);">
+                <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px;">Skip Assignment<br><span style="color: var(--amber);">(Academy)</span></div>
+              </div>
             </div>
             
-            <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Shuffle the remaining 24 Prophecy tokens face-down</span></div>
+            <div id="full-prophecy-shuffle-instruction" style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Shuffle the remaining 24 Prophecy tokens face-down</span></div>
             
             <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Draw 3 random Prophecy tokens and place them in the <strong>Pending</strong> slots of the crystal ball</span></div>
             
@@ -1764,6 +1779,19 @@
             <div class="state-row">
               <span class="state-label">Shards</span>
               <span class="state-count" id="heir-shards">0</span>
+            </div>
+          </div>
+
+          <!-- Academy Stats (only shown when Academy expansion enabled) -->
+          <div class="state-card" id="academy-stats-card" style="display: none;">
+            <h3>📚 Academy</h3>
+            <div class="state-row">
+              <span class="state-label">Secrets</span>
+              <span class="state-count" id="heir-secrets-display">0</span>
+            </div>
+            <div class="state-row">
+              <span class="state-label">Protégé AP</span>
+              <span class="state-count" id="heir-protege-ap-display">1</span>
             </div>
           </div>
 
@@ -1918,8 +1946,7 @@
         id: 'academy', 
         title: 'With Academy', 
         description: 'Adds Protégé, 6th character slot, Classrooms, Practice Rooms',
-        comingSoon: true,
-        disabled: true
+        disabled: false
       },
       { 
         id: 'dawn', 
@@ -1941,6 +1968,16 @@
       note: 'The Heir does not build Contraptions or acquire Signature Tricks. The Heir starts with 1 Shard instead of 0.',
       challengeTitle: 'Optional Challenge Rule',
       challengeDescription: 'At end of turn, Heir gains 1 Fame per Contraption you did NOT reactivate, and 1 Coin per empty Contraption slot. If neither applies, Heir gains 1 Shard.'
+    };
+
+    const ACADEMY_OPTIONS_INFO = {
+      note: 'You start with 3 Fame, 12 Coins, and a Protégé (instead of 5 Fame and 10 Coins). The Heir also gains a Protégé and can place at the Academy location.',
+      setupChanges: [
+        'Use the 6-character side of the Heir board',
+        'Add Academy Assignment cards to the Heir\'s Plan deck',
+        'Include the blue Academy die (5 dice total)',
+        'Set up the Academy board with Classroom and Practice Room tiles'
+      ]
     };
 
     // Generate expansion options HTML - used by both Full Setup and Quick Setup
@@ -1982,7 +2019,22 @@
                 </label>
               </div>`;
       
-      return { cardsHtml, dawnOptionsHtml };
+      const academyOptionsHtml = `
+              <div id="${prefix}academy-options" class="hidden" style="margin-top: 20px; padding: 15px; background: var(--bg-card); border-radius: 6px; border: 1px solid var(--border);">
+                <h3 style="color: var(--amber); margin-bottom: 10px; font-size: 1rem;">Academy Options</h3>
+                <div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin-bottom: 15px; border-radius: 0 4px 4px 0;">
+                  <span style="color: var(--info); font-weight: 600;">ℹ️ NOTE:</span> 
+                  <span style="color: var(--text-secondary);">${ACADEMY_OPTIONS_INFO.note}</span>
+                </div>
+                <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                  <p style="margin: 0 0 8px 0; font-weight: 500; color: var(--text-primary);">Setup Changes:</p>
+                  <ul style="margin: 0; padding-left: 20px;">
+                    ${ACADEMY_OPTIONS_INFO.setupChanges.map(c => `<li>${c}</li>`).join('')}
+                  </ul>
+                </div>
+              </div>`;
+      
+      return { cardsHtml, dawnOptionsHtml, academyOptionsHtml };
     }
 
     const MAGICIANS = {
@@ -2057,10 +2109,39 @@
         { id: 'p20', name: 'Shards Give Fame', icon: 'p20.png', description: 'Any time you receive one or more Shards, you also receive 2 Fame.' },
         { id: 'p22', name: 'Place Two Characters', icon: 'p22.png', description: 'You may place two Characters on each of your turns during the "Place Characters" phase.' },
         { id: 'p25', name: '1 Base AP', icon: 'p25.png', description: 'Each Character has only 1 base Action Point.' }
+      ],
+      
+      // ACADEMY EXPANSION - Heir Ignores (1)
+      academyHeirIgnores: [
+        { id: 'p30', name: 'Secret Draw 3', icon: 'p30.png', description: 'When you take the "Learn Secret" Action, you may draw 3 Secrets from the pile, learn one and return the other two to the bottom of the stack.' }
+      ],
+      
+      // ACADEMY EXPANSION - Affect Both (5)
+      academyAffectBoth: [
+        { id: 'p28', name: 'Renovate Fame Bonus', icon: 'p28.png', description: 'When you take the "Renovate" Action, gain 2/4/6 additional Fame (respective to Fame Threshold 1/16/36).' },
+        { id: 'p29', name: 'Practice Coins', icon: 'p29.png', description: 'When you take the "Practice" Action, you immediately gain 2/4/6 Coins (respective to the Fame Threshold of the Trick placed).' },
+        { id: 'p32', name: 'Teach Immediate Yield', icon: 'p32.png', description: 'When you take the "Teach" Action, you immediately receive the Classroom\'s Yield.' },
+        { id: 'p33', name: 'Protégé Backstage Bonus', icon: 'p33.png', description: 'Gain 1 Coin, 1 Fame and 1 Shard if the Protégé is on a backstage slot during the "Performance" phase.' },
+        { id: 'p34', name: 'Double Classroom Yield', icon: 'p34.png', description: 'You may double the "Classroom" phase Yield this turn for one of your Tricks.' }
+      ],
+      
+      // ACADEMY EXPANSION - Removed (1) - p31 is removed when Academy is enabled
+      academyRemoved: [
+        { id: 'p31', name: 'Skip Assignment', icon: 'p31.png', description: 'If you Advertised, skip the "Assignment" phase. Instead, place an Assignment card under a Character when placing it.', reason: 'Heir uses Plan deck, not Assignment phase' }
       ]
     };
     
     // Helper to get all valid prophecies for solo play (excludes removed ones)
+    // Now a function to dynamically include Academy prophecies when expansion is enabled
+    const getValidProphecies = () => {
+      const base = [...PROPHECIES.heirIgnores, ...PROPHECIES.affectBoth];
+      if (gameState.expansions?.academy) {
+        return [...base, ...PROPHECIES.academyHeirIgnores, ...PROPHECIES.academyAffectBoth];
+      }
+      return base;
+    };
+    
+    // Legacy constant for backward compatibility (used before game starts)
     const VALID_PROPHECIES = [...PROPHECIES.heirIgnores, ...PROPHECIES.affectBoth];
 
     const ALL_TRICKS = {
@@ -2798,11 +2879,15 @@
         coins: 0,
         shards: 0,
         stance: null, // null until Assignment phase, then 'defensive', 'neutral', or 'aggressive'
-        characters: [], // ['magician', 'engineer', 'apprentice', ...]
+        characters: [], // ['magician', 'protege', 'engineer', 'apprentice', ...]
         tricks: [], // [{ ...trickData, markers: X }, ...]
         shoppingList: [], // ['Metal', 'Wood', ...]
         specialAssignments: { theater: 0, downtown: 0, market: 0, workshop: 0 },
-        pendingCharacters: [] // Characters hired this turn, join at end of turn
+        pendingCharacters: [], // Characters hired this turn, join at end of turn
+        // Academy expansion state
+        secrets: 0,       // Secrets learned (0-2)
+        protegeAP: 1,     // Protégé AP (1-3), derived from secrets
+        banners: 0        // Banners placed on Academy board
       },
       
       // Player state (for tracking tricks)
@@ -2999,8 +3084,8 @@
         startingChars.push('apprentice');
       }
       
-      // Sort in correct board order
-      const sortOrder = { 'magician': 0, 'engineer': 1, 'manager': 2, 'assistant': 3, 'apprentice': 4 };
+      // Sort in correct board order (Magician → Protégé → Specialists → Apprentices)
+      const sortOrder = { 'magician': 0, 'protege': 1, 'engineer': 2, 'manager': 3, 'assistant': 4, 'apprentice': 5 };
       startingChars.sort((a, b) => sortOrder[a] - sortOrder[b]);
       
       // Build character icons display
@@ -3088,21 +3173,154 @@
       window.scrollTo(0, 0);
     }
     
+    // Update difficulty descriptions based on Academy expansion
+    function updateDifficultyDescriptions() {
+      const hasAcademy = gameState.expansions.academy;
+      
+      // Full Setup descriptions
+      const easyChars = $('#diff-easy-chars');
+      const easyTotal = $('#diff-easy-total');
+      const normalChars = $('#diff-normal-chars');
+      const normalTotal = $('#diff-normal-total');
+      const hardChars = $('#diff-hard-chars');
+      const hardTotal = $('#diff-hard-total');
+      
+      if (hasAcademy) {
+        if (easyChars) easyChars.textContent = 'Magician + Protégé + 1 Specialist + 1 Apprentice';
+        if (easyTotal) easyTotal.textContent = '(4 characters total)';
+        if (normalChars) normalChars.textContent = 'Magician + Protégé + 1 Specialist + 2 Apprentices';
+        if (normalTotal) normalTotal.textContent = '(5 characters total)';
+        if (hardChars) hardChars.textContent = 'Magician + Protégé + 2 Specialists + 1 Apprentice';
+        if (hardTotal) hardTotal.textContent = '(5 characters total)';
+      } else {
+        if (easyChars) easyChars.textContent = 'Magician + 1 Specialist + 1 Apprentice';
+        if (easyTotal) easyTotal.textContent = '(3 characters total)';
+        if (normalChars) normalChars.textContent = 'Magician + 1 Specialist + 2 Apprentices';
+        if (normalTotal) normalTotal.textContent = '(4 characters total)';
+        if (hardChars) hardChars.textContent = 'Magician + 2 Specialists + 1 Apprentice';
+        if (hardTotal) hardTotal.textContent = '(4 characters total)';
+      }
+      
+      // Quick Setup descriptions (just totals)
+      const quickEasy = $('#quick-diff-easy-total');
+      const quickNormal = $('#quick-diff-normal-total');
+      const quickHard = $('#quick-diff-hard-total');
+      
+      if (hasAcademy) {
+        if (quickEasy) quickEasy.textContent = '4 characters';
+        if (quickNormal) quickNormal.textContent = '5 characters';
+        if (quickHard) quickHard.textContent = '5 characters';
+      } else {
+        if (quickEasy) quickEasy.textContent = '3 characters';
+        if (quickNormal) quickNormal.textContent = '4 characters';
+        if (quickHard) quickHard.textContent = '4 characters';
+      }
+    }
+    
+    // Update prophecy removal display based on Academy expansion
+    function updateProphecyRemovalDisplay() {
+      const hasAcademy = gameState.expansions.academy;
+      
+      // Update Quick Setup prophecy info (page 0)
+      const prophecyInfo = $('#prophecy-setup-info');
+      const p31Icon = $('#p31-removal-icon');
+      
+      if (hasAcademy) {
+        if (prophecyInfo) prophecyInfo.innerHTML = `<span style="color: var(--info); font-weight: 600;">ℹ️ PROPHECY SETUP:</span> Remove these <strong>4</strong> tokens (includes p31 for Academy), shuffle remaining 30 Academy prophecies, draw 3 to Pending slots. No Active Prophecy on Turn 1.`;
+        if (p31Icon) p31Icon.classList.remove('hidden');
+      } else {
+        if (prophecyInfo) prophecyInfo.innerHTML = `<span style="color: var(--info); font-weight: 600;">ℹ️ PROPHECY SETUP:</span> Remove these 3 tokens, shuffle remaining 24, draw 3 to Pending slots. No Active Prophecy on Turn 1.`;
+        if (p31Icon) p31Icon.classList.add('hidden');
+      }
+      
+      // Update Full Setup page 13 prophecy elements
+      const fullRemoveInstruction = $('#full-prophecy-remove-instruction');
+      const fullP31Icon = $('#full-p31-removal-icon');
+      const fullShuffleInstruction = $('#full-prophecy-shuffle-instruction');
+      
+      if (hasAcademy) {
+        if (fullRemoveInstruction) fullRemoveInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Remove these <strong>4</strong> Prophecy tokens from the game (includes p31 for Academy):</span>`;
+        if (fullP31Icon) fullP31Icon.classList.remove('hidden');
+        if (fullShuffleInstruction) fullShuffleInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Shuffle the remaining <strong>30</strong> Prophecy tokens face-down (Academy adds 7 new prophecies)</span>`;
+      } else {
+        if (fullRemoveInstruction) fullRemoveInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Remove these 3 Prophecy tokens from the game:</span>`;
+        if (fullP31Icon) fullP31Icon.classList.add('hidden');
+        if (fullShuffleInstruction) fullShuffleInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Shuffle the remaining 24 Prophecy tokens face-down</span>`;
+      }
+    }
+    
     function updateSetupPageContent(pageNum) {
       // Update dynamic content on certain pages
       if (pageNum === 2) {
-        // Update DoT notes based on expansion selection
+        // Update expansion notes based on expansion selection
         const dotTricksNote = $('#dot-tricks-note-text');
         const dotSANote = $('#dot-sa-note-text');
         
-        if (gameState.expansions.dawn) {
-          // DoT is selected - include the content
-          if (dotTricksNote) dotTricksNote.textContent = 'Include the Dawn of Technology Signature Tricks (3 per category)';
-          if (dotSANote) dotSANote.textContent = 'Remove Academy Special Assignment cards (keep Dawn of Technology SA cards)';
+        const hasDawn = gameState.expansions.dawn;
+        const hasAcademy = gameState.expansions.academy;
+        
+        // Tricks note (Dawn of Technology adds signature tricks)
+        if (dotTricksNote) {
+          if (hasDawn) {
+            dotTricksNote.textContent = 'Include the Dawn of Technology Signature Tricks (3 per category)';
+          } else {
+            dotTricksNote.textContent = 'Leave the Dawn of Technology tricks in the box (3 per category)';
+          }
+        }
+        
+        // SA cards note (both expansions add SA cards)
+        if (dotSANote) {
+          if (hasDawn && hasAcademy) {
+            // Both expansions - keep all expansion SA cards
+            dotSANote.textContent = 'Keep Academy and Dawn of Technology Special Assignment cards';
+          } else if (hasDawn) {
+            // DoT only
+            dotSANote.textContent = 'Remove Academy Special Assignment cards (Dawn of Technology)';
+          } else if (hasAcademy) {
+            // Academy only
+            dotSANote.textContent = 'Remove Dawn of Technology Special Assignment cards (Academy)';
+          } else {
+            // Base game only
+            dotSANote.textContent = 'Remove Academy and Dawn of Technology Special Assignment cards';
+          }
+        }
+      }
+      
+      if (pageNum === 5) {
+        // Update heir board side based on Academy expansion
+        const heirBoardInstruction = $('#heir-board-side-instruction');
+        if (heirBoardInstruction) {
+          if (gameState.expansions.academy) {
+            heirBoardInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place the Heir's board (<strong>6-character side</strong>) near your play area (Academy)</span>`;
+          } else {
+            heirBoardInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place the Heir's board (5-character side) near your play area</span>`;
+          }
+        }
+      }
+      
+      if (pageNum === 3) {
+        // Update player Fame/Coins/Disks/Assignment cards based on Academy expansion
+        const fameInstruction = $('#player-fame-instruction');
+        const coinsInstruction = $('#player-coins-instruction');
+        const disksInstruction = $('#player-disks-instruction');
+        const assignmentInstruction = $('#player-assignment-cards-instruction');
+        
+        if (gameState.expansions.academy) {
+          if (fameInstruction) fameInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place your Fame marker on <strong>3 Fame</strong> (Academy)</span>`;
+          if (coinsInstruction) coinsInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Take <strong>12 Coins</strong> and <strong>1 Shard</strong> (Academy)</span>`;
+          if (disksInstruction) disksInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place your Magician disk, <strong>Protégé disk</strong>, and 1 Apprentice disk on their respective slots on your Player Board (Academy)</span>`;
+          if (assignmentInstruction) assignmentInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Take your permanent Assignment cards: 2× Theater, 1× Workshop, 1× Market Row, 1× Downtown, 1× Dark Alley, <strong>1× Academy</strong> (Academy)</span>`;
         } else {
-          // Base game - exclude DoT content
-          if (dotTricksNote) dotTricksNote.textContent = 'Leave the Dawn of Technology tricks in the box (3 per category)';
-          if (dotSANote) dotSANote.textContent = 'Remove Academy and Dawn of Technology Special Assignment cards';
+          if (fameInstruction) fameInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place your Fame marker on <strong>5 Fame</strong></span>`;
+          if (coinsInstruction) coinsInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Take <strong>10 Coins</strong> and <strong>1 Shard</strong></span>`;
+          if (disksInstruction) disksInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place your Magician disk and 1 Apprentice disk on their respective slots on your Player Board</span>`;
+          if (assignmentInstruction) assignmentInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Take your permanent Assignment cards: 2× Theater, 1× Workshop, 1× Market Row, 1× Downtown, 1× Dark Alley</span>`;
+        }
+        
+        // Hide the Academy note - now redundant since main instructions are dynamic
+        const academyPlayerNote = $('#academy-player-setup-note');
+        if (academyPlayerNote) {
+          academyPlayerNote.classList.add('hidden');
         }
       }
       
@@ -3131,6 +3349,34 @@
       if (pageNum === 11) {
         // Update trick placement and shopping list
         updateFinalHeirSetup();
+      }
+      
+      if (pageNum === 12) {
+        // Update Plan deck instructions based on Academy expansion
+        const planDeckInstructions = $('#plan-deck-instructions');
+        if (planDeckInstructions) {
+          if (gameState.expansions.academy) {
+            planDeckInstructions.innerHTML = `
+              <ol style="color: var(--text-secondary); line-height: 2; margin-left: 20px;">
+                <li>Randomly select 1 <strong>Perform</strong> card → place face-down on <strong>bottom</strong></li>
+                <li>Shuffle 1 Set Up + 2 Perform → place 2 face-down on top, <strong>remove 1 unseen</strong></li>
+                <li>Shuffle 2 Set Up + 1 Perform → place all 3 face-down on top</li>
+                <li>Place 1 of the remaining 2 Set Up cards face-down on <strong>top</strong>, <strong>remove the other unseen</strong> (Academy)</li>
+              </ol>
+              <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 10px;">Uses 5 Set Up + 5 Perform cards (Academy). Result: 7 cards (remove 3).</p>
+            `;
+          } else {
+            planDeckInstructions.innerHTML = `
+              <ol style="color: var(--text-secondary); line-height: 2; margin-left: 20px;">
+                <li>Randomly select 1 <strong>Perform</strong> card → place face-down on <strong>bottom</strong></li>
+                <li>Shuffle 1 Set Up + 2 Perform → place 2 face-down on top, <strong>remove 1 unseen</strong></li>
+                <li>Shuffle 2 Set Up + 1 Perform → place all 3 face-down on top</li>
+                <li>Place remaining Set Up card face-down on <strong>top</strong></li>
+              </ol>
+              <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 10px;">Uses 4 Set Up + 4 Perform cards. Result: 7 cards (remove 1).</p>
+            `;
+          }
+        }
       }
     }
     
@@ -3288,8 +3534,9 @@
       
       // Also randomly select a magician
       setTimeout(() => {
+        // Include Academy magicians only if Academy expansion is enabled
         const magicians = MAGICIANS[randomSchool].filter(
-          mag => !ACADEMY_REQUIRED_MAGICIANS.includes(mag.id)
+          mag => gameState.expansions?.academy || !ACADEMY_REQUIRED_MAGICIANS.includes(mag.id)
         );
         const randomMagician = magicians[Math.floor(Math.random() * magicians.length)];
         quickSelectHeirMagician(randomMagician, randomSchool);
@@ -3323,8 +3570,9 @@
       if (!container || !gameState.playerSchool) return;
       container.innerHTML = '';
       
+      // Include Academy magicians only if Academy expansion is enabled
       const magicians = MAGICIANS[gameState.playerSchool].filter(
-        mag => !ACADEMY_REQUIRED_MAGICIANS.includes(mag.id)
+        mag => gameState.expansions?.academy || !ACADEMY_REQUIRED_MAGICIANS.includes(mag.id)
       );
       
       const schoolColors = {
@@ -3353,8 +3601,9 @@
       if (!container) return;
       container.innerHTML = '';
       
+      // Include Academy magicians only if Academy expansion is enabled
       const magicians = MAGICIANS[school].filter(
-        mag => !ACADEMY_REQUIRED_MAGICIANS.includes(mag.id)
+        mag => gameState.expansions?.academy || !ACADEMY_REQUIRED_MAGICIANS.includes(mag.id)
       );
       
       const schoolColors = {
@@ -3431,6 +3680,10 @@
       // Build character order display
       const diff = DIFFICULTY_SETTINGS[gameState.difficulty];
       const chars = ['magician'];
+      // Academy: Add Protégé after Magician
+      if (gameState.expansions.academy) {
+        chars.push('protege');
+      }
       gameState.startingSpecialists.forEach(s => chars.push(s));
       for (let i = 0; i < diff.characters.apprentices; i++) {
         chars.push('apprentice');
@@ -3450,39 +3703,51 @@
       
       if (isElektra && trick.markers >= 2) {
         trickMarkers = trick.markers - 1;
-        elektraNote = `<div style="background: rgba(180, 100, 200, 0.15); border-left: 3px solid #a6c; padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: #a6c; font-weight: 600;">✨ MAGICIAN ABILITY:</span> <strong>Elektra:</strong> This trick starts with ${trickMarkers} marker(s) instead of ${trick.markers}.</div>`;
+        elektraNote = magicianAbilityBox(`<strong>Elektra:</strong> This trick starts with ${trickMarkers} marker(s) instead of ${trick.markers}.`);
       }
       
       const shoppingList = gameState.heir.shoppingList.join(', ');
       
       // DoT-specific content
-      const heirStartingShards = gameState.expansions.dawn ? '1 Shard' : '0 Shards';
+      const heirStartingShards = gameState.expansions.dawn ? '1 Shard (Dawn of Technology)' : '0 Shards';
       const dawnShardAction = gameState.expansions.dawn 
-        ? `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Give the Heir <strong>1 Shard</strong> (Dawn of Technology)</span></div>`
+        ? boardAction(`Give the Heir <strong>1 Shard</strong> (Dawn of Technology)`)
         : '';
       const challengeRuleNote = gameState.expansions.dawnChallengeRule
-        ? `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ CHALLENGE RULE:</span> At end of each turn, Heir gains 1 Fame per Contraption you did NOT reactivate, and 1 Coin per empty Contraption slot. If neither applies, Heir gains 1 Shard.</div>`
+        ? infoBox(`At end of each turn, Heir gains 1 Fame per Contraption you did NOT reactivate, and 1 Coin per empty Contraption slot. If neither applies, Heir gains 1 Shard. (Dawn of Technology)`, 'CHALLENGE RULE')
+        : '';
+      
+      // Academy-specific content
+      const playerStartingFame = gameState.expansions.academy ? 3 : 5;
+      const playerStartingCoins = gameState.expansions.academy ? 12 : 10;
+      const academyPlayerSetupNote = gameState.expansions.academy
+        ? infoBox(`You start with <strong>${playerStartingFame} Fame</strong>, <strong>${playerStartingCoins} Coins</strong>, and a <strong>Protégé</strong> (instead of 5 Fame and 10 Coins) (Academy)`, 'ACADEMY')
+        : '';
+      const academyHeirSetupNote = gameState.expansions.academy
+        ? boardAction(`Use the <strong>6-character side</strong> of the Heir board (Academy)`)
         : '';
       
       content.innerHTML = `
-        <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Heir's Poster: <strong>${gameState.heirMagician.name}</strong></span></div>
+        ${academyPlayerSetupNote}
+        ${boardAction(`Heir's Poster: <strong>${gameState.heirMagician.name}</strong>`)}
+        ${academyHeirSetupNote}
         
-        <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Heir's Characters (left to right):</span></div>
+        ${boardAction(`Heir's Characters (left to right):`)}
         <div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;">
           <div style="margin-bottom: 6px;">${characterIcons}</div>
           <div style="color: var(--text-secondary); font-size: 0.85rem;">${characterNames}</div>
         </div>
         
-        <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Heir starts with <strong>5 Fame</strong>, 0 Coins, <strong>${heirStartingShards}</strong></span></div>
+        ${boardAction(`Heir starts with <strong>5 Fame</strong>, 0 Coins, <strong>${heirStartingShards}</strong>`)}
         ${dawnShardAction}
         ${challengeRuleNote}
         
-        <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Heir's Trick: <strong>${trick.name}</strong> with <strong>${trickMarkers} Trick marker(s)</strong> (Prepared)</span></div>
+        ${boardAction(`Heir's Trick: <strong>${trick.name}</strong> with <strong>${trickMarkers} Trick marker(s)</strong> (Prepared)`)}
         ${elektraNote}
         
-        <div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ NOTE:</span> If you chose the Engineer as your specialist, choose a Level 1 Trick and place it on the Engineer's Board Extension. Mark it with a Symbol Marker.</div>
+        ${noteBox(`If you chose the Engineer as your specialist, choose a Level 1 Trick and place it on the Engineer's Board Extension. Mark it with a Symbol Marker.`)}
         
-        <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Shopping List: <strong>${shoppingList}</strong></span></div>
+        ${boardAction(`Shopping List: <strong>${shoppingList}</strong>`)}
       `;
     }
     
@@ -3493,6 +3758,11 @@
       
       const diff = DIFFICULTY_SETTINGS[gameState.difficulty];
       const chars = ['magician'];
+      
+      // Academy: Add Protégé after Magician
+      if (gameState.expansions.academy) {
+        chars.push('protege');
+      }
       
       // Add specific specialist types from gameState
       gameState.startingSpecialists.forEach(specialistType => {
@@ -3524,7 +3794,7 @@
       // Update starting shards display based on DoT expansion
       const shardText = $('#heir-starting-shards');
       if (shardText) {
-        shardText.textContent = gameState.expansions.dawn ? '1 Shard' : '0 Shards';
+        shardText.textContent = gameState.expansions.dawn ? '1 Shard (Dawn of Technology)' : '0 Shards';
       }
       
       // Show/hide DoT shard board action
@@ -3534,6 +3804,16 @@
           dotShardAction.classList.remove('hidden');
         } else {
           dotShardAction.classList.add('hidden');
+        }
+      }
+      
+      // Update assignment cards based on Academy expansion
+      const assignmentCardsInstruction = $('#heir-assignment-cards-instruction');
+      if (assignmentCardsInstruction) {
+        if (gameState.expansions.academy) {
+          assignmentCardsInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Take the Heir's permanent Assignment cards: 2× Theater, 1× Workshop, 1× Market Row, 1× Downtown, 1× Dark Alley, <strong>1× Academy</strong> (Academy)</span>`;
+        } else {
+          assignmentCardsInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Take the Heir's permanent Assignment cards: 2× Theater, 1× Workshop, 1× Market Row, 1× Downtown, 1× Dark Alley</span>`;
         }
       }
       
@@ -3549,19 +3829,19 @@
       let elektraNote = '';
       if (isElektra && trick.markers >= 2) {
         markers = trick.markers - 1;
-        elektraNote = `<div style="background: rgba(180, 100, 200, 0.15); border-left: 3px solid #a6c; padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: #a6c; font-weight: 600;">✨ MAGICIAN ABILITY:</span> <strong>Elektra:</strong> Tricks with 2-3 markers start with 1 fewer marker. This trick starts with ${markers} instead of ${trick.markers}.</div>`;
+        elektraNote = magicianAbilityBox(`<strong>Elektra:</strong> Tricks with 2-3 markers start with 1 fewer marker. This trick starts with ${markers} instead of ${trick.markers}.`);
       }
       
       trickContainer.innerHTML = `
-        <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place <strong>${trick.name}</strong> on the leftmost Trick slot of the Heir's board with <strong>${markers} Trick marker(s)</strong> — it starts <strong>Prepared</strong></span></div>
+        ${boardAction(`Place <strong>${trick.name}</strong> on the leftmost Trick slot of the Heir's board with <strong>${markers} Trick marker(s)</strong> — it starts <strong>Prepared</strong>`)}
         ${elektraNote}
-        <div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ NOTE:</span> If you chose the Engineer as your specialist, choose a Level 1 Trick and place it on the Engineer's Board Extension. Mark it with a Symbol Marker.</div>
+        ${noteBox(`If you chose the Engineer as your specialist, choose a Level 1 Trick and place it on the Engineer's Board Extension. Mark it with a Symbol Marker.`)}
       `;
       
       const components = Object.keys(trick.components).map(c => c.charAt(0).toUpperCase() + c.slice(1)).join(', ');
       shoppingContainer.innerHTML = `
-        <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place one of each Component type in the Heir's Shopping List: <strong>${components}</strong></span></div>
-        <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place the Turn Setup markers on the Heir's board</span></div>
+        ${boardAction(`Place one of each Component type in the Heir's Shopping List: <strong>${components}</strong>`)}
+        ${boardAction(`Place the Turn Setup markers on the Heir's board`)}
       `;
     }
 
@@ -3687,8 +3967,9 @@
       
       // Also randomly select a magician from that school
       setTimeout(() => {
+        // Include Academy magicians only if Academy expansion is enabled
         const magicians = MAGICIANS[randomSchool].filter(
-          mag => !ACADEMY_REQUIRED_MAGICIANS.includes(mag.id)
+          mag => gameState.expansions?.academy || !ACADEMY_REQUIRED_MAGICIANS.includes(mag.id)
         );
         const randomMagician = magicians[Math.floor(Math.random() * magicians.length)];
         selectHeirMagician(randomMagician, randomSchool);
@@ -3700,8 +3981,9 @@
       if (!container) return;
       container.innerHTML = '';
       
+      // Include Academy magicians only if Academy expansion is enabled
       const magicians = MAGICIANS[school].filter(
-        mag => !ACADEMY_REQUIRED_MAGICIANS.includes(mag.id)
+        mag => gameState.expansions?.academy || !ACADEMY_REQUIRED_MAGICIANS.includes(mag.id)
       );
       
       const schoolColors = {
@@ -3735,9 +4017,9 @@
         return;
       }
       
-      // Filter to only base game magicians (exclude Academy expansion)
+      // Include Academy magicians only if Academy expansion is enabled
       const magicians = MAGICIANS[gameState.playerSchool].filter(
-        mag => !ACADEMY_REQUIRED_MAGICIANS.includes(mag.id)
+        mag => gameState.expansions?.academy || !ACADEMY_REQUIRED_MAGICIANS.includes(mag.id)
       );
       
       const schoolColors = {
@@ -3791,13 +4073,14 @@
     function randomizeHeirMagician() {
       if (!gameState.playerSchool) return;
       
-      // Get all available magicians (not from player's school, and not requiring Academy)
+      // Get all available magicians (not from player's school)
+      // Include Academy magicians only if Academy expansion is enabled
       const availableMagicians = [];
       Object.entries(MAGICIANS).forEach(([school, magicians]) => {
         if (school !== gameState.playerSchool) {
           magicians.forEach(mag => {
-            // Exclude magicians that require Academy expansion
-            if (!ACADEMY_REQUIRED_MAGICIANS.includes(mag.id)) {
+            // Include Academy magicians only when Academy expansion is enabled
+            if (gameState.expansions?.academy || !ACADEMY_REQUIRED_MAGICIANS.includes(mag.id)) {
               availableMagicians.push({ ...mag, school });
             }
           });
@@ -3867,6 +4150,20 @@
       $('#heir-coins').textContent = gameState.heir.coins;
       $('#heir-shards').textContent = gameState.heir.shards;
       
+      // Academy stats (Secrets/Protégé AP)
+      const academyStatsCard = $('#academy-stats-card');
+      if (academyStatsCard) {
+        if (gameState.expansions?.academy) {
+          academyStatsCard.style.display = 'block';
+          const secretsDisplay = $('#heir-secrets-display');
+          const protegeAPDisplay = $('#heir-protege-ap-display');
+          if (secretsDisplay) secretsDisplay.textContent = gameState.heir.secrets || 0;
+          if (protegeAPDisplay) protegeAPDisplay.textContent = gameState.heir.protegeAP || 1;
+        } else {
+          academyStatsCard.style.display = 'none';
+        }
+      }
+      
       // Stance
       const stanceEl = $('#heir-stance');
       if (gameState.heir.stance) {
@@ -3884,7 +4181,8 @@
         $('#prophecy-icon').src = `assets/images/prophecies/${gameState.activeProphecy.icon}`;
         $('#prophecy-icon').alt = gameState.activeProphecy.name;
         $('#prophecy-name').textContent = gameState.activeProphecy.name;
-        const isHeirIgnores = PROPHECIES.heirIgnores.some(p => p.id === gameState.activeProphecy.id);
+        const isHeirIgnores = PROPHECIES.heirIgnores.some(p => p.id === gameState.activeProphecy.id) ||
+                             PROPHECIES.academyHeirIgnores.some(p => p.id === gameState.activeProphecy.id);
         
         // Update type badge
         const typeEl = $('#prophecy-type');
@@ -4194,8 +4492,17 @@
         return html;
       };
       
-      const affectBothHtml = buildSection(PROPHECIES.affectBoth, 'affect-both');
-      const heirIgnoresHtml = buildSection(PROPHECIES.heirIgnores, 'heir-ignores');
+      // Combine base prophecies with Academy prophecies if expansion is enabled
+      const hasAcademy = gameState.expansions?.academy;
+      const affectBothProphecies = hasAcademy 
+        ? [...PROPHECIES.affectBoth, ...PROPHECIES.academyAffectBoth]
+        : PROPHECIES.affectBoth;
+      const heirIgnoresProphecies = hasAcademy
+        ? [...PROPHECIES.heirIgnores, ...PROPHECIES.academyHeirIgnores]
+        : PROPHECIES.heirIgnores;
+      
+      const affectBothHtml = buildSection(affectBothProphecies, 'affect-both');
+      const heirIgnoresHtml = buildSection(heirIgnoresProphecies, 'heir-ignores');
       
       // Create modal
       const modal = document.createElement('div');
@@ -4337,8 +4644,8 @@
     }
 
     function selectProphecy(prophecyId) {
-      // Find the prophecy
-      const prophecy = VALID_PROPHECIES.find(p => p.id === prophecyId);
+      // Find the prophecy (use dynamic list that includes Academy if enabled)
+      const prophecy = getValidProphecies().find(p => p.id === prophecyId);
       if (!prophecy) return;
       
       // Set the active prophecy
@@ -4375,6 +4682,11 @@
       const diff = DIFFICULTY_SETTINGS[gameState.difficulty];
       const chars = ['magician'];
       
+      // Academy: Add Protégé after Magician
+      if (gameState.expansions.academy) {
+        chars.push('protege');
+      }
+      
       // Use the specialists assigned during difficulty selection
       gameState.startingSpecialists.forEach(specialistType => {
         chars.push(specialistType);
@@ -4390,6 +4702,14 @@
       gameState.heir.coins = 0;
       gameState.heir.shards = gameState.expansions.dawn ? 1 : 0; // DoT: Heir starts with 1 Shard
       gameState.heir.stance = null;
+      
+      // Academy: Initialize Protégé state
+      if (gameState.expansions.academy) {
+        gameState.heir.secrets = 0;      // Secrets learned (0-2)
+        gameState.heir.protegeAP = 1;    // Protégé starts with 1 AP
+        gameState.heir.banners = 0;      // Banners placed
+        gameState.classroomPhaseDone = false;  // Reset each turn
+      }
       
       // Show restart button
       $('#restart-btn').classList.remove('hidden');
@@ -4458,13 +4778,20 @@
       'p16': ['performance'],                     // Coins count as Fame during performance
       'p17': ['theater'],                         // Enhance at Theater
       'p18': ['workshop'],                        // Enhance receives 2 AP
-      'p19': ['performance', 'end-turn', 'theater', 'end-game'],  // +1 extra shard when receiving shards
-      'p20': ['performance', 'end-turn', 'theater', 'end-game'],  // Receiving shards gives +2 Fame
+      'p19': ['performance', 'end-turn', 'theater', 'end-game', 'classroom'],  // +1 extra shard when receiving shards
+      'p20': ['performance', 'end-turn', 'theater', 'end-game', 'classroom'],  // Receiving shards gives +2 Fame
       'p21': ['assignment'],                      // Pay 3 coins for +2 slots
       'p22': ['place-characters'],                // Place 2 characters at once
       'p25': ['place-characters'],                // All characters 1 base AP
       'p26': ['market'],                          // Buy from Orders section
-      'p27': ['market']                           // All components 2 coins
+      'p27': ['market'],                          // All components 2 coins
+      // Academy expansion prophecies
+      'p28': ['academy'],                         // Renovate Fame Bonus: +2/4/6 Fame
+      'p29': ['academy'],                         // Practice Coins: +2/4/6 Coins
+      'p30': ['academy'],                         // Secret Draw 3 (heirIgnores)
+      'p32': ['academy', 'classroom'],            // Teach Immediate Yield
+      'p33': ['performance'],                     // Protégé Backstage Bonus
+      'p34': ['classroom']                        // Double Classroom Yield
     };
 
     function getProphecyReminderHtml(phaseId) {
@@ -4473,8 +4800,9 @@
       const phases = PROPHECY_PHASE_MAP[gameState.activeProphecy.id];
       if (!phases || !phases.includes(phaseId)) return '';
       
-      // Determine if this is player-only or affects both
-      const isHeirIgnores = PROPHECIES.heirIgnores.some(p => p.id === gameState.activeProphecy.id);
+      // Determine if this is player-only or affects both (check both base and Academy heirIgnores)
+      const isHeirIgnores = PROPHECIES.heirIgnores.some(p => p.id === gameState.activeProphecy.id) ||
+                           PROPHECIES.academyHeirIgnores.some(p => p.id === gameState.activeProphecy.id);
       const badgeHtml = isHeirIgnores 
         ? '<span class="prophecy-badge badge-player-only">👤 PLAYER ONLY</span>'
         : '<span class="prophecy-badge badge-affect-both">⚡ AFFECTS BOTH</span>';
@@ -4495,12 +4823,13 @@
     }
 
     // Heir-specific prophecy reminder - shows only "affectBoth" prophecies at relevant Heir screens
-    // Context: 'heir-downtown', 'heir-market', 'heir-darkalley', 'heir-theater-nonmagician', 'heir-performance'
+    // Context: 'heir-downtown', 'heir-market', 'heir-darkalley', 'heir-theater-nonmagician', 'heir-performance', 'heir-academy', 'heir-classroom'
     function getHeirProphecyReminderHtml(context) {
       if (!gameState.activeProphecy) return '';
       
-      // Only show prophecies that affect the Heir (not heirIgnores)
-      const isHeirIgnores = PROPHECIES.heirIgnores.some(p => p.id === gameState.activeProphecy.id);
+      // Only show prophecies that affect the Heir (not heirIgnores - check both base and Academy)
+      const isHeirIgnores = PROPHECIES.heirIgnores.some(p => p.id === gameState.activeProphecy.id) ||
+                           PROPHECIES.academyHeirIgnores.some(p => p.id === gameState.activeProphecy.id);
       if (isHeirIgnores) return '';
       
       // Map contexts to relevant prophecy IDs
@@ -4509,7 +4838,9 @@
         'heir-market': ['p01', 'p25'],                    // Apprentice AP, 1 Base AP
         'heir-darkalley': ['p01', 'p25'],                 // Apprentice AP, 1 Base AP
         'heir-theater-nonmagician': ['p01', 'p07', 'p08', 'p09', 'p10', 'p19', 'p20', 'p25'],  // Apprentice AP, Fame for trick schools, Shard bonuses, 1 Base AP
-        'heir-performance': ['p14', 'p16', 'p19', 'p20']  // Double performer bonus, Coins as Fame, Shard bonuses
+        'heir-performance': ['p14', 'p16', 'p19', 'p20', 'p33'],  // Double performer bonus, Coins as Fame, Shard bonuses, Protégé Backstage
+        'heir-academy': ['p28', 'p29', 'p32'],            // Renovate Fame Bonus, Practice Coins, Teach Immediate Yield
+        'heir-classroom': ['p19', 'p20', 'p32', 'p34']    // Shard bonuses, Teach Immediate Yield, Double Classroom Yield
       };
       
       const relevantProphecies = contextMap[context] || [];
@@ -4562,19 +4893,33 @@
     function handleRollDicePhase() {
       const isFirstTurn = gameState.currentTurn === 1;
       const turnNumber = gameState.currentTurn;
+      const hasAcademy = gameState.expansions.academy;
       
+      const diceCount = hasAcademy ? 5 : 4;
+      const diceLabel = hasAcademy ? '5 Turn Setup dice' : '4 Turn Setup dice';
       
       let content = boardAction('Roll all 6 Downtown dice and place them on the Downtown board area');
       
-      if (turnNumber === 1) {
-        content += `
-          ${boardAction('Roll all 4 Turn Setup dice and place each on its matching location')}
-          <div style="display: flex; gap: 15px; flex-wrap: wrap; margin: 10px 0 20px 0; color: var(--text-secondary); align-items: center;">
+      // Dice color legend - dynamic based on Academy
+      const diceColorLegend = hasAcademy 
+        ? `<div style="display: flex; gap: 15px; flex-wrap: wrap; margin: 10px 0 20px 0; color: var(--text-secondary); align-items: center;">
+            <span><span style="color: #C9B84A; font-size: 1.5em; vertical-align: middle;">●</span> Downtown</span>
+            <span><span style="color: #C48040; font-size: 1.5em; vertical-align: middle;">●</span> Market Row</span>
+            <span><span style="color: #5A5A5A; font-size: 1.5em; vertical-align: middle;">●</span> Dark Alley</span>
+            <span><span style="color: #4A7CB8; font-size: 1.5em; vertical-align: middle;">●</span> Academy</span>
+            <span><span style="color: #983030; font-size: 1.5em; vertical-align: middle;">●</span> Theater</span>
+          </div>`
+        : `<div style="display: flex; gap: 15px; flex-wrap: wrap; margin: 10px 0 20px 0; color: var(--text-secondary); align-items: center;">
             <span><span style="color: #C9B84A; font-size: 1.5em; vertical-align: middle;">●</span> Downtown</span>
             <span><span style="color: #C48040; font-size: 1.5em; vertical-align: middle;">●</span> Market Row</span>
             <span><span style="color: #5A5A5A; font-size: 1.5em; vertical-align: middle;">●</span> Dark Alley</span>
             <span><span style="color: #983030; font-size: 1.5em; vertical-align: middle;">●</span> Theater</span>
-          </div>
+          </div>`;
+      
+      if (turnNumber === 1) {
+        content += `
+          ${boardAction(`Roll all ${diceLabel} and place each on its matching location`)}
+          ${diceColorLegend}
           ${boardAction('Place Blocking tiles based on the dice results')}`;
       } else if (turnNumber === 2) {
         content += `
@@ -4873,6 +5218,11 @@
       // Reset stance to busy for new turn
       gameState.heir.stance = 'busy';
       
+      // Reset Academy classroom phase flag for new turn
+      if (gameState.expansions.academy) {
+        gameState.classroomPhaseDone = false;
+      }
+      
       // Reset downtown dice for new turn (they get re-rolled)
       gameState.downtownDice = {
         trick1: 'x',
@@ -4896,6 +5246,11 @@
       gameState.heir.fame = 5; // Reset to starting fame
       gameState.heir.stance = 'busy';
       
+      // Reset Academy classroom phase flag
+      if (gameState.expansions.academy) {
+        gameState.classroomPhaseDone = false;
+      }
+      
       updateGameDisplay();
       updatePhaseDisplay();
       
@@ -4903,11 +5258,16 @@
     }
 
     function getLocationPriorityHtml(stance) {
+      const hasAcademy = gameState.expansions.academy;
+      const academyLine = hasAcademy 
+        ? '<li>Academy</li>'
+        : '<li style="color: var(--text-muted);"><s>Academy</s> <em>(expansion)</em></li>';
+      
       if (stance === 'ready') {
         return `<ol style="color: var(--text-secondary); line-height: 1.8; padding-left: 20px;">
           <li>Theater (earliest available day)</li>
           <li>Downtown</li>
-          <li style="color: var(--text-muted);"><s>Academy</s> <em>(expansion)</em></li>
+          ${academyLine}
           <li>Market Row</li>
           <li>Dark Alley</li>
           <li>Workshop</li>
@@ -4915,7 +5275,7 @@
       } else {
         return `<ol style="color: var(--text-secondary); line-height: 1.8; padding-left: 20px;">
           <li>Downtown</li>
-          <li style="color: var(--text-muted);"><s>Academy</s> <em>(expansion)</em></li>
+          ${academyLine}
           <li>Theater (latest possible day)</li>
           <li>Market Row</li>
           <li>Dark Alley</li>
@@ -5037,7 +5397,8 @@
       // Prophecy reminder for player (matches standard styling)
       let prophecyReminder = '';
       if (gameState.activeProphecy) {
-        const isHeirIgnores = PROPHECIES.heirIgnores.some(p => p.id === gameState.activeProphecy.id);
+        const isHeirIgnores = PROPHECIES.heirIgnores.some(p => p.id === gameState.activeProphecy.id) ||
+                             PROPHECIES.academyHeirIgnores.some(p => p.id === gameState.activeProphecy.id);
         const badgeHtml = isHeirIgnores 
           ? '<span class="prophecy-badge badge-player-only">👤 PLAYER ONLY</span>'
           : '<span class="prophecy-badge badge-affect-both">⚡ AFFECTS BOTH</span>';
@@ -5353,6 +5714,22 @@
       // Player tells us which contested location to go to
       const stance = gameState.heir.stance;
       const priorityHtml = getLocationPriorityHtml(stance);
+      const hasAcademy = gameState.expansions.academy;
+      
+      // Build location buttons - include Academy if expansion enabled
+      const locationButtons = [
+        { text: 'Downtown', action: () => showDowntownDiceInput() },
+        { text: 'Market Row', action: () => showMarketRowInput() },
+        { text: 'Dark Alley', action: () => showDarkAlleyInput() },
+        { text: 'Theater', action: () => showTheaterInput() }
+      ];
+      
+      if (hasAcademy) {
+        // Insert Academy after Dark Alley
+        locationButtons.splice(3, 0, { text: 'Academy', action: () => showAcademyInput() });
+      }
+      
+      locationButtons.push({ text: 'Back', action: () => showContestedCheck() });
       
       setActionContent(
         `Turn ${gameState.currentTurn} — Place Characters`,
@@ -5362,13 +5739,7 @@
          ${priorityHtml}
          
          <p style="margin-top: 15px;"><strong>Which contested location is the Heir going to?</strong></p>`,
-        [
-          { text: 'Downtown', action: () => showDowntownDiceInput() },
-          { text: 'Market Row', action: () => showMarketRowInput() },
-          { text: 'Dark Alley', action: () => showDarkAlleyInput() },
-          { text: 'Theater', action: () => showTheaterInput() },
-          { text: 'Back', action: () => showContestedCheck() }
-        ]
+        locationButtons
       );
     }
 
@@ -5376,6 +5747,23 @@
       // No contested locations — use priority list
       const stance = gameState.heir.stance;
       const priorityHtml = getLocationPriorityHtml(stance);
+      const hasAcademy = gameState.expansions.academy;
+      
+      // Build location buttons - include Academy if expansion enabled
+      const locationButtons = [
+        { text: 'Downtown', action: () => showDowntownDiceInput() },
+        { text: 'Market Row', action: () => showMarketRowInput() },
+        { text: 'Dark Alley', action: () => showDarkAlleyInput() },
+        { text: 'Theater', action: () => showTheaterInput() },
+        { text: 'Workshop', action: () => showWorkshopActions() }
+      ];
+      
+      if (hasAcademy) {
+        // Insert Academy after Market Row (position 2 in the buttons array)
+        locationButtons.splice(2, 0, { text: 'Academy', action: () => showAcademyInput() });
+      }
+      
+      locationButtons.push({ text: 'Back', action: () => showContestedCheck() });
       
       setActionContent(
         `Turn ${gameState.currentTurn} — Place Characters`,
@@ -5384,14 +5772,7 @@
          ${priorityHtml}
          
          <p style="margin-top: 15px;"><strong>Which location is the Heir going to?</strong></p>`,
-        [
-          { text: 'Downtown', action: () => showDowntownDiceInput() },
-          { text: 'Market Row', action: () => showMarketRowInput() },
-          { text: 'Dark Alley', action: () => showDarkAlleyInput() },
-          { text: 'Theater', action: () => showTheaterInput() },
-          { text: 'Workshop', action: () => showWorkshopActions() },
-          { text: 'Back', action: () => showContestedCheck() }
-        ]
+        locationButtons
       );
       
       // Add the End Heir Placements button after render
@@ -7175,6 +7556,606 @@
     }
 
     // ============================================
+    // ACADEMY LOCATION (Academy Expansion)
+    // ============================================
+    
+    // Academy action count by difficulty (different from Downtown!)
+    function getAcademyActionCount(actionPoints) {
+      const difficulty = gameState.difficulty;
+      // Table from Solo Rulebook p.9
+      const table = {
+        easy:   { 1: 1, 2: 1, 3: 1, 4: 2, 5: 2 },
+        normal: { 1: 1, 2: 1, 3: 2, 4: 2, 5: 2 },
+        hard:   { 1: 1, 2: 1, 3: 2, 4: 2, 5: 3 }
+      };
+      const ap = Math.min(5, Math.max(1, actionPoints)); // Clamp to 1-5
+      return table[difficulty]?.[ap] || 1;
+    }
+    
+    function showAcademyInput() {
+      // Academy location - ask for AP like other locations
+      setActionContent(
+        `Turn ${gameState.currentTurn} — Academy`,
+        `<p>The Heir is placing a Character at the Academy.</p>
+         
+         <p style="margin-top: 15px;"><strong>How many Action Points does this Character have?</strong></p>
+         <p style="color: var(--text-secondary); font-size: 0.9rem;">Include the slot's AP modifier and the Character's base AP.</p>
+         
+         <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: center; flex-wrap: wrap;">
+           ${[1,2,3,4,5].map(ap => `
+             <button class="btn academy-ap-btn" data-ap="${ap}" style="min-width: 50px;">${ap} AP</button>
+           `).join('')}
+         </div>`,
+        []
+      );
+      
+      setTimeout(() => {
+        $$('.academy-ap-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const ap = parseInt(btn.dataset.ap);
+            showAcademyActions(ap);
+          });
+        });
+      }, 0);
+    }
+    
+    function showAcademyActions(actionPoints) {
+      const actionCount = getAcademyActionCount(actionPoints);
+      
+      // Store pending state for the wizard
+      gameState.pendingAcademy = {
+        actionPoints,
+        actionsRemaining: actionCount,
+        currentStep: 1
+      };
+      
+      // Start the wizard at Step 1
+      academyStep1LearnSecret();
+    }
+    
+    // Step 1: Learn Secret
+    function academyStep1LearnSecret() {
+      const { actionsRemaining } = gameState.pendingAcademy;
+      
+      // Check condition: Heir has fewer than 2 Secrets
+      if (gameState.heir.secrets >= 2) {
+        // Skip to Step 2
+        gameState.pendingAcademy.currentStep = 2;
+        academyStep2Renovate();
+        return;
+      }
+      
+      if (actionsRemaining <= 0) {
+        academyComplete();
+        return;
+      }
+      
+      // p30 reminder for player (Heir ignores - uses coin flip)
+      const prophecyReminder = getProphecyReminderHtml('academy');
+      
+      // Heir will learn a secret - use coin flip like Dark Alley
+      setActionContent(
+        `Turn ${gameState.currentTurn} — Academy: Learn Secret`,
+        `<p>The Heir has <strong>${gameState.heir.secrets}</strong> of 2 Secrets.</p>
+         
+         ${prophecyReminder}
+         
+         <p style="color: var(--text-secondary); margin-bottom: 20px;">Flip a coin to determine which Secret the Heir takes.</p>
+         
+         <div id="coin-container" style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+           <div id="coin" style="
+             width: 80px;
+             height: 80px;
+             border-radius: 50%;
+             background: linear-gradient(145deg, var(--amber), #8a6914);
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             font-size: 2.5rem;
+             box-shadow: 0 4px 15px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.2);
+             cursor: pointer;
+             transition: transform 0.1s ease;
+             border: 3px solid #8a6914;
+           ">✦</div>
+           <button id="flip-coin-btn" class="btn" style="min-width: 150px;">Flip Coin</button>
+         </div>
+         
+         <div id="coin-result" style="display: none; text-align: center; margin-top: 20px;"></div>`,
+        []
+      );
+      
+      setTimeout(() => {
+        const coin = $('#coin');
+        const flipBtn = $('#flip-coin-btn');
+        
+        flipBtn.addEventListener('click', () => {
+          // Disable button during animation
+          flipBtn.disabled = true;
+          flipBtn.textContent = 'Flipping...';
+          
+          // Animate the coin
+          let flips = 0;
+          const maxFlips = 10;
+          const flipInterval = setInterval(() => {
+            flips++;
+            coin.style.transform = `rotateY(${flips * 180}deg)`;
+            coin.innerHTML = flips % 2 === 0 ? '✦' : '✧';
+            
+            if (flips >= maxFlips) {
+              clearInterval(flipInterval);
+              
+              // Determine result (50/50): true = top, false = bottom
+              const isTop = Math.random() < 0.5;
+              const position = isTop ? 'top' : 'bottom';
+              
+              // Show result
+              coin.innerHTML = isTop ? '▲' : '▼';
+              coin.style.background = isTop 
+                ? 'linear-gradient(145deg, #4a9e6b, #2d5e40)' 
+                : 'linear-gradient(145deg, #6b4a9e, #402d5e)';
+              
+              const resultDiv = $('#coin-result');
+              resultDiv.style.display = 'block';
+              resultDiv.innerHTML = `
+                <p style="font-size: 1.2rem; font-weight: 600; color: var(--text-primary);">${isTop ? 'Top' : 'Bottom'} Secret!</p>
+                <button class="btn" id="continue-secret-btn" style="margin-top: 15px;">Continue</button>
+              `;
+              
+              $('#continue-secret-btn').addEventListener('click', () => academyLearnSecretResult(position));
+            }
+          }, 100);
+        });
+      }, 0);
+    }
+    
+    function academyLearnSecretResult(position) {
+      // Update state
+      gameState.heir.secrets++;
+      gameState.heir.protegeAP = 1 + gameState.heir.secrets; // 1 secret = 2 AP, 2 secrets = 3 AP
+      gameState.pendingAcademy.actionsRemaining--;
+      
+      // Determine disk action text
+      let diskAction = '';
+      if (gameState.heir.secrets === 1) {
+        diskAction = 'Flip the Protégé disk to show 2 AP';
+      } else if (gameState.heir.secrets === 2) {
+        diskAction = 'Replace the Protégé disk with the 3 AP disk';
+      }
+      
+      setActionContent(
+        `Turn ${gameState.currentTurn} — Academy: Learn Secret`,
+        `<p>The Heir learns the <strong>${position}</strong> Secret.</p>
+         
+         ${boardAction(`Take the ${position} Secret tile and place it on the Heir's board`)}
+         ${boardAction(diskAction)}
+         
+         <p style="margin-top: 15px; color: var(--text-secondary);">Heir now has <strong>${gameState.heir.secrets}</strong> Secret${gameState.heir.secrets > 1 ? 's' : ''} (Protégé: ${gameState.heir.protegeAP} AP)</p>
+         
+         <p style="margin-top: 10px;"><strong>${gameState.pendingAcademy.actionsRemaining}</strong> action${gameState.pendingAcademy.actionsRemaining !== 1 ? 's' : ''} remaining.</p>`,
+        [
+          { text: 'Continue', action: () => {
+            gameState.pendingAcademy.currentStep = 2;
+            academyStep2Renovate();
+          }}
+        ]
+      );
+    }
+    
+    // Step 2: Renovate (placeholder for now)
+    function academyStep2Renovate() {
+      const { actionsRemaining } = gameState.pendingAcademy;
+      
+      if (actionsRemaining <= 0) {
+        academyComplete();
+        return;
+      }
+      
+      // TODO: Implement full Renovate logic
+      // For now, ask if conditions are met
+      setActionContent(
+        `Turn ${gameState.currentTurn} — Academy: Renovate Check`,
+        `<p><strong>Check Renovate conditions:</strong></p>
+         
+         <ul style="color: var(--text-secondary); margin: 15px 0 15px 20px; line-height: 1.8;">
+           <li>Heir has <strong>equal or fewer</strong> Banners than you</li>
+           <li>Heir has at least <strong>one Banner</strong> remaining</li>
+           <li>There is at least <strong>one empty</strong> Classroom or Practice Room space</li>
+         </ul>
+         
+         <p><strong>Are ALL conditions met?</strong></p>`,
+        [
+          { text: 'Yes — Heir Renovates', action: () => academyRenovateAction() },
+          { text: 'No — Skip to Teach/Practice', action: () => {
+            gameState.pendingAcademy.currentStep = 3;
+            academyStep3And4TeachPractice();
+          }}
+        ]
+      );
+    }
+    
+    function academyRenovateAction() {
+      gameState.pendingAcademy.actionsRemaining--;
+      
+      const coins = gameState.heir.coins;
+      const currentTurn = gameState.currentTurn;
+      const isEvenTurn = currentTurn % 2 === 0;
+      const isP28Active = gameState.activeProphecy?.id === 'p28';
+      const isGeert = gameState.heirMagician?.id === 'geert';
+      
+      // Selection rule based on coins (Geert always chooses most expensive)
+      const selectionRule = isGeert ? 'most expensive' : (coins <= 4 ? 'cheapest' : 'most expensive');
+      
+      // Tie-breaker based on odd/even turn
+      const tiebreaker = isEvenTurn ? 'Practice Rooms first' : 'Classrooms first';
+      
+      // Banner count based on turn
+      let bannerCount;
+      if (currentTurn <= 2) bannerCount = 4;
+      else if (currentTurn <= 4) bannerCount = 3;
+      else if (currentTurn <= 6) bannerCount = 2;
+      else bannerCount = 1;
+      
+      // Coin discard amount
+      const coinDiscard = coins <= 9 ? `all ${coins}` : '9';
+      const newCoinTotal = coins <= 9 ? 0 : coins - 9;
+      
+      // Prophecy reminder
+      const prophecyReminder = getHeirProphecyReminderHtml('heir-academy');
+      
+      // Geert ability note
+      const geertNote = isGeert ? magicianAbilityBox(`<strong>Geert van Augustin:</strong> Always chooses the <strong>most expensive</strong> renovation regardless of Coins. Gains <strong>+1 Shard</strong> when Renovating.`) : '';
+      
+      // Geert shard bonus
+      const geertShardAction = isGeert ? boardAction(`Update Heir's Shards (${gameState.heir.shards} → ${gameState.heir.shards + 1}) <span style="color: #a6c;">(Geert ability)</span>`) : '';
+      
+      // If p28 is active, need to ask which Fame Threshold was selected
+      if (isP28Active) {
+        setActionContent(
+          `Turn ${gameState.currentTurn} — Academy: Renovate`,
+          `<p>The Heir Renovates.</p>
+           
+           ${geertNote}
+           ${prophecyReminder}
+           
+           ${boardAction(`Select the <strong>${selectionRule}</strong> space where Heir's Fame (${gameState.heir.fame}) exceeds threshold`)}
+           <p style="color: var(--text-secondary); font-size: 0.9rem; margin: -4px 0 12px 12px;">Tie-breaker: ${tiebreaker}, then top to bottom</p>
+           
+           ${boardAction('Place a random tile from the selected stack')}
+           ${boardAction(`Place <strong>${bannerCount} Banner${bannerCount !== 1 ? 's' : ''}</strong> in Heir's color`)}
+           ${boardAction(`Discard <strong>${coinDiscard} Coin${coinDiscard === '1' ? '' : 's'}</strong> from Heir (${coins} → ${newCoinTotal})`)}
+           ${geertShardAction}
+           
+           <p style="margin-top: 15px;"><strong>Which Fame Threshold space was selected?</strong></p>
+           <p style="color: var(--text-secondary); font-size: 0.9rem;">p28 grants +2/4/6 Fame based on threshold.</p>`,
+          [
+            { text: 'Threshold 1 (+2 Fame)', action: () => applyRenovateP28Bonus(2, isGeert) },
+            { text: 'Threshold 16 (+4 Fame)', action: () => applyRenovateP28Bonus(4, isGeert) },
+            { text: 'Threshold 36 (+6 Fame)', action: () => applyRenovateP28Bonus(6, isGeert) }
+          ]
+        );
+      } else {
+        // Apply Geert shard bonus immediately if not going to p28 flow
+        if (isGeert) {
+          gameState.heir.shards += 1;
+          updateGameDisplay();
+        }
+        
+        setActionContent(
+          `Turn ${gameState.currentTurn} — Academy: Renovate`,
+          `<p>The Heir Renovates.</p>
+           
+           ${geertNote}
+           ${prophecyReminder}
+           
+           ${boardAction(`Select the <strong>${selectionRule}</strong> space where Heir's Fame (${gameState.heir.fame}) exceeds threshold`)}
+           <p style="color: var(--text-secondary); font-size: 0.9rem; margin: -4px 0 12px 12px;">Tie-breaker: ${tiebreaker}, then top to bottom</p>
+           
+           ${boardAction('Place a random tile from the selected stack')}
+           ${boardAction(`Place <strong>${bannerCount} Banner${bannerCount !== 1 ? 's' : ''}</strong> in Heir's color`)}
+           ${boardAction(`Discard <strong>${coinDiscard} Coin${coinDiscard === '1' ? '' : 's'}</strong> from Heir (${coins} → ${newCoinTotal})`)}
+           ${geertShardAction}
+           
+           <p style="margin-top: 15px;"><strong>${gameState.pendingAcademy.actionsRemaining}</strong> action${gameState.pendingAcademy.actionsRemaining !== 1 ? 's' : ''} remaining.</p>`,
+          [
+            { text: 'Continue', action: () => {
+              gameState.pendingAcademy.currentStep = 3;
+              academyStep3And4TeachPractice();
+            }}
+          ]
+        );
+      }
+    }
+    
+    function applyRenovateP28Bonus(fameBonus, isGeert = false) {
+      const currentFame = gameState.heir.fame;
+      const currentShards = gameState.heir.shards;
+      
+      gameState.heir.fame += fameBonus;
+      if (isGeert) {
+        gameState.heir.shards += 1;
+      }
+      updateGameDisplay();
+      
+      const geertShardNote = isGeert 
+        ? boardAction(`Update Heir's Shards (${currentShards} → ${gameState.heir.shards}) <span style="color: #a6c;">(Geert ability)</span>`)
+        : '';
+      
+      setActionContent(
+        `Turn ${gameState.currentTurn} — Academy: Renovate Complete`,
+        `<p>p28 Bonus Applied!</p>
+         
+         ${boardAction(`Update Heir's Fame (${currentFame}★ → ${gameState.heir.fame}★) <span style="color: var(--prophecy);">(+${fameBonus} from p28)</span>`)}
+         ${geertShardNote}
+         
+         <p style="margin-top: 15px;"><strong>${gameState.pendingAcademy.actionsRemaining}</strong> action${gameState.pendingAcademy.actionsRemaining !== 1 ? 's' : ''} remaining.</p>`,
+        [
+          { text: 'Continue', action: () => {
+            gameState.pendingAcademy.currentStep = 3;
+            academyStep3And4TeachPractice();
+          }}
+        ]
+      );
+    }
+    
+    // Steps 3 & 4: Teach and Practice (swapped on even turns)
+    function academyStep3And4TeachPractice() {
+      const { actionsRemaining } = gameState.pendingAcademy;
+      
+      if (actionsRemaining <= 0) {
+        academyComplete();
+        return;
+      }
+      
+      const isEvenTurn = gameState.currentTurn % 2 === 0;
+      const firstAction = isEvenTurn ? 'Practice' : 'Teach';
+      const secondAction = isEvenTurn ? 'Teach' : 'Practice';
+      
+      setActionContent(
+        `Turn ${gameState.currentTurn} — Academy: ${firstAction}/${secondAction}`,
+        `<p><strong>${gameState.pendingAcademy.actionsRemaining}</strong> action${actionsRemaining !== 1 ? 's' : ''} remaining.</p>
+         
+         ${isEvenTurn ? `<div style="background: var(--exception-bg); border-left: 3px solid var(--exception); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--exception); font-weight: 600;">⚠️ EVEN TURN:</span> Practice before Teach</div>` : ''}
+         
+         <p style="margin-top: 15px;"><strong>Can the Heir ${firstAction}?</strong></p>
+         <p style="color: var(--text-secondary); font-size: 0.9rem;">${firstAction === 'Teach' ? 'Requires: Trick not in Academy AND available Classroom slot' : 'Requires: Trick not in Academy AND available Practice Room slot'}</p>`,
+        [
+          { text: `Yes — ${firstAction}`, action: () => academyTeachOrPractice(firstAction, secondAction) },
+          { text: `No — Try ${secondAction}`, action: () => academyTrySecondAction(secondAction) },
+          { text: 'Neither possible — Overflow', action: () => academyOverflow() }
+        ]
+      );
+    }
+    
+    function academyTeachOrPractice(action, nextAction) {
+      gameState.pendingAcademy.actionsRemaining--;
+      
+      const isTeach = action === 'Teach';
+      const trickSelection = isTeach ? 'Rightmost' : 'Leftmost';
+      const slotType = isTeach ? 'Classroom' : 'Practice Room';
+      
+      const isP29Active = gameState.activeProphecy?.id === 'p29';
+      const isP32Active = gameState.activeProphecy?.id === 'p32';
+      
+      let slotSelection = isTeach 
+        ? 'Highest Fame Threshold Classroom, first slot from top'
+        : 'Highest Fame Threshold (IGNORE slots that decrease Preparation cost), top to bottom';
+      
+      const prophecyReminder = getHeirProphecyReminderHtml('heir-academy');
+      
+      // p32: Teach Immediate Yield - need to collect yield
+      if (isTeach && isP32Active) {
+        setActionContent(
+          `Turn ${gameState.currentTurn} — Academy: Teach`,
+          `<p>The Heir Teaches.</p>
+           
+           ${prophecyReminder}
+           
+           ${boardAction(`Select the <strong>${trickSelection}</strong> Trick from the Heir's board`)}
+           ${boardAction(`Place its Academy marker in a ${slotType} slot (${slotSelection})`)}
+           
+           <p style="margin-top: 15px;"><strong>p32: Enter the Classroom's Yield for this Trick:</strong></p>
+           <p style="color: var(--text-secondary); font-size: 0.9rem;">The Heir immediately receives the Classroom's Yield (check tile modifiers).</p>
+           
+           <div style="background: var(--bg-card); padding: 15px; border-radius: 8px; margin: 15px 0;">
+             <div class="stepper-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; text-align: center;">
+               <div>
+                 <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 8px;">Fame ★</label>
+                 ${createStepper('p32-fame', 0)}
+               </div>
+               <div>
+                 <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 8px;">Coins</label>
+                 ${createStepper('p32-coins', 0)}
+               </div>
+               <div>
+                 <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 8px;">Shards ◆</label>
+                 ${createStepper('p32-shards', 0)}
+               </div>
+             </div>
+           </div>
+           
+           <div id="p32-board-action">
+             ${boardAction('No yields to apply')}
+           </div>`,
+          [
+            { text: 'Apply Yield & Continue', action: () => applyP32TeachYield() }
+          ]
+        );
+        
+        const updateP32BoardAction = () => {
+          const fame = parseInt($('#p32-fame')?.dataset.value) || 0;
+          const coins = parseInt($('#p32-coins')?.dataset.value) || 0;
+          const shards = parseInt($('#p32-shards')?.dataset.value) || 0;
+          
+          const actionDiv = $('#p32-board-action');
+          if (!actionDiv) return;
+          
+          if (fame === 0 && coins === 0 && shards === 0) {
+            actionDiv.innerHTML = boardAction('No yields to apply');
+            return;
+          }
+          
+          let parts = [];
+          if (fame > 0) parts.push(`Update Heir's Fame (${gameState.heir.fame}★ → ${gameState.heir.fame + fame}★)`);
+          if (coins > 0) parts.push(`Update Heir's Coins (${gameState.heir.coins} → ${gameState.heir.coins + coins})`);
+          if (shards > 0) parts.push(`Update Heir's Shards (${gameState.heir.shards} → ${gameState.heir.shards + shards})`);
+          
+          actionDiv.innerHTML = parts.map(p => boardAction(p)).join('');
+        };
+        
+        attachStepperListeners(updateP32BoardAction);
+        return;
+      }
+      
+      // p29: Practice Coins - need to ask for Trick's Fame Threshold
+      if (!isTeach && isP29Active) {
+        setActionContent(
+          `Turn ${gameState.currentTurn} — Academy: Practice`,
+          `<p>The Heir Practices.</p>
+           
+           ${prophecyReminder}
+           
+           ${boardAction(`Select the <strong>${trickSelection}</strong> Trick from the Heir's board`)}
+           ${boardAction(`Place its Academy marker in a ${slotType} slot (${slotSelection})`)}
+           ${boardAction('If the Practice Room grants an extra Trick marker, place it on the Trick')}
+           
+           <p style="margin-top: 15px;"><strong>What is the Trick's Fame Threshold?</strong></p>
+           <p style="color: var(--text-secondary); font-size: 0.9rem;">p29 grants +2/4/6 Coins based on the Trick's level.</p>`,
+          [
+            { text: 'Level 1 (+2 Coins)', action: () => applyP29PracticeBonus(2) },
+            { text: 'Level 16 (+4 Coins)', action: () => applyP29PracticeBonus(4) },
+            { text: 'Level 36 (+6 Coins)', action: () => applyP29PracticeBonus(6) }
+          ]
+        );
+        return;
+      }
+      
+      // Normal flow (no p29/p32)
+      setActionContent(
+        `Turn ${gameState.currentTurn} — Academy: ${action}`,
+        `<p>The Heir ${action}es.</p>
+         
+         ${prophecyReminder}
+         
+         ${boardAction(`Select the <strong>${trickSelection}</strong> Trick from the Heir's board`)}
+         ${boardAction(`Place its Academy marker in a ${slotType} slot (${slotSelection})`)}
+         ${isTeach ? '' : boardAction('If the Practice Room grants an extra Trick marker, place it on the Trick')}
+         
+         <p style="margin-top: 15px;"><strong>${gameState.pendingAcademy.actionsRemaining}</strong> action${gameState.pendingAcademy.actionsRemaining !== 1 ? 's' : ''} remaining.</p>`,
+        [
+          { text: 'Continue', action: () => {
+            if (gameState.pendingAcademy.actionsRemaining > 0) {
+              // Continue alternating
+              academyStep3And4TeachPractice();
+            } else {
+              academyComplete();
+            }
+          }}
+        ]
+      );
+    }
+    
+    function applyP32TeachYield() {
+      const fame = parseInt($('#p32-fame')?.dataset.value) || 0;
+      const coins = parseInt($('#p32-coins')?.dataset.value) || 0;
+      let shards = parseInt($('#p32-shards')?.dataset.value) || 0;
+      
+      // Check for p19/p20 effects on shards (shouldn't happen since p32 is active, but be safe)
+      const isExtraShard = gameState.activeProphecy?.id === 'p19';
+      const isShardsGiveFame = gameState.activeProphecy?.id === 'p20';
+      
+      let extraFame = 0;
+      if (shards > 0 && isShardsGiveFame) extraFame = 2;
+      if (shards > 0 && isExtraShard) shards += 1;
+      
+      gameState.heir.fame += fame + extraFame;
+      gameState.heir.coins += coins;
+      gameState.heir.shards += shards;
+      updateGameDisplay();
+      
+      if (gameState.pendingAcademy.actionsRemaining > 0) {
+        academyStep3And4TeachPractice();
+      } else {
+        academyComplete();
+      }
+    }
+    
+    function applyP29PracticeBonus(coinBonus) {
+      const currentCoins = gameState.heir.coins;
+      gameState.heir.coins += coinBonus;
+      updateGameDisplay();
+      
+      setActionContent(
+        `Turn ${gameState.currentTurn} — Academy: Practice Complete`,
+        `<p>p29 Bonus Applied!</p>
+         
+         ${boardAction(`Update Heir's Coins (${currentCoins} → ${gameState.heir.coins}) <span style="color: var(--prophecy);">(+${coinBonus} from p29)</span>`)}
+         
+         <p style="margin-top: 15px;"><strong>${gameState.pendingAcademy.actionsRemaining}</strong> action${gameState.pendingAcademy.actionsRemaining !== 1 ? 's' : ''} remaining.</p>`,
+        [
+          { text: 'Continue', action: () => {
+            if (gameState.pendingAcademy.actionsRemaining > 0) {
+              academyStep3And4TeachPractice();
+            } else {
+              academyComplete();
+            }
+          }}
+        ]
+      );
+    }
+    
+    function academyTrySecondAction(action) {
+      setActionContent(
+        `Turn ${gameState.currentTurn} — Academy: ${action}`,
+        `<p><strong>Can the Heir ${action}?</strong></p>
+         <p style="color: var(--text-secondary); font-size: 0.9rem;">${action === 'Teach' ? 'Requires: Trick not in Academy AND available Classroom slot' : 'Requires: Trick not in Academy AND available Practice Room slot'}</p>`,
+        [
+          { text: `Yes — ${action}`, action: () => academyTeachOrPractice(action, action === 'Teach' ? 'Practice' : 'Teach') },
+          { text: 'No — Overflow', action: () => academyOverflow() }
+        ]
+      );
+    }
+    
+    function academyOverflow() {
+      const { actionsRemaining } = gameState.pendingAcademy;
+      
+      if (actionsRemaining <= 0) {
+        academyComplete();
+        return;
+      }
+      
+      // Force Renovate (even if more Banners than player)
+      setActionContent(
+        `Turn ${gameState.currentTurn} — Academy: Overflow`,
+        `<p>Neither Teach nor Practice is possible.</p>
+         
+         <p style="margin-top: 15px;">The Heir must <strong>Renovate</strong> (even if it has more Banners than you), then continue with Teach/Practice.</p>
+         
+         <p style="margin-top: 15px;"><strong>Can the Heir Renovate?</strong></p>
+         <p style="color: var(--text-secondary); font-size: 0.9rem;">Requires: Heir has Banners AND empty room space exists</p>`,
+        [
+          { text: 'Yes — Renovate', action: () => {
+            academyRenovateAction();
+          }},
+          { text: 'No — Cannot Renovate', action: () => {
+            // Actions are lost
+            gameState.pendingAcademy.actionsRemaining = 0;
+            academyComplete();
+          }}
+        ]
+      );
+    }
+    
+    function academyComplete() {
+      setActionContent(
+        `Turn ${gameState.currentTurn} — Academy Complete`,
+        `<p>The Heir has completed all Academy actions.</p>`,
+        [
+          { text: 'Done — Continue Placement', action: () => startPlaceCharactersSequence() }
+        ]
+      );
+    }
+
+    // ============================================
     // WORKSHOP LOCATION
     // ============================================
 
@@ -8018,7 +8999,7 @@
             if (isRedLotus) {
               heirPerformanceTempData.redLotusTricks = parseInt($('#red-lotus-tricks')?.dataset?.value) || 0;
             }
-            showHeirPerformanceStep3_FinalTotals();
+            showHeirPerformanceStep2b_P33Check();
           }}
         ]
       );
@@ -8051,6 +9032,41 @@
           });
         });
       }, 0);
+    }
+    
+    // Step 2b: Check p33 (Protégé Backstage Bonus) if active
+    function showHeirPerformanceStep2b_P33Check() {
+      const isP33Active = gameState.activeProphecy?.id === 'p33';
+      const hasAcademy = gameState.expansions?.academy;
+      
+      // Skip if p33 not active or no Academy
+      if (!isP33Active || !hasAcademy) {
+        showHeirPerformanceStep3_FinalTotals();
+        return;
+      }
+      
+      // Ask if Protégé is backstage
+      const prophecyReminder = getHeirProphecyReminderHtml('heir-performance');
+      
+      setActionContent(
+        `Turn ${gameState.currentTurn} — Heir Performance: Protégé Check`,
+        `<p><strong>p33: Protégé Backstage Bonus</strong></p>
+         
+         ${prophecyReminder}
+         
+         <p style="margin-top: 15px;">Is the Heir's <strong>Protégé</strong> currently on a backstage slot at the Theater?</p>
+         <p style="color: var(--text-secondary); font-size: 0.9rem;">If yes, the Heir gains +1 Fame, +1 Coin, and +1 Shard.</p>`,
+        [
+          { text: 'Yes — Protégé is Backstage', action: () => {
+            heirPerformanceTempData.p33Bonus = true;
+            showHeirPerformanceStep3_FinalTotals();
+          }},
+          { text: 'No — Not Backstage', action: () => {
+            heirPerformanceTempData.p33Bonus = false;
+            showHeirPerformanceStep3_FinalTotals();
+          }}
+        ]
+      );
     }
     
     function showHeirPerformanceStep3_FinalTotals() {
@@ -8093,10 +9109,20 @@
       // Red Lotus bonus
       const redLotusFame = isRedLotus ? (data.redLotusTricks || 0) : 0;
       
+      // p33 Protégé Backstage Bonus
+      let p33BonusFame = 0;
+      let p33BonusCoins = 0;
+      let p33BonusShards = 0;
+      if (data.p33Bonus) {
+        p33BonusFame = 1;
+        p33BonusCoins = 1;
+        p33BonusShards = 1;
+      }
+      
       // Base totals (before prophecy effects)
-      let baseFame = data.trickYields.fame + data.cardBonus.fame + data.winningLinks + backstageFame + elektraBonusFame + redLotusFame;
-      let baseCoins = data.trickYields.coins + data.cardBonus.coins + backstageCoins + elektraBonusCoins;
-      let baseShards = data.trickYields.shards + data.cardBonus.shards + elektraBonusShards;
+      let baseFame = data.trickYields.fame + data.cardBonus.fame + data.winningLinks + backstageFame + elektraBonusFame + redLotusFame + p33BonusFame;
+      let baseCoins = data.trickYields.coins + data.cardBonus.coins + backstageCoins + elektraBonusCoins + p33BonusCoins;
+      let baseShards = data.trickYields.shards + data.cardBonus.shards + elektraBonusShards + p33BonusShards;
       
       // Apply p14 (Double Performer Bonus) - doubles Links + Backstage + Card Bonus (NOT trick yields)
       let p14BonusFame = 0;
@@ -8154,6 +9180,9 @@
       if (redLotusFame > 0) {
         fameBreakdown += `<tr style="color: #a6c;"><td>✨ Red Lotus (${data.redLotusTricks} tricks)</td><td style="text-align: right; font-weight: 600;">+${redLotusFame}</td></tr>`;
       }
+      if (p33BonusFame > 0) {
+        fameBreakdown += `<tr style="color: var(--prophecy);"><td>🔮 p33 Protégé Backstage</td><td style="text-align: right; font-weight: 600;">+${p33BonusFame}</td></tr>`;
+      }
       if (p14BonusFame > 0) {
         fameBreakdown += `<tr style="color: var(--amber);"><td>⚠️ p14 Doubled</td><td style="text-align: right; font-weight: 600;">+${p14BonusFame}</td></tr>`;
       }
@@ -8184,6 +9213,9 @@
       if (isElektra && elektraBonusCoins > 0) {
         coinsBreakdown += `<tr style="color: #a6c;"><td>✨ Elektra Bonus</td><td style="text-align: right; font-weight: 600;">+${elektraBonusCoins}</td></tr>`;
       }
+      if (p33BonusCoins > 0) {
+        coinsBreakdown += `<tr style="color: var(--prophecy);"><td>🔮 p33 Protégé Backstage</td><td style="text-align: right; font-weight: 600;">+${p33BonusCoins}</td></tr>`;
+      }
       if (p14BonusCoins > 0) {
         coinsBreakdown += `<tr style="color: var(--amber);"><td>⚠️ p14 Doubled</td><td style="text-align: right; font-weight: 600;">+${p14BonusCoins}</td></tr>`;
       }
@@ -8207,6 +9239,9 @@
       
       if (isElektra && elektraBonusShards > 0) {
         shardsBreakdown += `<tr style="color: #a6c;"><td>✨ Elektra Bonus</td><td style="text-align: right; font-weight: 600;">+${elektraBonusShards}</td></tr>`;
+      }
+      if (p33BonusShards > 0) {
+        shardsBreakdown += `<tr style="color: var(--prophecy);"><td>🔮 p33 Protégé Backstage</td><td style="text-align: right; font-weight: 600;">+${p33BonusShards}</td></tr>`;
       }
       if (p14BonusShards > 0) {
         shardsBreakdown += `<tr style="color: var(--amber);"><td>⚠️ p14 Doubled</td><td style="text-align: right; font-weight: 600;">+${p14BonusShards}</td></tr>`;
@@ -8485,7 +9520,16 @@
          
          ${boardAction("Return your trick markers to your supply")}
          
-         ${boardAction("Return the Heir's trick markers (if any) to their tricks")}`,
+         ${boardAction("Return the Heir's trick markers (if any) to their tricks")}
+         
+         ${gameState.expansions?.academy ? `<div style="background: rgba(100, 149, 237, 0.1); border: 1px solid var(--info); padding: 10px; border-radius: 6px; margin: 12px 0;">
+           <p style="color: var(--info); font-weight: 600; margin-bottom: 8px;">📚 Academy: Practice Room Abilities</p>
+           <ul style="margin-left: 20px; color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">
+             <li><strong>Stay on Card:</strong> If your Trick has this ability, its marker stays on the Performance card (don't remove it)</li>
+             <li><strong>Double Marker:</strong> You may have 2 markers of the same Trick on one Performance card</li>
+             <li><strong>Free Rotate:</strong> Marker doesn't need to be in a Link circle</li>
+           </ul>
+         </div>` : ''}`,
         [
           { text: 'Continue', action: () => {
             // Use shared calculation function
@@ -8556,6 +9600,15 @@
     }
 
     function handleEndTurnPhase() {
+      // Academy: Classroom Phase happens before End Turn
+      if (gameState.expansions.academy && !gameState.classroomPhaseDone) {
+        handleClassroomPhase();
+        return;
+      }
+      
+      // Reset classroom phase flag for next turn
+      gameState.classroomPhaseDone = false;
+      
       // Dawn of Technology: Optional challenge rule - ask before normal End Turn
       if (gameState.expansions.dawnChallengeRule) {
         showDawnChallengeRuleInput();
@@ -8564,6 +9617,344 @@
       
       // Normal End Turn flow
       continueToEndTurn();
+    }
+    
+    // ============================================
+    // CLASSROOM PHASE (Academy Expansion)
+    // ============================================
+    
+    function handleClassroomPhase() {
+      setActionContent(
+        `Turn ${gameState.currentTurn} — Classroom Phase`,
+        `<p><strong>Classroom Phase</strong> (Academy)</p>
+         
+         ${infoBox("The Heir receives the <strong>full Trick Yield</strong> (as printed on the card) for each Trick it has in a Classroom. The Heir ignores Classroom modifiers.")}
+         
+         <div style="background: var(--exception-bg); border-left: 3px solid var(--exception); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--exception); font-weight: 600;">⚠️ NOTE:</span> The Heir's Trick markers are <strong>NOT removed</strong> from Theater or the Trick. The Heir can continue performing these Tricks.</div>
+         
+         <p style="margin-top: 15px;"><strong>Does the Heir have any Tricks in Classrooms?</strong></p>
+         <p style="color: var(--text-secondary); font-size: 0.9rem;">Check the Academy board for Heir's Academy markers in Classroom slots.</p>`,
+        [
+          { text: 'Yes — Enter Yields', action: () => showClassroomYieldInput() },
+          { text: 'No — Skip to End Turn', action: () => {
+            // Check for Bernard - he still gets coins from player's markers
+            const isBernard = gameState.heirMagician?.id === 'bernard';
+            if (isBernard) {
+              showBernardClassroomBonus();
+            } else {
+              gameState.classroomPhaseDone = true;
+              handleEndTurnPhase();
+            }
+          }}
+        ]
+      );
+    }
+    
+    function showClassroomYieldInput() {
+      // Check for shard-related prophecies
+      const isExtraShard = gameState.activeProphecy?.id === 'p19';
+      const isShardsGiveFame = gameState.activeProphecy?.id === 'p20';
+      
+      const currentFame = gameState.heir.fame;
+      const currentCoins = gameState.heir.coins;
+      const currentShards = gameState.heir.shards;
+      
+      // Use standard prophecy reminder
+      const prophecyReminder = getHeirProphecyReminderHtml('heir-classroom');
+      
+      setActionContent(
+        `Turn ${gameState.currentTurn} — Classroom Yields`,
+        `<p>Enter the <strong>total Yields</strong> from all Heir Tricks in Classrooms.</p>
+         <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 15px;">Use the printed Yields on each Trick card (Heir ignores Classroom modifiers).</p>
+         
+         ${prophecyReminder}
+         
+         <div style="background: var(--bg-card); padding: 15px; border-radius: 8px; margin: 15px 0;">
+           <div class="stepper-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; text-align: center;">
+             <div>
+               <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 8px;">Fame ★</label>
+               ${createStepper('classroom-fame', 0)}
+             </div>
+             <div>
+               <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 8px;">Coins</label>
+               ${createStepper('classroom-coins', 0)}
+             </div>
+             <div>
+               <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 8px;">Shards ◆</label>
+               ${createStepper('classroom-shards', 0)}
+             </div>
+           </div>
+         </div>
+         
+         <div id="classroom-board-action">
+           ${boardAction(`No yields to apply`)}
+         </div>`,
+        [
+          { text: 'Apply Yields & Continue', action: () => applyClassroomYields() }
+        ]
+      );
+      
+      // Update board action dynamically
+      const updateBoardAction = () => {
+        const fame = parseInt($('#classroom-fame')?.dataset.value) || 0;
+        const coins = parseInt($('#classroom-coins')?.dataset.value) || 0;
+        let shards = parseInt($('#classroom-shards')?.dataset.value) || 0;
+        
+        // Apply p19 (Extra Shard)
+        let extraShards = 0;
+        if (shards > 0 && isExtraShard) {
+          extraShards = 1;
+        }
+        const totalShards = shards + extraShards;
+        
+        // Apply p20 (Shards Give Fame)
+        let extraFame = 0;
+        if (shards > 0 && isShardsGiveFame) {
+          extraFame = 2;
+        }
+        const totalFame = fame + extraFame;
+        
+        const actionDiv = $('#classroom-board-action');
+        if (!actionDiv) return;
+        
+        if (totalFame === 0 && coins === 0 && totalShards === 0) {
+          actionDiv.innerHTML = boardAction('No yields to apply');
+          return;
+        }
+        
+        let parts = [];
+        if (totalFame > 0) {
+          let fameText = `Update Heir's Fame (${currentFame}★ → ${currentFame + totalFame}★)`;
+          if (extraFame > 0) fameText += ` <span style="color: var(--prophecy);">(+${extraFame} from p20)</span>`;
+          parts.push(fameText);
+        }
+        if (coins > 0) {
+          parts.push(`Update Heir's Coins (${currentCoins} → ${currentCoins + coins})`);
+        }
+        if (totalShards > 0) {
+          let shardText = `Update Heir's Shards (${currentShards} → ${currentShards + totalShards})`;
+          if (extraShards > 0) shardText += ` <span style="color: var(--prophecy);">(+${extraShards} from p19)</span>`;
+          parts.push(shardText);
+        }
+        
+        actionDiv.innerHTML = parts.map(p => boardAction(p)).join('');
+      };
+      
+      attachStepperListeners(updateBoardAction);
+    }
+    
+    function applyClassroomYields() {
+      const isExtraShard = gameState.activeProphecy?.id === 'p19';
+      const isShardsGiveFame = gameState.activeProphecy?.id === 'p20';
+      const isP34Active = gameState.activeProphecy?.id === 'p34';
+      
+      // Store values for potential p34 flow
+      gameState.pendingClassroomYields = {
+        fame: parseInt($('#classroom-fame')?.dataset.value) || 0,
+        coins: parseInt($('#classroom-coins')?.dataset.value) || 0,
+        shards: parseInt($('#classroom-shards')?.dataset.value) || 0
+      };
+      
+      // If p34 is active, ask about doubling
+      if (isP34Active) {
+        showP34DoubleCheck();
+        return;
+      }
+      
+      // Apply yields normally
+      finalizeClassroomYields();
+    }
+    
+    function showP34DoubleCheck() {
+      const prophecyReminder = getHeirProphecyReminderHtml('heir-classroom');
+      
+      setActionContent(
+        `Turn ${gameState.currentTurn} — p34: Double Classroom Yield`,
+        `<p><strong>p34: Double Classroom Yield</strong></p>
+         
+         ${prophecyReminder}
+         
+         <p style="margin-top: 15px;">Did the Heir use p34 to <strong>double</strong> one Trick's Classroom Yield?</p>
+         <p style="color: var(--text-secondary); font-size: 0.9rem;">If yes, enter the Yield values for the ONE Trick that was doubled (these will be added again to double that Trick's contribution).</p>`,
+        [
+          { text: 'Yes — Enter Doubled Trick\'s Yield', action: () => showP34YieldInput() },
+          { text: 'No — Apply Normal Yields', action: () => finalizeClassroomYields() }
+        ]
+      );
+    }
+    
+    function showP34YieldInput() {
+      const currentFame = gameState.heir.fame;
+      const currentCoins = gameState.heir.coins;
+      const currentShards = gameState.heir.shards;
+      const pending = gameState.pendingClassroomYields;
+      
+      setActionContent(
+        `Turn ${gameState.currentTurn} — p34: Doubled Trick Yield`,
+        `<p>Enter the Yield of the <strong>one Trick</strong> that was doubled by p34.</p>
+         <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 15px;">This Trick's Yield is already included in your total. Enter it again to double it.</p>
+         
+         <div style="background: var(--bg-card); padding: 15px; border-radius: 8px; margin: 15px 0;">
+           <div class="stepper-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; text-align: center;">
+             <div>
+               <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 8px;">Fame ★</label>
+               ${createStepper('p34-fame', 0)}
+             </div>
+             <div>
+               <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 8px;">Coins</label>
+               ${createStepper('p34-coins', 0)}
+             </div>
+             <div>
+               <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 8px;">Shards ◆</label>
+               ${createStepper('p34-shards', 0)}
+             </div>
+           </div>
+         </div>
+         
+         <div id="p34-board-action">
+           ${boardAction('No doubling bonus to apply')}
+         </div>`,
+        [
+          { text: 'Apply Doubled Yield & Continue', action: () => applyP34Doubling() }
+        ]
+      );
+      
+      const updateP34BoardAction = () => {
+        const fame = parseInt($('#p34-fame')?.dataset.value) || 0;
+        const coins = parseInt($('#p34-coins')?.dataset.value) || 0;
+        const shards = parseInt($('#p34-shards')?.dataset.value) || 0;
+        
+        const totalFame = pending.fame + fame;
+        const totalCoins = pending.coins + coins;
+        const totalShards = pending.shards + shards;
+        
+        const actionDiv = $('#p34-board-action');
+        if (!actionDiv) return;
+        
+        if (fame === 0 && coins === 0 && shards === 0) {
+          actionDiv.innerHTML = boardAction('No doubling bonus to apply');
+          return;
+        }
+        
+        let parts = [];
+        if (totalFame > 0) {
+          parts.push(`Update Heir's Fame (${currentFame}★ → ${currentFame + totalFame}★) <span style="color: var(--prophecy);">(+${fame} from p34)</span>`);
+        }
+        if (totalCoins > 0) {
+          parts.push(`Update Heir's Coins (${currentCoins} → ${currentCoins + totalCoins}) <span style="color: var(--prophecy);">(+${coins} from p34)</span>`);
+        }
+        if (totalShards > 0) {
+          parts.push(`Update Heir's Shards (${currentShards} → ${currentShards + totalShards}) <span style="color: var(--prophecy);">(+${shards} from p34)</span>`);
+        }
+        
+        actionDiv.innerHTML = parts.map(p => boardAction(p)).join('');
+      };
+      
+      attachStepperListeners(updateP34BoardAction);
+    }
+    
+    function applyP34Doubling() {
+      // Add doubled Trick yields to pending
+      gameState.pendingClassroomYields.fame += parseInt($('#p34-fame')?.dataset.value) || 0;
+      gameState.pendingClassroomYields.coins += parseInt($('#p34-coins')?.dataset.value) || 0;
+      gameState.pendingClassroomYields.shards += parseInt($('#p34-shards')?.dataset.value) || 0;
+      
+      finalizeClassroomYields();
+    }
+    
+    function finalizeClassroomYields() {
+      const isExtraShard = gameState.activeProphecy?.id === 'p19';
+      const isShardsGiveFame = gameState.activeProphecy?.id === 'p20';
+      const isBernard = gameState.heirMagician?.id === 'bernard';
+      
+      let fame = gameState.pendingClassroomYields?.fame || 0;
+      let coins = gameState.pendingClassroomYields?.coins || 0;
+      let shards = gameState.pendingClassroomYields?.shards || 0;
+      
+      // Apply p19 (Extra Shard)
+      if (shards > 0 && isExtraShard) {
+        shards += 1;
+      }
+      
+      // Apply p20 (Shards Give Fame)
+      let extraFame = 0;
+      if (shards > 0 && isShardsGiveFame) {
+        extraFame = 2;
+      }
+      
+      // Update Heir state
+      gameState.heir.fame += fame + extraFame;
+      gameState.heir.coins += coins;
+      gameState.heir.shards += shards;
+      
+      // Clear pending data
+      delete gameState.pendingClassroomYields;
+      
+      updateGameDisplay();
+      
+      // Bernard: Ask for total markers in Classrooms
+      if (isBernard) {
+        showBernardClassroomBonus();
+        return;
+      }
+      
+      // Mark Classroom phase as done and continue to End Turn
+      gameState.classroomPhaseDone = true;
+      handleEndTurnPhase();
+    }
+    
+    function showBernardClassroomBonus() {
+      const currentCoins = gameState.heir.coins;
+      
+      setActionContent(
+        `Turn ${gameState.currentTurn} — Bernard's Classroom Bonus`,
+        `${magicianAbilityBox(`<strong>Professor Bernard:</strong> During the Classroom phase, the Heir gains <strong>3 Coins</strong> for each Academy marker in Classrooms (regardless of owner).`)}
+         
+         <p style="margin-top: 15px;"><strong>How many total Academy markers are in Classrooms?</strong></p>
+         <p style="color: var(--text-secondary); font-size: 0.9rem;">Count ALL markers (both yours and the Heir's) currently on Classroom slots.</p>
+         
+         <div style="background: var(--bg-card); padding: 15px; border-radius: 8px; margin: 15px 0;">
+           <div style="text-align: center;">
+             <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 8px;">Total Markers in Classrooms</label>
+             ${createStepper('bernard-markers', 0)}
+           </div>
+         </div>
+         
+         <div id="bernard-board-action">
+           ${boardAction('No bonus to apply (0 markers)')}
+         </div>`,
+        [
+          { text: 'Apply Bonus & Continue', action: () => applyBernardBonus() }
+        ]
+      );
+      
+      const updateBernardBoardAction = () => {
+        const markers = parseInt($('#bernard-markers')?.dataset.value) || 0;
+        const coinBonus = markers * 3;
+        
+        const actionDiv = $('#bernard-board-action');
+        if (!actionDiv) return;
+        
+        if (markers === 0) {
+          actionDiv.innerHTML = boardAction('No bonus to apply (0 markers)');
+        } else {
+          actionDiv.innerHTML = boardAction(`Update Heir's Coins (${currentCoins} → ${currentCoins + coinBonus}) <span style="color: #a6c;">(+${coinBonus} from Bernard: ${markers} markers × 3)</span>`);
+        }
+      };
+      
+      attachStepperListeners(updateBernardBoardAction);
+    }
+    
+    function applyBernardBonus() {
+      const markers = parseInt($('#bernard-markers')?.dataset.value) || 0;
+      const coinBonus = markers * 3;
+      
+      gameState.heir.coins += coinBonus;
+      updateGameDisplay();
+      
+      // Mark Classroom phase as done and continue to End Turn
+      gameState.classroomPhaseDone = true;
+      handleEndTurnPhase();
     }
     
     function showDawnChallengeRuleInput() {
@@ -8690,6 +10081,18 @@
     }
     
     function continueToEndTurn() {
+      // Anjali: At the beginning of End Turn, Heir gains 2 Coins per Secret
+      const isAnjali = gameState.heirMagician?.id === 'anjali';
+      const secrets = gameState.heir.secrets || 0;
+      
+      if (isAnjali && secrets > 0 && !gameState.anjaliEndTurnApplied) {
+        showAnjaliEndTurnBonus();
+        return;
+      }
+      
+      // Clear Anjali flag for next turn
+      gameState.anjaliEndTurnApplied = false;
+      
       // Turn 7 has a streamlined End Turn (no setup for next turn)
       if (gameState.currentTurn === 7) {
         showEndTurnFinalTurn();
@@ -8700,6 +10103,29 @@
         // Turns 1-2: no card removal
         showEndTurnFull();
       }
+    }
+    
+    function showAnjaliEndTurnBonus() {
+      const secrets = gameState.heir.secrets || 0;
+      const coinBonus = secrets * 2;
+      const currentCoins = gameState.heir.coins;
+      
+      setActionContent(
+        `Turn ${gameState.currentTurn} — Anjali's End Turn Bonus`,
+        `${magicianAbilityBox(`<strong>Anjali (Spirit Guide):</strong> At the beginning of the End Turn phase, the Heir gains <strong>2 Coins</strong> for each Secret its Protégé has.`)}
+         
+         <p style="margin-top: 15px;">The Heir's Protégé has <strong>${secrets} Secret${secrets !== 1 ? 's' : ''}</strong>.</p>
+         
+         ${boardAction(`Update Heir's Coins (${currentCoins} → ${currentCoins + coinBonus}) <span style="color: #a6c;">(+${coinBonus} from Anjali: ${secrets} secrets × 2)</span>`)}`,
+        [
+          { text: 'Apply Bonus & Continue', action: () => {
+            gameState.heir.coins += coinBonus;
+            gameState.anjaliEndTurnApplied = true;
+            updateGameDisplay();
+            continueToEndTurn();
+          }}
+        ]
+      );
     }
     
     function showEndTurnPartOne() {
@@ -8754,7 +10180,8 @@
       }
       
       // Build dynamic character order icons
-      const sortOrder = { 'magician': 0, 'engineer': 1, 'manager': 2, 'assistant': 3, 'apprentice': 4 };
+      // Order: Magician → Protégé → Specialists → Apprentices
+      const sortOrder = { 'magician': 0, 'protege': 1, 'engineer': 2, 'manager': 3, 'assistant': 4, 'apprentice': 5 };
       const allChars = [...gameState.heir.characters].sort((a, b) => sortOrder[a] - sortOrder[b]);
       
       const characterOrderIcons = allChars.map((char, index) => {
@@ -9040,6 +10467,15 @@
       content += boardAction("Discard any used Special Assignment cards to their respective discard piles");
       content += noteBox("Unused SA cards remain in your hand and score 2 Fame each at game end.");
       
+      // Academy: Reveal Secrets subphase
+      if (gameState.expansions.academy) {
+        content += `<div style="background: rgba(100, 149, 237, 0.1); border: 1px solid var(--info); padding: 10px; border-radius: 6px; margin: 12px 0;">
+          <p style="color: var(--info); font-weight: 600; margin-bottom: 8px;">📚 Academy: Reveal Secrets</p>
+          ${boardAction("Return any unclaimed Secrets from Academy slots to the <strong>bottom</strong> of the Secret stack")}
+          ${boardAction("Draw <strong>2 new Secrets</strong> from the top of the stack and place them on the Academy")}
+        </div>`;
+      }
+      
       // Return Assignment Cards
       content += boardAction("Return all Assignment cards (yours and the Heir's) to their respective boards");
       
@@ -9207,7 +10643,8 @@
       }
       
       // Build dynamic character order icons
-      const sortOrder = { 'magician': 0, 'engineer': 1, 'manager': 2, 'assistant': 3, 'apprentice': 4 };
+      // Order: Magician → Protégé → Specialists → Apprentices
+      const sortOrder = { 'magician': 0, 'protege': 1, 'engineer': 2, 'manager': 3, 'assistant': 4, 'apprentice': 5 };
       const allChars = [...gameState.heir.characters].sort((a, b) => sortOrder[a] - sortOrder[b]);
       
       const characterOrderIcons = allChars.map((char, index) => {
@@ -9247,6 +10684,15 @@
       // Discard Special Assignment cards
       content += boardAction("Discard any used Special Assignment cards to their respective discard piles");
       content += noteBox("Unused SA cards remain in your hand and score 2 Fame each at game end.");
+      
+      // Academy: Reveal Secrets subphase
+      if (gameState.expansions.academy) {
+        content += `<div style="background: rgba(100, 149, 237, 0.1); border: 1px solid var(--info); padding: 10px; border-radius: 6px; margin: 12px 0;">
+          <p style="color: var(--info); font-weight: 600; margin-bottom: 8px;">📚 Academy: Reveal Secrets</p>
+          ${boardAction("Return any unclaimed Secrets from Academy slots to the <strong>bottom</strong> of the Secret stack")}
+          ${boardAction("Draw <strong>2 new Secrets</strong> from the top of the stack and place them on the Academy")}
+        </div>`;
+      }
       
       // Return Assignment Cards
       content += boardAction("Return all Assignment cards (yours and the Heir's) to their respective boards");
@@ -9549,6 +10995,11 @@
       // Reset performance order for new turn
       gameState.performanceOrder = null;
       
+      // Reset Academy classroom phase flag for new turn
+      if (gameState.expansions.academy) {
+        gameState.classroomPhaseDone = false;
+      }
+      
       // Reset downtown dice for new turn (they get re-rolled)
       gameState.downtownDice = {
         trick1: 'x',
@@ -9643,7 +11094,14 @@
             endGameTempData.trickFame = parseInt($('#endgame-trick-fame')?.dataset?.value) || 0;
             endGameTempData.trickCoins = parseInt($('#endgame-trick-coins')?.dataset?.value) || 0;
             endGameTempData.trickShards = parseInt($('#endgame-trick-shards')?.dataset?.value) || 0;
-            showEndGameStep2_FinalTotals();
+            
+            // If Academy enabled, check banner scoring first
+            if (gameState.expansions.academy) {
+              showEndGameStep1b_BannerCheck();
+            } else {
+              endGameTempData.bannerFame = 0;
+              showEndGameStep2_FinalTotals();
+            }
           }}
         ]
       );
@@ -9676,6 +11134,35 @@
           });
         });
       }, 0);
+    }
+    
+    function showEndGameStep1b_BannerCheck() {
+      setActionContent(
+        'End Game — Banner Scoring (Academy)',
+        `<p><strong>Compare Banners on the Academy board:</strong></p>
+         
+         <p style="color: var(--text-secondary); margin: 15px 0;">Count the Banners each player has placed on Classroom and Practice Room tiles.</p>
+         
+         <div style="background: var(--bg-card); padding: 15px; border-radius: 8px; margin: 15px 0;">
+           <p style="margin-bottom: 10px;"><strong>Banner Scoring (2-player):</strong></p>
+           <ul style="margin-left: 20px; line-height: 1.8;">
+             <li><strong>More Banners than Heir:</strong> +8 Fame for Heir</li>
+             <li><strong>Tied or Fewer:</strong> +0 Fame</li>
+           </ul>
+         </div>
+         
+         <p style="margin-top: 15px;"><strong>Does the Heir have MORE Banners than you?</strong></p>`,
+        [
+          { text: 'Yes — Heir has more (+8 Fame)', action: () => {
+            endGameTempData.bannerFame = 8;
+            showEndGameStep2_FinalTotals();
+          }},
+          { text: 'No — Tied or I have more (+0 Fame)', action: () => {
+            endGameTempData.bannerFame = 0;
+            showEndGameStep2_FinalTotals();
+          }}
+        ]
+      );
     }
     
     function showEndGameStep2_FinalTotals() {
@@ -9715,8 +11202,11 @@
       const extraChars = Math.max(0, characterCount - 6);
       const charFame = Math.min(extraChars * charBonus, 20);
       
-      // Calculate final totals (include p20 bonus Fame)
-      const finalFame = baseFame + adjustedTrickFame + shardFame + saFame + l3Fame + charFame + p20Bonus;
+      // Academy: Banner scoring
+      const bannerFame = endGameTempData.bannerFame || 0;
+      
+      // Calculate final totals (include p20 bonus Fame and banner Fame)
+      const finalFame = baseFame + adjustedTrickFame + shardFame + saFame + l3Fame + charFame + p20Bonus + bannerFame;
       const finalCoins = baseCoins + adjustedTrickCoins;
       const finalShards = totalShards;
       
@@ -9744,6 +11234,10 @@
       
       if (p20Bonus > 0) {
         fameBreakdown += `<tr style="color: var(--amber);"><td>⚠️ p20 Shards Give Fame</td><td style="text-align: right; font-weight: 600;">+${p20Bonus}</td></tr>`;
+      }
+      
+      if (bannerFame > 0) {
+        fameBreakdown += `<tr style="color: var(--info);"><td>📚 Academy Banners</td><td style="text-align: right; font-weight: 600;">+${bannerFame}</td></tr>`;
       }
       
       fameBreakdown += `
@@ -9907,22 +11401,26 @@
         const fullSetupHtml = generateExpansionOptionsHTML('');
         const fullOptionsGrid = $('#expansion-options');
         const fullDawnContainer = $('#dawn-options-container');
+        const fullAcademyContainer = $('#academy-options-container');
         if (fullOptionsGrid) fullOptionsGrid.innerHTML = fullSetupHtml.cardsHtml;
         if (fullDawnContainer) fullDawnContainer.innerHTML = fullSetupHtml.dawnOptionsHtml;
+        if (fullAcademyContainer) fullAcademyContainer.innerHTML = fullSetupHtml.academyOptionsHtml;
         
         // Quick Setup
         const quickSetupHtml = generateExpansionOptionsHTML('quick');
         const quickOptionsGrid = $('#quick-expansion-options');
         const quickDawnContainer = $('#quick-dawn-options-container');
+        const quickAcademyContainer = $('#quick-academy-options-container');
         if (quickOptionsGrid) quickOptionsGrid.innerHTML = quickSetupHtml.cardsHtml;
         if (quickDawnContainer) quickDawnContainer.innerHTML = quickSetupHtml.dawnOptionsHtml;
+        if (quickAcademyContainer) quickAcademyContainer.innerHTML = quickSetupHtml.academyOptionsHtml;
       }
       
       // Populate expansion options
       initializeExpansionOptions();
       
       // Generic expansion selection handler - works for both Full and Quick Setup
-      function setupExpansionHandlers(optionsSelector, dawnOptionsSelector, dawnCheckboxSelector) {
+      function setupExpansionHandlers(optionsSelector, dawnOptionsSelector, dawnCheckboxSelector, academyOptionsSelector) {
         $$(optionsSelector + ' .option-card').forEach(card => {
           card.addEventListener('click', () => {
             const expansion = card.dataset.expansion;
@@ -9932,6 +11430,7 @@
             card.classList.toggle('selected');
             gameState.expansions[expansion] = card.classList.contains('selected');
             
+            // Handle Dawn of Technology options panel
             const dawnOptions = $(dawnOptionsSelector);
             if (dawnOptions) {
               if (gameState.expansions.dawn) {
@@ -9943,6 +11442,22 @@
                 gameState.expansions.dawnChallengeRule = false;
               }
             }
+            
+            // Handle Academy options panel
+            const academyOptions = $(academyOptionsSelector);
+            if (academyOptions) {
+              if (gameState.expansions.academy) {
+                academyOptions.classList.remove('hidden');
+              } else {
+                academyOptions.classList.add('hidden');
+              }
+            }
+            
+            // Update difficulty descriptions (Academy changes character counts)
+            updateDifficultyDescriptions();
+            
+            // Update prophecy removal display (Academy adds p31)
+            updateProphecyRemovalDisplay();
             
             // Update Quick Setup summary if visible
             if (optionsSelector.includes('quick')) {
@@ -9963,10 +11478,10 @@
       }
       
       // Setup handlers for Full Setup
-      setupExpansionHandlers('#expansion-options', '#dawn-options', '#dawn-challenge-rule');
+      setupExpansionHandlers('#expansion-options', '#dawn-options', '#dawn-challenge-rule', '#academy-options');
       
       // Setup handlers for Quick Setup
-      setupExpansionHandlers('#quick-expansion-options', '#quick-dawn-options', '#quick-dawn-challenge-rule');
+      setupExpansionHandlers('#quick-expansion-options', '#quick-dawn-options', '#quick-dawn-challenge-rule', '#quick-academy-options');
       
       // Show setup section on load if expansion is pre-selected (base game)
       const preselectedExpansion = $('#expansion-options .option-card.selected');
@@ -10186,7 +11701,7 @@
         
         // Set prophecy if provided
         if (prophecyId) {
-          const allProphecies = [...PROPHECIES.heirIgnores, ...PROPHECIES.affectBoth];
+          const allProphecies = getValidProphecies();
           const prophecy = allProphecies.find(p => p.id === prophecyId);
           if (prophecy) {
             gameState.activeProphecy = prophecy;
@@ -10207,7 +11722,7 @@
       // Set prophecy mid-game
       // Usage: debug.setProphecy('p19')
       setProphecy: function(prophecyId) {
-        const allProphecies = [...PROPHECIES.heirIgnores, ...PROPHECIES.affectBoth];
+        const allProphecies = getValidProphecies();
         const prophecy = allProphecies.find(p => p.id === prophecyId);
         if (prophecy) {
           gameState.activeProphecy = prophecy;
@@ -10265,7 +11780,7 @@
         
         // Set prophecy if provided
         if (prophecyId) {
-          const allProphecies = [...PROPHECIES.heirIgnores, ...PROPHECIES.affectBoth];
+          const allProphecies = getValidProphecies();
           const prophecy = allProphecies.find(p => p.id === prophecyId);
           if (prophecy) {
             gameState.activeProphecy = prophecy;
@@ -10342,7 +11857,7 @@
         
         // Set prophecy if provided
         if (prophecyId) {
-          const allProphecies = [...PROPHECIES.heirIgnores, ...PROPHECIES.affectBoth];
+          const allProphecies = getValidProphecies();
           const prophecy = allProphecies.find(p => p.id === prophecyId);
           if (prophecy) {
             gameState.activeProphecy = prophecy;
@@ -10382,7 +11897,7 @@
         
         // Set prophecy if provided
         if (prophecyId) {
-          const allProphecies = [...PROPHECIES.heirIgnores, ...PROPHECIES.affectBoth];
+          const allProphecies = getValidProphecies();
           const prophecy = allProphecies.find(p => p.id === prophecyId);
           if (prophecy) {
             gameState.activeProphecy = prophecy;
