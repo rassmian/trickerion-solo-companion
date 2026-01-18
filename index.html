@@ -1135,7 +1135,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.14.5-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.14.6-beta</p>
       <button class="restart-btn hidden" id="restart-btn">↺ New Game</button>
     </header>
 
@@ -1310,7 +1310,7 @@
                   </div>
                   <div id="p31-removal-icon" class="hidden" style="text-align: center;">
                     <img src="assets/images/prophecies/p31.png" alt="Skip Assignment" style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--danger);">
-                    <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 3px;">Skip Assign <span style="color: var(--amber);">(Academy)</span></div>
+                    <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 3px;">Skip Assign (Academy)</div>
                   </div>
                 </div>
               </div>
@@ -1696,7 +1696,7 @@
               </div>
               <div id="full-p31-removal-icon" class="hidden" style="text-align: center;">
                 <img src="assets/images/prophecies/p31.png" alt="Skip Assignment" style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--danger);">
-                <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px;">Skip Assignment<br><span style="color: var(--amber);">(Academy)</span></div>
+                <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px;">Skip Assignment<br>(Academy)</div>
               </div>
             </div>
             
@@ -3241,7 +3241,7 @@
       if (hasAcademy) {
         if (fullRemoveInstruction) fullRemoveInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Remove these <strong>4</strong> Prophecy tokens from the game (includes p31 for Academy):</span>`;
         if (fullP31Icon) fullP31Icon.classList.remove('hidden');
-        if (fullShuffleInstruction) fullShuffleInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Shuffle the remaining <strong>30</strong> Prophecy tokens face-down (Academy adds 7 new prophecies)</span>`;
+        if (fullShuffleInstruction) fullShuffleInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Shuffle the remaining <strong>30</strong> Prophecy tokens face-down (Academy adds 6 new prophecies)</span>`;
       } else {
         if (fullRemoveInstruction) fullRemoveInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Remove these 3 Prophecy tokens from the game:</span>`;
         if (fullP31Icon) fullP31Icon.classList.add('hidden');
@@ -5455,8 +5455,8 @@
         `${playerTurnBox("Place one of your Characters at their assigned Location.")}
          ${playerMagicianReminder}
          ${prophecyReminder}
-         <div style="background: var(--bg-card); padding: 15px; border-radius: 6px; margin: 15px 0;">
-           <p style="color: var(--text-secondary); font-size: 0.9rem;">Heir has placed <strong>${gameState.heirPlacementsEndedEarly ? gameState.heirActualPlacements : heirPlaced}</strong> of <strong>${heirCharacterCount}</strong> characters this turn.${gameState.heirPlacementsEndedEarly ? ' <span style="color: var(--text-muted);">(ended early)</span>' : ''}</p>
+         <div style="background: var(--bg-card); padding: 12px 15px; border-radius: 6px; margin: 8px 0;">
+           <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0;">Heir has placed <strong>${gameState.heirPlacementsEndedEarly ? gameState.heirActualPlacements : heirPlaced}</strong> of <strong>${heirCharacterCount}</strong> characters this turn.${gameState.heirPlacementsEndedEarly ? ' <span style="color: var(--text-muted);">(ended early)</span>' : ''}</p>
            ${heirRemaining === 0 
              ? `<p style="color: var(--amber); font-size: 0.9rem; margin-top: 5px;">The Heir has placed all their characters. Continue placing yours until done.</p>`
              : ''
@@ -7326,39 +7326,39 @@
            
            <div style="margin-bottom: 20px;">
              <p style="margin-bottom: 10px;">What level is this Trick?</p>
-             <div class="option-grid" style="grid-template-columns: repeat(3, 1fr);">
-               <div class="option-card theater-level-btn selected" data-level="1">
-                 <div class="title">Level 1</div>
-                 <div class="description">+1 Fame/Link</div>
+             <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+               <div class="option-card theater-level-btn selected" data-level="1" style="flex: 1 1 90px; min-width: 90px; padding: 12px 8px;">
+                 <div class="title" style="font-size: 0.9rem;">Level 1</div>
+                 <div class="description" style="font-size: 0.75rem;">+1 Fame/Link</div>
                </div>
-               <div class="option-card theater-level-btn" data-level="2">
-                 <div class="title">Level 2</div>
-                 <div class="description">+2 Fame/Link</div>
+               <div class="option-card theater-level-btn" data-level="2" style="flex: 1 1 90px; min-width: 90px; padding: 12px 8px;">
+                 <div class="title" style="font-size: 0.9rem;">Level 2</div>
+                 <div class="description" style="font-size: 0.75rem;">+2 Fame/Link</div>
                </div>
-               <div class="option-card theater-level-btn" data-level="3">
-                 <div class="title">Level 3</div>
-                 <div class="description">+3 Fame/Link</div>
+               <div class="option-card theater-level-btn" data-level="3" style="flex: 1 1 90px; min-width: 90px; padding: 12px 8px;">
+                 <div class="title" style="font-size: 0.9rem;">Level 3</div>
+                 <div class="description" style="font-size: 0.75rem;">+3 Fame/Link</div>
                </div>
              </div>
            </div>
            
-           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+           <div style="display: flex; flex-direction: column; gap: 15px;">
              <div>
                <p style="margin-bottom: 10px;">⭐ Links created</p>
-               <div style="display: flex; gap: 8px;">
-                 <button class="btn theater-links-btn" data-links="0">0</button>
-                 <button class="btn theater-links-btn btn-selected" data-links="1">1</button>
-                 <button class="btn theater-links-btn" data-links="2">2</button>
-                 <button class="btn theater-links-btn" data-links="3">3</button>
+               <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                 <button class="btn theater-links-btn" data-links="0" style="min-width: 44px; flex: 1;">0</button>
+                 <button class="btn theater-links-btn btn-selected" data-links="1" style="min-width: 44px; flex: 1;">1</button>
+                 <button class="btn theater-links-btn" data-links="2" style="min-width: 44px; flex: 1;">2</button>
+                 <button class="btn theater-links-btn" data-links="3" style="min-width: 44px; flex: 1;">3</button>
                </div>
              </div>
              <div>
                <p style="margin-bottom: 10px;">💎 Shard-space links</p>
-               <div style="display: flex; gap: 8px;">
-                 <button class="btn theater-shards-btn btn-selected" data-shards="0">0</button>
-                 <button class="btn theater-shards-btn" data-shards="1">1</button>
-                 <button class="btn theater-shards-btn" data-shards="2">2</button>
-                 <button class="btn theater-shards-btn" data-shards="3">3</button>
+               <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                 <button class="btn theater-shards-btn btn-selected" data-shards="0" style="min-width: 44px; flex: 1;">0</button>
+                 <button class="btn theater-shards-btn" data-shards="1" style="min-width: 44px; flex: 1;">1</button>
+                 <button class="btn theater-shards-btn" data-shards="2" style="min-width: 44px; flex: 1;">2</button>
+                 <button class="btn theater-shards-btn" data-shards="3" style="min-width: 44px; flex: 1;">3</button>
                </div>
              </div>
            </div>
@@ -7795,9 +7795,12 @@
       else if (currentTurn <= 6) bannerCount = 2;
       else bannerCount = 1;
       
-      // Coin discard amount
+      // Coin discard amount (only show if coins > 0)
       const coinDiscard = coins <= 9 ? `all ${coins}` : '9';
       const newCoinTotal = coins <= 9 ? 0 : coins - 9;
+      const coinDiscardAction = coins > 0 
+        ? boardAction(`Discard <strong>${coinDiscard} Coin${coinDiscard === '1' ? '' : 's'}</strong> from Heir (${coins} → ${newCoinTotal})`)
+        : '';
       
       // Prophecy reminder
       const prophecyReminder = getHeirProphecyReminderHtml('heir-academy');
@@ -7822,7 +7825,7 @@
            
            ${boardAction('Place a random tile from the selected stack')}
            ${boardAction(`Place <strong>${bannerCount} Banner${bannerCount !== 1 ? 's' : ''}</strong> in Heir's color`)}
-           ${boardAction(`Discard <strong>${coinDiscard} Coin${coinDiscard === '1' ? '' : 's'}</strong> from Heir (${coins} → ${newCoinTotal})`)}
+           ${coinDiscardAction}
            ${geertShardAction}
            
            <p style="margin-top: 15px;"><strong>Which Fame Threshold space was selected?</strong></p>
@@ -7852,7 +7855,7 @@
            
            ${boardAction('Place a random tile from the selected stack')}
            ${boardAction(`Place <strong>${bannerCount} Banner${bannerCount !== 1 ? 's' : ''}</strong> in Heir's color`)}
-           ${boardAction(`Discard <strong>${coinDiscard} Coin${coinDiscard === '1' ? '' : 's'}</strong> from Heir (${coins} → ${newCoinTotal})`)}
+           ${coinDiscardAction}
            ${geertShardAction}
            
            <p style="margin-top: 15px;"><strong>${gameState.pendingAcademy.actionsRemaining}</strong> action${gameState.pendingAcademy.actionsRemaining !== 1 ? 's' : ''} remaining.</p>`,
@@ -7957,7 +7960,7 @@
            <p style="color: var(--text-secondary); font-size: 0.9rem;">The Heir immediately receives the Classroom's Yield (check tile modifiers).</p>
            
            <div style="background: var(--bg-card); padding: 15px; border-radius: 8px; margin: 15px 0;">
-             <div class="stepper-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; text-align: center;">
+             <div class="stepper-grid" style="text-align: center;">
                <div>
                  <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 8px;">Fame ★</label>
                  ${createStepper('p32-fame', 0)}
@@ -9632,8 +9635,7 @@
          
          <div style="background: var(--exception-bg); border-left: 3px solid var(--exception); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--exception); font-weight: 600;">⚠️ NOTE:</span> The Heir's Trick markers are <strong>NOT removed</strong> from Theater or the Trick. The Heir can continue performing these Tricks.</div>
          
-         <p style="margin-top: 15px;"><strong>Does the Heir have any Tricks in Classrooms?</strong></p>
-         <p style="color: var(--text-secondary); font-size: 0.9rem;">Check the Academy board for Heir's Academy markers in Classroom slots.</p>`,
+         <p style="margin-top: 15px;"><strong>Does the Heir have any Tricks in Classrooms?</strong></p>`,
         [
           { text: 'Yes — Enter Yields', action: () => showClassroomYieldInput() },
           { text: 'No — Skip to End Turn', action: () => {
@@ -9670,7 +9672,7 @@
          ${prophecyReminder}
          
          <div style="background: var(--bg-card); padding: 15px; border-radius: 8px; margin: 15px 0;">
-           <div class="stepper-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; text-align: center;">
+           <div class="stepper-grid" style="text-align: center;">
              <div>
                <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 8px;">Fame ★</label>
                ${createStepper('classroom-fame', 0)}
@@ -9795,7 +9797,7 @@
          <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 15px;">This Trick's Yield is already included in your total. Enter it again to double it.</p>
          
          <div style="background: var(--bg-card); padding: 15px; border-radius: 8px; margin: 15px 0;">
-           <div class="stepper-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; text-align: center;">
+           <div class="stepper-grid" style="text-align: center;">
              <div>
                <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 8px;">Fame ★</label>
                ${createStepper('p34-fame', 0)}
