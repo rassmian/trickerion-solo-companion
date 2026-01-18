@@ -1135,7 +1135,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.14.6-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.14.13-beta</p>
       <button class="restart-btn hidden" id="restart-btn">↺ New Game</button>
     </header>
 
@@ -1293,7 +1293,7 @@
                   </ol>
                 </div>
                 
-                <div id="prophecy-setup-info" style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 12px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ PROPHECY SETUP:</span> Remove these 3 tokens, shuffle remaining 24, draw 3 to Pending slots. No Active Prophecy on Turn 1.</div>
+                <div id="prophecy-setup-info" style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 12px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ PROPHECY SETUP:</span> <span id="prophecy-setup-text">Remove these 3 tokens, shuffle remaining 24, draw 3 to Pending slots. No Active Prophecy on Turn 1.</span></div>
                 
                 <div id="prophecy-removal-icons" style="display: flex; justify-content: center; gap: 15px; margin: 10px 0 20px 0; flex-wrap: wrap;">
                   <div style="text-align: center;">
@@ -1310,9 +1310,36 @@
                   </div>
                   <div id="p31-removal-icon" class="hidden" style="text-align: center;">
                     <img src="assets/images/prophecies/p31.png" alt="Skip Assignment" style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--danger);">
-                    <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 3px;">Skip Assign (Academy)</div>
+                    <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 3px;">Skip Assign</div>
+                    <div style="font-size: 0.55rem; color: var(--danger);">(Academy)</div>
                   </div>
                 </div>
+                
+                <!-- Academy random prophecy removal (shown when Academy enabled) -->
+                <div id="quick-academy-prophecy-section" class="hidden">
+                  <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Also remove these 3 randomly selected prophecies (Academy):</span></div>
+                  
+                  <div id="quick-academy-random-prophecies" style="display: flex; justify-content: center; gap: 15px; margin: 10px 0; flex-wrap: wrap;">
+                    <!-- Populated by updateQuickSetupProphecyRemoval() -->
+                  </div>
+                  
+                  <div style="text-align: center; margin: 10px 0 20px 0;">
+                    <button class="btn-randomize" onclick="selectRandomPropheciesToRemove()">🎲 Re-randomize</button>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Academy Board Setup (shown when Academy enabled) -->
+              <div id="quick-academy-board-setup" class="hidden" style="margin-top: 20px;">
+                <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place <strong>Academy board</strong> (2-player side) left of main board</span></div>
+                
+                <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Cover slots A & B with Closed Room tiles (4 slots open)</span></div>
+                
+                <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Open Room tokens on Turn IV and Turn VI</span></div>
+                
+                <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Create 6 tile stacks (Practice/Classroom × Fame 1/16/36)</span></div>
+                
+                <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Shuffle Secrets, draw 2 to Academy board slots</span></div>
               </div>
             </div>
             
@@ -1366,12 +1393,53 @@
             
             <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Shuffle each Special Assignment deck by location and place face-down on the Dark Alley slots</span></div>
             
+            <div id="academy-sa-deck-instruction" class="hidden" style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Shuffle the 14 <strong>Academy</strong> Special Assignment cards and place the deck <strong>face-up</strong> next to the other SA decks (Academy)</span></div>
+            
             <div id="dot-sa-note" style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ NOTE:</span> <span id="dot-sa-note-text">Remove Academy and Dawn of Technology Special Assignment cards</span></div>
             
             <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place the Trickerion Stone token on space I of the Turn Counter track</span></div>
             
             <div class="setup-nav">
               <button class="btn" onclick="showSetupPage(1)">← Back</button>
+              <button class="btn" onclick="continueFromBoardSetup()">Continue →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- PAGE: Academy Setup (only shown when Academy expansion enabled) -->
+        <div class="setup-page hidden" id="setup-page-academy">
+          <div class="setup-section">
+            <h2 style="color: var(--amber); margin-bottom: 20px;">📋 Academy Board Setup</h2>
+            
+            <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place the <strong>Academy board</strong> to the left of the Main Game Board (use the <strong>2-player side</strong> with 8 room slots)</span></div>
+            
+            <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Cover the 4 slots marked <strong>"A"</strong> and <strong>"B"</strong> with Closed Room tiles (4 slots remain open)</span></div>
+            
+            <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place <strong>Open Room tokens</strong> on the Turn Counter at <strong>Turn IV</strong> and <strong>Turn VI</strong></span></div>
+            
+            <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Separate <strong>Practice Room</strong> and <strong>Classroom</strong> tiles by type, then by Fame Threshold (1, 16, 36) — create <strong>6 face-down stacks</strong> near the Academy board</span></div>
+            
+            <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Shuffle all <strong>Secret tiles</strong> face-down, draw 2 and place on the indicated Academy board slots</span></div>
+            
+            <!-- Prophecy Removal Section -->
+            <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--border);">
+              <h3 style="color: var(--prophecy); margin-bottom: 15px;">🔮 Prophecy Removal</h3>
+              
+              <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Remove these prophecy tokens from the game:</span></div>
+              
+              <div id="academy-prophecy-removal" style="display: flex; justify-content: center; gap: 15px; margin: 15px 0; flex-wrap: wrap;">
+                <!-- Populated by selectRandomPropheciesToRemove() -->
+              </div>
+              
+              <div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ NOTE:</span> <span style="color: var(--text-primary);">The remaining <strong>6 Academy prophecies</strong> are now part of the pool (27 prophecies total: 21 base + 6 Academy)</span></div>
+              
+              <div style="text-align: center; margin: 15px 0;">
+                <button class="btn-randomize" onclick="selectRandomPropheciesToRemove()">🎲 Re-randomize</button>
+              </div>
+            </div>
+            
+            <div class="setup-nav">
+              <button class="btn" onclick="showSetupPage(2)">← Back</button>
               <button class="btn" onclick="showSetupPage(3)">Continue →</button>
             </div>
           </div>
@@ -1632,7 +1700,7 @@
               <!-- Populated by JavaScript -->
             </div>
             
-            <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place the Heir's Fame marker on <strong>5 Fame</strong></span></div>
+            <div id="heir-fame-board-action" style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place the Heir's Fame marker on <strong id="heir-fame-value">5</strong> Fame</span></div>
             
             <div id="dot-shard-board-action" class="hidden" style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Give the Heir <strong>1 Shard</strong> (Dawn of Technology)</span></div>
             
@@ -1697,6 +1765,19 @@
               <div id="full-p31-removal-icon" class="hidden" style="text-align: center;">
                 <img src="assets/images/prophecies/p31.png" alt="Skip Assignment" style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--danger);">
                 <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px;">Skip Assignment<br>(Academy)</div>
+              </div>
+            </div>
+            
+            <!-- Academy random prophecy removal (shown when Academy enabled) -->
+            <div id="full-academy-prophecy-section" class="hidden">
+              <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Also remove these 3 randomly selected prophecies (Academy):</span></div>
+              
+              <div id="full-academy-random-prophecies" style="display: flex; justify-content: center; gap: 20px; margin: 15px 0; flex-wrap: wrap;">
+                <!-- Populated by updateFullSetupProphecyRemoval() -->
+              </div>
+              
+              <div style="text-align: center; margin: 10px 0;">
+                <button class="btn-randomize" onclick="selectRandomPropheciesToRemove()">🎲 Re-randomize</button>
               </div>
             </div>
             
@@ -2869,6 +2950,7 @@
       
       // Prophecy system
       activeProphecy: null, // Set at start of Turn 2+ after dice roll or Dark Alley rotation
+      removedProphecies: [], // Academy: 3 random base prophecies to remove (set on Academy setup page)
       
       // Performance phase tracking
       performanceOrder: null, // 'heir-first' or 'player-first', set during Performance phase
@@ -2882,7 +2964,7 @@
         characters: [], // ['magician', 'protege', 'engineer', 'apprentice', ...]
         tricks: [], // [{ ...trickData, markers: X }, ...]
         shoppingList: [], // ['Metal', 'Wood', ...]
-        specialAssignments: { theater: 0, downtown: 0, market: 0, workshop: 0 },
+        specialAssignments: { theater: 0, downtown: 0, market: 0, workshop: 0, academy: 0 },
         pendingCharacters: [], // Characters hired this turn, join at end of turn
         // Academy expansion state
         secrets: 0,       // Secrets learned (0-2)
@@ -3128,10 +3210,10 @@
           ${boardAction(`Place one of each component type in the Heir's Shopping List box: ${shoppingListDisplay}`)}
         </li>
         <li>Set the Heir's starting Fame
-          ${boardAction('Place the Heir\'s Fame marker on <strong>5</strong> on the Fame track')}
+          ${boardAction(`Place the Heir's Fame marker on <strong>${gameState.expansions.academy ? '3' : '5'}</strong> on the Fame track`)}
         </li>
         <li>You are first in Initiative Order (start with 10 Coins)</li>
-        <li>The Heir starts with <strong>5 Fame</strong>, 0 Coins and <strong>${gameState.expansions.dawn ? '1 Shard' : '0 Shards'}</strong>
+        <li>The Heir starts with <strong>${gameState.expansions.academy ? '3' : '5'} Fame</strong>, 0 Coins and <strong>${gameState.expansions.dawn ? '1 Shard' : '0 Shards'}</strong>
           ${gameState.expansions.dawn ? boardAction('Give the Heir <strong>1 Shard</strong> (Dawn of Technology)') : ''}
         </li>
         <li>Remove certain Prophecies before setting up (see solo rulebook p.4, step 13)</li>
@@ -3171,6 +3253,104 @@
       
       // Scroll to top
       window.scrollTo(0, 0);
+    }
+    
+    // Navigate from Board Setup (page 2) - go to Academy page if enabled, else page 3
+    function continueFromBoardSetup() {
+      if (gameState.expansions.academy) {
+        // Initialize random prophecies if not already done
+        if (gameState.removedProphecies.length === 0) {
+          selectRandomPropheciesToRemove();
+        }
+        showSetupPage('academy');
+      } else {
+        showSetupPage(3);
+      }
+    }
+    
+    // Select 3 random base prophecies to remove (Academy expansion)
+    function selectRandomPropheciesToRemove() {
+      // Get all base prophecies that are eligible for random removal
+      // Exclude p15, p23, p24 (already removed in solo mode)
+      const eligibleProphecies = [
+        ...PROPHECIES.heirIgnores,
+        ...PROPHECIES.affectBoth
+      ];
+      
+      // Shuffle and pick 3
+      const shuffled = [...eligibleProphecies].sort(() => Math.random() - 0.5);
+      const selected = shuffled.slice(0, 3);
+      
+      // Store in gameState
+      gameState.removedProphecies = selected;
+      
+      // Update all displays
+      updateAcademyProphecyRemovalDisplay();
+      updateQuickSetupProphecyRemoval();
+      updateFullSetupProphecyRemoval();
+    }
+    
+    // Update the Academy setup page prophecy removal display
+    function updateAcademyProphecyRemovalDisplay() {
+      const container = $('#academy-prophecy-removal');
+      if (!container) return;
+      
+      // Always show p31 (Skip Assignment) first - always removed with Academy
+      let html = `
+        <div style="text-align: center;">
+          <img src="assets/images/prophecies/p31.png" alt="Skip Assignment" style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--danger);">
+          <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 3px;">Skip Assignment</div>
+          <div style="font-size: 0.55rem; color: var(--danger);">(Academy)</div>
+        </div>
+      `;
+      
+      // Add the 3 random base prophecies
+      gameState.removedProphecies.forEach(p => {
+        html += `
+          <div style="text-align: center;">
+            <img src="assets/images/prophecies/${p.icon}" alt="${p.name}" style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--danger);">
+            <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 3px;">${p.name}</div>
+          </div>
+        `;
+      });
+      
+      container.innerHTML = html;
+    }
+    
+    // Update Quick Setup prophecy removal display for Academy
+    function updateQuickSetupProphecyRemoval() {
+      const container = $('#quick-academy-random-prophecies');
+      if (!container || !gameState.expansions.academy) return;
+      
+      let html = '';
+      gameState.removedProphecies.forEach(p => {
+        html += `
+          <div style="text-align: center;">
+            <img src="assets/images/prophecies/${p.icon}" alt="${p.name}" style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--danger);">
+            <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 3px;">${p.name}</div>
+          </div>
+        `;
+      });
+      
+      container.innerHTML = html;
+    }
+    
+    // Update Full Setup page 13 prophecy removal display for Academy
+    function updateFullSetupProphecyRemoval() {
+      const container = $('#full-academy-random-prophecies');
+      if (!container || !gameState.expansions.academy) return;
+      
+      let html = '';
+      gameState.removedProphecies.forEach(p => {
+        html += `
+          <div style="text-align: center;">
+            <img src="assets/images/prophecies/${p.icon}" alt="${p.name}" style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--danger);">
+            <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px;">${p.name}</div>
+          </div>
+        `;
+      });
+      
+      container.innerHTML = html;
     }
     
     // Update difficulty descriptions based on Academy expansion
@@ -3221,31 +3401,52 @@
     function updateProphecyRemovalDisplay() {
       const hasAcademy = gameState.expansions.academy;
       
-      // Update Quick Setup prophecy info (page 0)
-      const prophecyInfo = $('#prophecy-setup-info');
+      // Update Quick Setup prophecy info text
+      const prophecyInfoText = $('#prophecy-setup-text');
       const p31Icon = $('#p31-removal-icon');
+      const academyProphecySection = $('#quick-academy-prophecy-section');
+      const academyBoardSetup = $('#quick-academy-board-setup');
       
-      if (hasAcademy) {
-        if (prophecyInfo) prophecyInfo.innerHTML = `<span style="color: var(--info); font-weight: 600;">ℹ️ PROPHECY SETUP:</span> Remove these <strong>4</strong> tokens (includes p31 for Academy), shuffle remaining 30 Academy prophecies, draw 3 to Pending slots. No Active Prophecy on Turn 1.`;
-        if (p31Icon) p31Icon.classList.remove('hidden');
-      } else {
-        if (prophecyInfo) prophecyInfo.innerHTML = `<span style="color: var(--info); font-weight: 600;">ℹ️ PROPHECY SETUP:</span> Remove these 3 tokens, shuffle remaining 24, draw 3 to Pending slots. No Active Prophecy on Turn 1.`;
-        if (p31Icon) p31Icon.classList.add('hidden');
-      }
-      
-      // Update Full Setup page 13 prophecy elements
+      // Full Setup page 13 elements
       const fullRemoveInstruction = $('#full-prophecy-remove-instruction');
       const fullP31Icon = $('#full-p31-removal-icon');
       const fullShuffleInstruction = $('#full-prophecy-shuffle-instruction');
+      const fullAcademyProphecySection = $('#full-academy-prophecy-section');
       
       if (hasAcademy) {
+        // With Academy: remove 7 total (3 base + p31 + 3 random), shuffle 27
+        if (prophecyInfoText) prophecyInfoText.textContent = 'Remove these 4 tokens (plus 3 random below), shuffle remaining 27, draw 3 to Pending slots. No Active Prophecy on Turn 1.';
+        if (p31Icon) p31Icon.classList.remove('hidden');
+        if (academyProphecySection) academyProphecySection.classList.remove('hidden');
+        if (academyBoardSetup) academyBoardSetup.classList.remove('hidden');
+        
+        // Full Setup page 13
         if (fullRemoveInstruction) fullRemoveInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Remove these <strong>4</strong> Prophecy tokens from the game (includes p31 for Academy):</span>`;
         if (fullP31Icon) fullP31Icon.classList.remove('hidden');
-        if (fullShuffleInstruction) fullShuffleInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Shuffle the remaining <strong>30</strong> Prophecy tokens face-down (Academy adds 6 new prophecies)</span>`;
+        if (fullAcademyProphecySection) fullAcademyProphecySection.classList.remove('hidden');
+        if (fullShuffleInstruction) fullShuffleInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Shuffle the remaining <strong>27</strong> Prophecy tokens face-down (Academy adds 6 new prophecies, 3 removed randomly)</span>`;
+        
+        // Initialize random prophecies if not already done
+        if (gameState.removedProphecies.length === 0) {
+          selectRandomPropheciesToRemove();
+        } else {
+          updateQuickSetupProphecyRemoval();
+          updateFullSetupProphecyRemoval();
+        }
       } else {
+        if (prophecyInfoText) prophecyInfoText.textContent = 'Remove these 3 tokens, shuffle remaining 24, draw 3 to Pending slots. No Active Prophecy on Turn 1.';
+        if (p31Icon) p31Icon.classList.add('hidden');
+        if (academyProphecySection) academyProphecySection.classList.add('hidden');
+        if (academyBoardSetup) academyBoardSetup.classList.add('hidden');
+        
+        // Full Setup page 13
         if (fullRemoveInstruction) fullRemoveInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Remove these 3 Prophecy tokens from the game:</span>`;
         if (fullP31Icon) fullP31Icon.classList.add('hidden');
+        if (fullAcademyProphecySection) fullAcademyProphecySection.classList.add('hidden');
         if (fullShuffleInstruction) fullShuffleInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Shuffle the remaining 24 Prophecy tokens face-down</span>`;
+        
+        // Clear removed prophecies when Academy is disabled
+        gameState.removedProphecies = [];
       }
     }
     
@@ -3284,6 +3485,16 @@
             dotSANote.textContent = 'Remove Academy and Dawn of Technology Special Assignment cards';
           }
         }
+        
+        // Academy SA deck instruction
+        const academySAInstruction = $('#academy-sa-deck-instruction');
+        if (academySAInstruction) {
+          if (hasAcademy) {
+            academySAInstruction.classList.remove('hidden');
+          } else {
+            academySAInstruction.classList.add('hidden');
+          }
+        }
       }
       
       if (pageNum === 5) {
@@ -3295,6 +3506,12 @@
           } else {
             heirBoardInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place the Heir's board (5-character side) near your play area</span>`;
           }
+        }
+        
+        // Update Heir starting Fame based on Academy expansion
+        const heirFameValue = $('#heir-fame-value');
+        if (heirFameValue) {
+          heirFameValue.textContent = gameState.expansions.academy ? '3' : '5';
         }
       }
       
@@ -3720,6 +3937,7 @@
       // Academy-specific content
       const playerStartingFame = gameState.expansions.academy ? 3 : 5;
       const playerStartingCoins = gameState.expansions.academy ? 12 : 10;
+      const heirStartingFame = gameState.expansions.academy ? 3 : 5;
       const academyPlayerSetupNote = gameState.expansions.academy
         ? infoBox(`You start with <strong>${playerStartingFame} Fame</strong>, <strong>${playerStartingCoins} Coins</strong>, and a <strong>Protégé</strong> (instead of 5 Fame and 10 Coins) (Academy)`, 'ACADEMY')
         : '';
@@ -3738,7 +3956,7 @@
           <div style="color: var(--text-secondary); font-size: 0.85rem;">${characterNames}</div>
         </div>
         
-        ${boardAction(`Heir starts with <strong>5 Fame</strong>, 0 Coins, <strong>${heirStartingShards}</strong>`)}
+        ${boardAction(`Heir starts with <strong>${heirStartingFame} Fame</strong>, 0 Coins, <strong>${heirStartingShards}</strong>`)}
         ${dawnShardAction}
         ${challengeRuleNote}
         
@@ -4335,6 +4553,7 @@
       if (assignments.downtown > 0) html += `<span class="assignment-badge" style="background: rgba(201, 184, 74, 0.2); border-color: #C9B84A;">Downtown: <span class="count">${assignments.downtown}</span></span>`;
       if (assignments.market > 0) html += `<span class="assignment-badge" style="background: rgba(196, 128, 64, 0.2); border-color: #C48040;">Market: <span class="count">${assignments.market}</span></span>`;
       if (assignments.workshop > 0) html += `<span class="assignment-badge" style="background: rgba(200, 112, 96, 0.2); border-color: #C87060;">Workshop: <span class="count">${assignments.workshop}</span></span>`;
+      if (assignments.academy > 0) html += `<span class="assignment-badge" style="background: rgba(74, 144, 201, 0.2); border-color: #4A90C9;">Academy: <span class="count">${assignments.academy}</span></span>`;
       
       container.innerHTML = html;
     }
@@ -4698,7 +4917,7 @@
       // Initialize other state
       gameState.currentTurn = 1;
       gameState.currentPhaseIndex = 0;
-      gameState.heir.fame = 5;
+      gameState.heir.fame = gameState.expansions.academy ? 3 : 5; // Academy: both players start at 3 Fame
       gameState.heir.coins = 0;
       gameState.heir.shards = gameState.expansions.dawn ? 1 : 0; // DoT: Heir starts with 1 Shard
       gameState.heir.stance = null;
@@ -5243,7 +5462,7 @@
     function restartForTesting() {
       gameState.currentTurn = 1;
       gameState.currentPhaseIndex = 0;
-      gameState.heir.fame = 5; // Reset to starting fame
+      gameState.heir.fame = gameState.expansions.academy ? 3 : 5; // Reset to starting fame
       gameState.heir.stance = 'busy';
       
       // Reset Academy classroom phase flag
@@ -6812,8 +7031,7 @@
         drawCounts[color] = (drawCounts[color] || 0) + 1;
       });
       
-      // Build visual pile display - order matches physical board: Downtown, Market Row, Workshop, Theater
-      // TODO: Add Academy pile when implementing Academy expansion
+      // Build visual pile display - order matches physical board: Downtown, Market Row, Workshop, Theater (+ Academy)
       const piles = [
         { key: 'downtown', icon: 'assets/images/locations/downtown.png', name: 'Downtown' },
         { key: 'market', icon: 'assets/images/locations/market_row.png', name: 'Market Row' },
@@ -6821,15 +7039,25 @@
         { key: 'theater', icon: 'assets/images/locations/theatre.png', name: 'Theater' }
       ];
       
+      // Add Academy pile if expansion enabled
+      if (gameState.expansions.academy) {
+        piles.push({ key: 'academy', icon: 'assets/images/locations/academy.png', name: 'Academy' });
+      }
+      
+      // Reduce pile size when Academy enabled to fit 5 on mobile
+      const pileWidth = gameState.expansions.academy ? 58 : 70;
+      const pileHeight = gameState.expansions.academy ? 78 : 95;
+      const iconSize = gameState.expansions.academy ? 32 : 40;
+      
       const pilesHtml = `
-        <div style="display: flex; justify-content: center; gap: 10px; margin: 20px 0; flex-wrap: wrap;">
+        <div style="display: flex; justify-content: center; gap: ${gameState.expansions.academy ? '6px' : '10px'}; margin: 20px 0;">
           ${piles.map(pile => {
             const isDrawing = drawCounts[pile.key] > 0;
             const count = drawCounts[pile.key] || 0;
             
             return `<div style="
-              width: 70px;
-              height: 95px;
+              width: ${pileWidth}px;
+              height: ${pileHeight}px;
               background: ${isDrawing ? 'rgba(212, 168, 71, 0.15)' : 'transparent'};
               border: 2px ${isDrawing ? 'solid var(--amber)' : 'dashed var(--border)'};
               border-radius: 6px;
@@ -6837,19 +7065,22 @@
               flex-direction: column;
               align-items: center;
               justify-content: center;
-              gap: 4px;
+              gap: 2px;
               ${isDrawing ? 'box-shadow: 0 0 12px rgba(212, 168, 71, 0.3);' : 'opacity: 0.5;'}
             ">
-              <img src="${pile.icon}" alt="${pile.name}" style="width: 40px; height: 40px; object-fit: contain;">
-              <span style="font-size: 0.7rem; color: ${isDrawing ? 'var(--amber)' : 'var(--text-muted)'}; text-align: center; line-height: 1.2;">${pile.name}</span>
-              ${isDrawing ? `<span style="font-size: 0.85rem; font-weight: 600; color: var(--amber);">×${count}</span>` : ''}
+              <img src="${pile.icon}" alt="${pile.name}" style="width: ${iconSize}px; height: ${iconSize}px; object-fit: contain;">
+              <span style="font-size: 0.65rem; color: ${isDrawing ? 'var(--amber)' : 'var(--text-muted)'}; text-align: center; line-height: 1.2;">${pile.name}</span>
+              ${isDrawing ? `<span style="font-size: 0.8rem; font-weight: 600; color: var(--amber);">×${count}</span>` : ''}
             </div>`;
           }).join('')}
         </div>`;
       
       // Show current counts
       const currentCounts = gameState.heir.specialAssignments;
-      const countsDisplay = `Downtown: ${currentCounts.downtown}, Market: ${currentCounts.market}, Workshop: ${currentCounts.workshop}, Theater: ${currentCounts.theater}`;
+      let countsDisplay = `Downtown: ${currentCounts.downtown}, Market: ${currentCounts.market}, Workshop: ${currentCounts.workshop}, Theater: ${currentCounts.theater}`;
+      if (gameState.expansions.academy) {
+        countsDisplay += `, Academy: ${currentCounts.academy}`;
+      }
       
       setActionContent(
         `Turn ${gameState.currentTurn} — Dark Alley (${actionPoints} AP)`,
@@ -6870,8 +7101,14 @@
     }
     
     function calculateSACardsToDraw(count) {
-      // Priority order (no Academy in base game)
-      const priority = ['theater', 'downtown', 'market', 'workshop'];
+      // Priority order: Theater → Downtown → Academy → Market Row → Workshop
+      // (Academy only included when expansion enabled)
+      let priority = ['theater', 'downtown'];
+      if (gameState.expansions.academy) {
+        priority.push('academy');
+      }
+      priority.push('market', 'workshop');
+      
       const cardsToDraw = [];
       
       // Create a working copy of current counts
@@ -7713,6 +7950,7 @@
       gameState.heir.secrets++;
       gameState.heir.protegeAP = 1 + gameState.heir.secrets; // 1 secret = 2 AP, 2 secrets = 3 AP
       gameState.pendingAcademy.actionsRemaining--;
+      updateGameDisplay(); // Update sidebar immediately
       
       // Determine disk action text
       let diskAction = '';
@@ -7861,6 +8099,11 @@
            <p style="margin-top: 15px;"><strong>${gameState.pendingAcademy.actionsRemaining}</strong> action${gameState.pendingAcademy.actionsRemaining !== 1 ? 's' : ''} remaining.</p>`,
           [
             { text: 'Continue', action: () => {
+              // Apply coin discard (was only shown as board action, not applied to state)
+              const coinsToDiscard = gameState.heir.coins <= 9 ? gameState.heir.coins : 9;
+              gameState.heir.coins -= coinsToDiscard;
+              updateGameDisplay();
+              
               gameState.pendingAcademy.currentStep = 3;
               academyStep3And4TeachPractice();
             }}
@@ -7893,6 +8136,11 @@
          <p style="margin-top: 15px;"><strong>${gameState.pendingAcademy.actionsRemaining}</strong> action${gameState.pendingAcademy.actionsRemaining !== 1 ? 's' : ''} remaining.</p>`,
         [
           { text: 'Continue', action: () => {
+            // Apply coin discard (was only shown as board action, not applied to state)
+            const coinsToDiscard = gameState.heir.coins <= 9 ? gameState.heir.coins : 9;
+            gameState.heir.coins -= coinsToDiscard;
+            updateGameDisplay();
+            
             gameState.pendingAcademy.currentStep = 3;
             academyStep3And4TeachPractice();
           }}
@@ -11575,7 +11823,7 @@
           characters: [],
           tricks: [],
           shoppingList: [],
-          specialAssignments: { theater: 0, downtown: 0, market: 0, workshop: 0 },
+          specialAssignments: { theater: 0, downtown: 0, market: 0, workshop: 0, academy: 0 },
           pendingCharacters: [],
           magicianAtTheaterThisTurn: false,
           nonMagiciansAtTheaterThisTurn: 0
