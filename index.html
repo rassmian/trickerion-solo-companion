@@ -689,6 +689,20 @@
       flex-wrap: wrap;
     }
 
+    /* Location selection 2-column grid for Place Characters */
+    .location-button-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    
+    .location-grid-btn {
+      width: 100%;
+      padding: 12px 8px;
+      font-size: 0.9rem;
+    }
+
     /* Heir's tricks display */
     .tricks-list {
       display: flex;
@@ -1135,7 +1149,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.14.14-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.14.15-beta</p>
       <button class="restart-btn hidden" id="restart-btn">↺ New Game</button>
     </header>
 
@@ -1420,23 +1434,6 @@
             <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Separate <strong>Practice Room</strong> and <strong>Classroom</strong> tiles by type, then by Fame Threshold (1, 16, 36) — create <strong>6 face-down stacks</strong> near the Academy board</span></div>
             
             <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Shuffle all <strong>Secret tiles</strong> face-down, draw 2 and place on the indicated Academy board slots</span></div>
-            
-            <!-- Prophecy Removal Section -->
-            <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--border);">
-              <h3 style="color: var(--prophecy); margin-bottom: 15px;">🔮 Prophecy Removal</h3>
-              
-              <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Remove these prophecy tokens from the game:</span></div>
-              
-              <div id="academy-prophecy-removal" style="display: flex; justify-content: center; gap: 15px; margin: 15px 0; flex-wrap: wrap;">
-                <!-- Populated by selectRandomPropheciesToRemove() -->
-              </div>
-              
-              <div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ NOTE:</span> <span style="color: var(--text-primary);">The remaining <strong>6 Academy prophecies</strong> are now part of the pool (27 prophecies total: 21 base + 6 Academy)</span></div>
-              
-              <div style="text-align: center; margin: 15px 0;">
-                <button class="btn-randomize" onclick="selectRandomPropheciesToRemove()">🎲 Re-randomize</button>
-              </div>
-            </div>
             
             <div class="setup-nav">
               <button class="btn" onclick="showSetupPage(2)">← Back</button>
@@ -2008,6 +2005,7 @@
     const LOCATION_COLORS = {
       theater:   { border: '#983030', bg: 'rgba(152, 48, 48, 0.2)' },
       downtown:  { border: '#C9B84A', bg: 'rgba(201, 184, 74, 0.2)' },
+      academy:   { border: '#4A90C9', bg: 'rgba(74, 144, 201, 0.2)' },
       market:    { border: '#C48040', bg: 'rgba(196, 128, 64, 0.2)' },
       workshop:  { border: '#C87060', bg: 'rgba(200, 112, 96, 0.2)' },
       darkAlley: { border: '#5A5A5A', bg: 'rgba(90, 90, 90, 0.2)' }
@@ -2215,11 +2213,16 @@
     // Helper to get all valid prophecies for solo play (excludes removed ones)
     // Now a function to dynamically include Academy prophecies when expansion is enabled
     const getValidProphecies = () => {
-      const base = [...PROPHECIES.heirIgnores, ...PROPHECIES.affectBoth];
+      let prophecies = [...PROPHECIES.heirIgnores, ...PROPHECIES.affectBoth];
       if (gameState.expansions?.academy) {
-        return [...base, ...PROPHECIES.academyHeirIgnores, ...PROPHECIES.academyAffectBoth];
+        prophecies = [...prophecies, ...PROPHECIES.academyHeirIgnores, ...PROPHECIES.academyAffectBoth];
       }
-      return base;
+      // Filter out randomly removed prophecies (Academy expansion)
+      if (gameState.removedProphecies?.length > 0) {
+        const removedIds = gameState.removedProphecies.map(p => p.id);
+        prophecies = prophecies.filter(p => !removedIds.includes(p.id));
+      }
+      return prophecies;
     };
     
     // Legacy constant for backward compatibility (used before game starts)
@@ -3285,36 +3288,8 @@
       gameState.removedProphecies = selected;
       
       // Update all displays
-      updateAcademyProphecyRemovalDisplay();
       updateQuickSetupProphecyRemoval();
       updateFullSetupProphecyRemoval();
-    }
-    
-    // Update the Academy setup page prophecy removal display
-    function updateAcademyProphecyRemovalDisplay() {
-      const container = $('#academy-prophecy-removal');
-      if (!container) return;
-      
-      // Always show p31 (Skip Assignment) first - always removed with Academy
-      let html = `
-        <div style="text-align: center;">
-          <img src="assets/images/prophecies/p31.png" alt="Skip Assignment" style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--danger);">
-          <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 3px;">Skip Assignment</div>
-          <div style="font-size: 0.55rem; color: var(--danger);">(Academy)</div>
-        </div>
-      `;
-      
-      // Add the 3 random base prophecies
-      gameState.removedProphecies.forEach(p => {
-        html += `
-          <div style="text-align: center;">
-            <img src="assets/images/prophecies/${p.icon}" alt="${p.name}" style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--danger);">
-            <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 3px;">${p.name}</div>
-          </div>
-        `;
-      });
-      
-      container.innerHTML = html;
     }
     
     // Update Quick Setup prophecy removal display for Academy
@@ -5935,20 +5910,21 @@
       const priorityHtml = getLocationPriorityHtml(stance);
       const hasAcademy = gameState.expansions.academy;
       
-      // Build location buttons - include Academy if expansion enabled
-      const locationButtons = [
-        { text: 'Downtown', action: () => showDowntownDiceInput() },
-        { text: 'Market Row', action: () => showMarketRowInput() },
-        { text: 'Dark Alley', action: () => showDarkAlleyInput() },
-        { text: 'Theater', action: () => showTheaterInput() }
+      // Build location buttons HTML in 2-column grid
+      const locations = [
+        { text: 'Downtown', action: 'showDowntownDiceInput' },
+        { text: 'Market Row', action: 'showMarketRowInput' },
+        { text: 'Dark Alley', action: 'showDarkAlleyInput' },
+        { text: 'Theater', action: 'showTheaterInput' }
       ];
       
       if (hasAcademy) {
-        // Insert Academy after Dark Alley
-        locationButtons.splice(3, 0, { text: 'Academy', action: () => showAcademyInput() });
+        locations.splice(2, 0, { text: 'Academy', action: 'showAcademyInput' });
       }
       
-      locationButtons.push({ text: 'Back', action: () => showContestedCheck() });
+      const locationButtonsHtml = locations.map(loc => 
+        `<button class="btn location-grid-btn" data-action="${loc.action}">${loc.text}</button>`
+      ).join('');
       
       setActionContent(
         `Turn ${gameState.currentTurn} — Place Characters`,
@@ -5957,9 +5933,27 @@
          <p style="margin-top: 10px;">If multiple locations are contested, use the Heir's priority list:</p>
          ${priorityHtml}
          
-         <p style="margin-top: 15px;"><strong>Which contested location is the Heir going to?</strong></p>`,
-        locationButtons
+         <p style="margin-top: 15px;"><strong>Which contested location is the Heir going to?</strong></p>
+         
+         <div class="location-button-grid">
+           ${locationButtonsHtml}
+         </div>`,
+        [{ text: 'Back', action: () => showContestedCheck() }]
       );
+      
+      // Attach event listeners to location buttons
+      setTimeout(() => {
+        $$('.location-grid-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const actionName = btn.dataset.action;
+            if (actionName === 'showDowntownDiceInput') showDowntownDiceInput();
+            else if (actionName === 'showMarketRowInput') showMarketRowInput();
+            else if (actionName === 'showDarkAlleyInput') showDarkAlleyInput();
+            else if (actionName === 'showTheaterInput') showTheaterInput();
+            else if (actionName === 'showAcademyInput') showAcademyInput();
+          });
+        });
+      }, 0);
     }
 
     function showSelectPriorityLocation() {
@@ -5968,21 +5962,23 @@
       const priorityHtml = getLocationPriorityHtml(stance);
       const hasAcademy = gameState.expansions.academy;
       
-      // Build location buttons - include Academy if expansion enabled
-      const locationButtons = [
-        { text: 'Downtown', action: () => showDowntownDiceInput() },
-        { text: 'Market Row', action: () => showMarketRowInput() },
-        { text: 'Dark Alley', action: () => showDarkAlleyInput() },
-        { text: 'Theater', action: () => showTheaterInput() },
-        { text: 'Workshop', action: () => showWorkshopActions() }
+      // Build location buttons HTML in 2-column grid
+      const locations = [
+        { text: 'Downtown', action: 'showDowntownDiceInput' },
+        { text: 'Market Row', action: 'showMarketRowInput' },
+        { text: 'Dark Alley', action: 'showDarkAlleyInput' },
+        { text: 'Theater', action: 'showTheaterInput' },
+        { text: 'Workshop', action: 'showWorkshopActions' }
       ];
       
       if (hasAcademy) {
-        // Insert Academy after Market Row (position 2 in the buttons array)
-        locationButtons.splice(2, 0, { text: 'Academy', action: () => showAcademyInput() });
+        // Insert Academy after Market Row (position 2)
+        locations.splice(2, 0, { text: 'Academy', action: 'showAcademyInput' });
       }
       
-      locationButtons.push({ text: 'Back', action: () => showContestedCheck() });
+      const locationButtonsHtml = locations.map(loc => 
+        `<button class="btn location-grid-btn" data-action="${loc.action}">${loc.text}</button>`
+      ).join('');
       
       setActionContent(
         `Turn ${gameState.currentTurn} — Place Characters`,
@@ -5990,12 +5986,30 @@
          
          ${priorityHtml}
          
-         <p style="margin-top: 15px;"><strong>Which location is the Heir going to?</strong></p>`,
-        locationButtons
+         <p style="margin-top: 15px;"><strong>Which location is the Heir going to?</strong></p>
+         
+         <div class="location-button-grid">
+           ${locationButtonsHtml}
+         </div>`,
+        [{ text: 'Back', action: () => showContestedCheck() }]
       );
       
-      // Add the End Heir Placements button after render
+      // Attach event listeners and add End Heir Placements button
       setTimeout(() => {
+        // Location button listeners
+        $$('.location-grid-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const actionName = btn.dataset.action;
+            if (actionName === 'showDowntownDiceInput') showDowntownDiceInput();
+            else if (actionName === 'showMarketRowInput') showMarketRowInput();
+            else if (actionName === 'showDarkAlleyInput') showDarkAlleyInput();
+            else if (actionName === 'showTheaterInput') showTheaterInput();
+            else if (actionName === 'showWorkshopActions') showWorkshopActions();
+            else if (actionName === 'showAcademyInput') showAcademyInput();
+          });
+        });
+        
+        // Add the End Heir Placements button
         const buttonsContainer = $('#action-buttons');
         if (buttonsContainer) {
           const endBtn = document.createElement('button');
@@ -10528,8 +10542,6 @@
          
          ${infoBox("The Heir receives the Yield of each Trick, <strong>minus 1 Coin and 1 Fame per Trick</strong>.")}
          
-         ${infoBox("<strong>Example:</strong> If Heir had 2 Tricks with yields of (3★, 2🪙) and (2★, 1🪙), total is 5★ and 3🪙, then subtract 2★ and 2🪙 = <strong>3★ Fame, 1🪙 Coin</strong>")}
-         
          <div style="background: var(--bg-card); padding: 15px; border-radius: 6px; margin: 15px 0;">
            <div class="stepper-grid">
              <div style="text-align: center;">
@@ -10622,6 +10634,7 @@
       let locationButtons = '';
       if (assignments.theater > 0) locationButtons += `<button class="btn sa-select-btn" data-color="theater" style="background: rgba(152, 48, 48, 0.2); border: 2px solid #983030;">Theater</button>`;
       if (assignments.downtown > 0) locationButtons += `<button class="btn sa-select-btn" data-color="downtown" style="background: rgba(201, 184, 74, 0.2); border: 2px solid #C9B84A;">Downtown</button>`;
+      if (assignments.academy > 0) locationButtons += `<button class="btn sa-select-btn" data-color="academy" style="background: rgba(74, 144, 201, 0.2); border: 2px solid #4A90C9;">Academy</button>`;
       if (assignments.market > 0) locationButtons += `<button class="btn sa-select-btn" data-color="market" style="background: rgba(196, 128, 64, 0.2); border: 2px solid #C48040;">Market</button>`;
       if (assignments.workshop > 0) locationButtons += `<button class="btn sa-select-btn" data-color="workshop" style="background: rgba(200, 112, 96, 0.2); border: 2px solid #C87060;">Workshop</button>`;
       
@@ -10635,6 +10648,7 @@
            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">
              ${assignments.theater > 0 ? `<span class="assignment-badge" style="background: rgba(152, 48, 48, 0.2); border: 1px solid #983030; padding: 4px 8px; border-radius: 4px;">Theater: ${assignments.theater}</span>` : ''}
              ${assignments.downtown > 0 ? `<span class="assignment-badge" style="background: rgba(201, 184, 74, 0.2); border: 1px solid #C9B84A; padding: 4px 8px; border-radius: 4px;">Downtown: ${assignments.downtown}</span>` : ''}
+             ${assignments.academy > 0 ? `<span class="assignment-badge" style="background: rgba(74, 144, 201, 0.2); border: 1px solid #4A90C9; padding: 4px 8px; border-radius: 4px;">Academy: ${assignments.academy}</span>` : ''}
              ${assignments.market > 0 ? `<span class="assignment-badge" style="background: rgba(196, 128, 64, 0.2); border: 1px solid #C48040; padding: 4px 8px; border-radius: 4px;">Market: ${assignments.market}</span>` : ''}
              ${assignments.workshop > 0 ? `<span class="assignment-badge" style="background: rgba(200, 112, 96, 0.2); border: 1px solid #C87060; padding: 4px 8px; border-radius: 4px;">Workshop: ${assignments.workshop}</span>` : ''}
            </div>
@@ -10732,6 +10746,21 @@
       // Move Trickerion Stone
       content += boardAction("Advance the Trickerion Stone token one step forward on the Turn Counter track");
       
+      // Academy: Open Room tiles reminder when advancing to Turn 4 or 6
+      if (gameState.expansions.academy && gameState.currentTurn === 3) {
+        content += `<div style="background: rgba(100, 149, 237, 0.1); border: 1px solid var(--info); padding: 10px; border-radius: 6px; margin: 12px 0;">
+          <p style="color: var(--info); font-weight: 600; margin-bottom: 8px;">📚 Academy: Open Rooms</p>
+          ${boardAction("Remove the <strong>Open Room token</strong> from Turn IV")}
+          ${boardAction("Remove <strong>2 Closed Room tiles</strong> from Academy slots marked <strong>\"A\"</strong>")}
+        </div>`;
+      } else if (gameState.expansions.academy && gameState.currentTurn === 5) {
+        content += `<div style="background: rgba(100, 149, 237, 0.1); border: 1px solid var(--info); padding: 10px; border-radius: 6px; margin: 12px 0;">
+          <p style="color: var(--info); font-weight: 600; margin-bottom: 8px;">📚 Academy: Open Rooms</p>
+          ${boardAction("Remove the <strong>Open Room token</strong> from Turn VI")}
+          ${boardAction("Remove <strong>2 Closed Room tiles</strong> from Academy slots marked <strong>\"B\"</strong>")}
+        </div>`;
+      }
+      
       const isLastTurn = gameState.currentTurn >= 7;
       const buttonText = isLastTurn ? 'End Game Scoring' : `Start Turn ${gameState.currentTurn + 1}`;
       
@@ -10777,6 +10806,7 @@
       let locationButtons = '';
       if (assignments.theater > 0) locationButtons += `<button class="btn sa-select-btn-full" data-color="theater" style="background: rgba(152, 48, 48, 0.2); border: 2px solid #983030;">Theater</button>`;
       if (assignments.downtown > 0) locationButtons += `<button class="btn sa-select-btn-full" data-color="downtown" style="background: rgba(201, 184, 74, 0.2); border: 2px solid #C9B84A;">Downtown</button>`;
+      if (assignments.academy > 0) locationButtons += `<button class="btn sa-select-btn-full" data-color="academy" style="background: rgba(74, 144, 201, 0.2); border: 2px solid #4A90C9;">Academy</button>`;
       if (assignments.market > 0) locationButtons += `<button class="btn sa-select-btn-full" data-color="market" style="background: rgba(196, 128, 64, 0.2); border: 2px solid #C48040;">Market</button>`;
       if (assignments.workshop > 0) locationButtons += `<button class="btn sa-select-btn-full" data-color="workshop" style="background: rgba(200, 112, 96, 0.2); border: 2px solid #C87060;">Workshop</button>`;
       
@@ -10790,6 +10820,7 @@
            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">
              ${assignments.theater > 0 ? `<span class="assignment-badge" style="background: rgba(152, 48, 48, 0.2); border: 1px solid #983030; padding: 4px 8px; border-radius: 4px;">Theater: ${assignments.theater}</span>` : ''}
              ${assignments.downtown > 0 ? `<span class="assignment-badge" style="background: rgba(201, 184, 74, 0.2); border: 1px solid #C9B84A; padding: 4px 8px; border-radius: 4px;">Downtown: ${assignments.downtown}</span>` : ''}
+             ${assignments.academy > 0 ? `<span class="assignment-badge" style="background: rgba(74, 144, 201, 0.2); border: 1px solid #4A90C9; padding: 4px 8px; border-radius: 4px;">Academy: ${assignments.academy}</span>` : ''}
              ${assignments.market > 0 ? `<span class="assignment-badge" style="background: rgba(196, 128, 64, 0.2); border: 1px solid #C48040; padding: 4px 8px; border-radius: 4px;">Market: ${assignments.market}</span>` : ''}
              ${assignments.workshop > 0 ? `<span class="assignment-badge" style="background: rgba(200, 112, 96, 0.2); border: 1px solid #C87060; padding: 4px 8px; border-radius: 4px;">Workshop: ${assignments.workshop}</span>` : ''}
            </div>
@@ -10950,6 +10981,21 @@
       // Move Trickerion Stone
       content += boardAction("Advance the Trickerion Stone token one step forward on the Turn Counter track");
       
+      // Academy: Open Room tiles reminder when advancing to Turn 4 or 6
+      if (gameState.expansions.academy && gameState.currentTurn === 3) {
+        content += `<div style="background: rgba(100, 149, 237, 0.1); border: 1px solid var(--info); padding: 10px; border-radius: 6px; margin: 12px 0;">
+          <p style="color: var(--info); font-weight: 600; margin-bottom: 8px;">📚 Academy: Open Rooms</p>
+          ${boardAction("Remove the <strong>Open Room token</strong> from Turn IV")}
+          ${boardAction("Remove <strong>2 Closed Room tiles</strong> from Academy slots marked <strong>\"A\"</strong>")}
+        </div>`;
+      } else if (gameState.expansions.academy && gameState.currentTurn === 5) {
+        content += `<div style="background: rgba(100, 149, 237, 0.1); border: 1px solid var(--info); padding: 10px; border-radius: 6px; margin: 12px 0;">
+          <p style="color: var(--info); font-weight: 600; margin-bottom: 8px;">📚 Academy: Open Rooms</p>
+          ${boardAction("Remove the <strong>Open Room token</strong> from Turn VI")}
+          ${boardAction("Remove <strong>2 Closed Room tiles</strong> from Academy slots marked <strong>\"B\"</strong>")}
+        </div>`;
+      }
+      
       const isLastTurn = gameState.currentTurn >= 7;
       const buttonText = isLastTurn ? 'End Game Scoring' : `Start Turn ${gameState.currentTurn + 1}`;
       
@@ -11064,8 +11110,6 @@
          
          ${infoBox("The Heir receives the Yield of each Trick, <strong>minus 1 Coin and 1 Fame per Trick</strong>.")}
          
-         ${infoBox("<strong>Example:</strong> If Heir had 2 Tricks with yields of (3★, 2🪙) and (2★, 1🪙), total is 5★ and 3🪙, then subtract 2★ and 2🪙 = <strong>3★ Fame, 1🪙 Coin</strong>")}
-         
          <div style="background: var(--bg-card); padding: 15px; border-radius: 6px; margin: 15px 0;">
            <div class="stepper-grid">
              <div style="text-align: center;">
@@ -11154,6 +11198,7 @@
       let locationButtons = '';
       if (assignments.theater > 0) locationButtons += `<button class="btn sa-select-btn-final" data-color="theater" style="background: rgba(152, 48, 48, 0.2); border: 2px solid #983030;">Theater</button>`;
       if (assignments.downtown > 0) locationButtons += `<button class="btn sa-select-btn-final" data-color="downtown" style="background: rgba(201, 184, 74, 0.2); border: 2px solid #C9B84A;">Downtown</button>`;
+      if (assignments.academy > 0) locationButtons += `<button class="btn sa-select-btn-final" data-color="academy" style="background: rgba(74, 144, 201, 0.2); border: 2px solid #4A90C9;">Academy</button>`;
       if (assignments.market > 0) locationButtons += `<button class="btn sa-select-btn-final" data-color="market" style="background: rgba(196, 128, 64, 0.2); border: 2px solid #C48040;">Market</button>`;
       if (assignments.workshop > 0) locationButtons += `<button class="btn sa-select-btn-final" data-color="workshop" style="background: rgba(200, 112, 96, 0.2); border: 2px solid #C87060;">Workshop</button>`;
       
@@ -11167,6 +11212,7 @@
            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">
              ${assignments.theater > 0 ? `<span class="assignment-badge" style="background: rgba(152, 48, 48, 0.2); border: 1px solid #983030; padding: 4px 8px; border-radius: 4px;">Theater: ${assignments.theater}</span>` : ''}
              ${assignments.downtown > 0 ? `<span class="assignment-badge" style="background: rgba(201, 184, 74, 0.2); border: 1px solid #C9B84A; padding: 4px 8px; border-radius: 4px;">Downtown: ${assignments.downtown}</span>` : ''}
+             ${assignments.academy > 0 ? `<span class="assignment-badge" style="background: rgba(74, 144, 201, 0.2); border: 1px solid #4A90C9; padding: 4px 8px; border-radius: 4px;">Academy: ${assignments.academy}</span>` : ''}
              ${assignments.market > 0 ? `<span class="assignment-badge" style="background: rgba(196, 128, 64, 0.2); border: 1px solid #C48040; padding: 4px 8px; border-radius: 4px;">Market: ${assignments.market}</span>` : ''}
              ${assignments.workshop > 0 ? `<span class="assignment-badge" style="background: rgba(200, 112, 96, 0.2); border: 1px solid #C87060; padding: 4px 8px; border-radius: 4px;">Workshop: ${assignments.workshop}</span>` : ''}
            </div>
