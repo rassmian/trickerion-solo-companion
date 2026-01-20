@@ -246,6 +246,23 @@
       box-shadow: 0 0 20px rgba(212, 168, 71, 0.15);
     }
 
+    .option-card.mandatory {
+      border-color: var(--amber);
+      background: rgba(212, 168, 71, 0.25);
+      cursor: default;
+    }
+
+    .option-card.mandatory .title {
+      color: var(--amber);
+    }
+
+    @media (hover: hover) {
+      .option-card.mandatory:hover {
+        border-color: var(--amber);
+        background: rgba(212, 168, 71, 0.25);
+      }
+    }
+
     .option-card .title {
       font-family: 'Cinzel', serif;
       font-size: 1.1rem;
@@ -1149,7 +1166,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.14.15-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.14.18-beta</p>
       <button class="restart-btn hidden" id="restart-btn">↺ New Game</button>
     </header>
 
@@ -1405,11 +1422,7 @@
             
             <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place Components, Trickerion Shards, and Coins in supply piles near the board</span></div>
             
-            <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Shuffle each Special Assignment deck by location and place face-down on the Dark Alley slots</span></div>
-            
-            <div id="academy-sa-deck-instruction" class="hidden" style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Shuffle the 14 <strong>Academy</strong> Special Assignment cards and place the deck <strong>face-up</strong> next to the other SA decks (Academy)</span></div>
-            
-            <div id="dot-sa-note" style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ NOTE:</span> <span id="dot-sa-note-text">Remove Academy and Dawn of Technology Special Assignment cards</span></div>
+            <div id="sa-decks-instruction" style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Shuffle the 4 Special Assignment decks (Theater, Downtown, Market, Workshop) and place face-down on the Dark Alley slots</span></div>
             
             <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place the Trickerion Stone token on space I of the Turn Counter track</span></div>
             
@@ -1462,7 +1475,7 @@
             
             <div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ NOTE:</span> Keep the remaining Specialist Board Extensions nearby — you may hire them during the game</div>
             
-            <div id="player-disks-instruction" style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place your Magician disk and 1 Apprentice disk on their respective slots on your Player Board</span></div>
+            <div id="player-disks-instruction" style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place your Magician disk, Specialist disk, and 1 Apprentice disk on their respective slots on your Player Board</span></div>
             
             <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Take starting Components of your choice worth up to 2 Coins total — place them in your Workshop</span></div>
             
@@ -2018,8 +2031,7 @@
         title: 'Base Game + Dark Alley', 
         description: 'Core solo experience with 7 turns and 5 character slots',
         footnote: '*requires Dahlgaard\'s Academy expansion',
-        selected: true,
-        disabled: false
+        mandatory: true
       },
       { 
         id: 'academy', 
@@ -2065,6 +2077,7 @@
       
       const cardsHtml = EXPANSION_OPTIONS.map(exp => {
         const classes = ['option-card'];
+        if (exp.mandatory) classes.push('mandatory');
         if (exp.selected) classes.push('selected');
         if (exp.disabled) classes.push('disabled');
         
@@ -2128,15 +2141,30 @@
         { id: 'lumenia', name: 'Lumenia the Radiant', title: 'Luminous Bonds', ability: 'You receive 1 additional Fame or Coin (but not Shard) for each Link you create when setting up Tricks in the Theater.', soloAbility: 'The Heir receives 1 additional Fame (but not Shard) for each Link it creates when setting up Tricks in the Theater.' }
       ],
       escape: [
-        { id: 'chains', name: 'Master of Chains', title: 'Breaking Free', ability: 'Before the Performance phase, you may take a special Reschedule Action without placing any Characters. Unlike the normal Reschedule Action, you receive the Link bonuses if you create Link(s) with this placement.', soloAbility: 'The first Trick placed by the Heir each turn can be oriented freely: the corner corresponding to the Trick\'s category does not have to be in a Link circle.' },
+        { id: 'chains', name: 'Master of Chains', title: 'Breaking Free', ability: 'Before the Performance phase, you may take a special Reschedule Action without placing any Characters. Unlike the normal Reschedule Action, you receive the Link bonuses if you create Link(s) with this placement.', soloAbility: 'The first Trick placed by the Heir each turn can be oriented freely: the corner corresponding to the Trick\'s category does not have to be in a Link circle.', academyTitle: 'The Secret Combination', academyAbility: 'When you Perform, each Trick Link with your Trick marker in it awards a Performer Bonus of 2 Fame instead of 1.' },
         { id: 'redlotus', name: 'Red Lotus', title: 'Trick Steal', ability: 'You may choose to receive the Yield of an opponent\'s Trick in the same Performance instead of your own Trick\'s Yield, as long as you are the Performer and the opponent\'s Trick has the same or lower Fame Threshold as yours. The opponent receives one less Fame for the Trick stolen this way.', soloAbility: 'When the Heir performs, it gets +1 Fame for each Trick you have on its selected Performance card.' },
         { id: 'bernard', name: 'Professor Bernard', title: 'Mentor of Magicians', ability: 'When receiving Yield from a Trick in Classroom, you may remove that Trick from Workshop and set it aside. Replace its markers with your special markers. You benefit from this Trick in Classroom phase but it doesn\'t occupy a Workshop slot. (Max 2 Tricks)', soloAbility: 'During the Classroom phase, the Heir gains 3 Coins for each marker in the Classrooms (regardless of the owner).' }
       ],
       spiritual: [
-        { id: 'priestess', name: 'Priestess of Mysticism', title: 'Fate Weaving', ability: 'For 1 Dark Alley Action Point, you may discard the Active Prophecy, then replace it with any of the Pending Prophecies and draw a new one in its place.', soloAbility: 'If the Heir rotates the Dark Alley Prophecies, it will swap the next turn\'s Prophecy with a randomly drawn one.' },
+        { id: 'priestess', name: 'Priestess of Mysticism', title: 'Fate Weaving', ability: 'For 1 Dark Alley Action Point, you may discard the Active Prophecy, then replace it with any of the Pending Prophecies and draw a new one in its place.', soloAbility: 'If the Heir rotates the Dark Alley Prophecies, it will swap the next turn\'s Prophecy with a randomly drawn one.', academyTitle: 'Déjà Vu', academyAbility: 'During the "Discard Special Assignment Cards" subphase, you may pay 1 Shard. If you do, you may return one of your placed Special Assignment cards to your hand instead of discarding it.' },
         { id: 'yoruba', name: 'Yoruba Spiritmaster', title: 'Soul Possession', ability: 'Once per turn, before an opponent chooses a card to Perform, you may pay one Shard. If you do, you may choose the card to Perform for that player. The chosen card must have at least one of the opponent\'s Trick markers on it.', soloAbility: 'The Heir always performs first, regardless of Theater workday assignment.' },
         { id: 'anjali', name: 'Anjali', title: 'Whisperer of Secrets', ability: 'During Assignment phase, place 1 Coin on any of your Protégé\'s Secrets. Before placing an Apprentice, you may spend that Coin to apply that Secret\'s ability to the Apprentice. Return unspent Coins during Return Characters.', soloAbility: 'At the beginning of the End Turn phase, the Heir gains 2 Coins for each Secret its Protégé has.' }
       ]
+    };
+    
+    // Helper to get magician ability/title - uses Academy alternate for Priestess and Chains when Academy enabled
+    const getMagicianAbility = (magician) => {
+      if (gameState.expansions?.academy && magician.academyAbility) {
+        return magician.academyAbility;
+      }
+      return magician.ability;
+    };
+    
+    const getMagicianTitle = (magician) => {
+      if (gameState.expansions?.academy && magician.academyTitle) {
+        return magician.academyTitle;
+      }
+      return magician.title;
     };
 
     // Component tiers
@@ -3430,7 +3458,6 @@
       if (pageNum === 2) {
         // Update expansion notes based on expansion selection
         const dotTricksNote = $('#dot-tricks-note-text');
-        const dotSANote = $('#dot-sa-note-text');
         
         const hasDawn = gameState.expansions.dawn;
         const hasAcademy = gameState.expansions.academy;
@@ -3444,31 +3471,20 @@
           }
         }
         
-        // SA cards note (both expansions add SA cards)
-        if (dotSANote) {
-          if (hasDawn && hasAcademy) {
-            // Both expansions - keep all expansion SA cards
-            dotSANote.textContent = 'Keep Academy and Dawn of Technology Special Assignment cards';
-          } else if (hasDawn) {
-            // DoT only
-            dotSANote.textContent = 'Remove Academy Special Assignment cards (Dawn of Technology)';
+        // SA decks instruction - single dynamic instruction based on expansions
+        const saDecksInstruction = $('#sa-decks-instruction');
+        if (saDecksInstruction) {
+          let saText = '';
+          if (hasAcademy && hasDawn) {
+            saText = 'Shuffle the 5 Special Assignment decks (Theater, Downtown, Market, Workshop, Academy) — include Academy and Dawn of Technology cards in all decks — and place face-down on the Dark Alley slots';
           } else if (hasAcademy) {
-            // Academy only
-            dotSANote.textContent = 'Remove Dawn of Technology Special Assignment cards (Academy)';
+            saText = 'Shuffle the 5 Special Assignment decks (Theater, Downtown, Market, Workshop, Academy) — include Academy expansion cards in all decks — and place face-down on the Dark Alley slots';
+          } else if (hasDawn) {
+            saText = 'Shuffle the 4 Special Assignment decks (Theater, Downtown, Market, Workshop) — include Dawn of Technology cards — and place face-down on the Dark Alley slots';
           } else {
-            // Base game only
-            dotSANote.textContent = 'Remove Academy and Dawn of Technology Special Assignment cards';
+            saText = 'Shuffle the 4 Special Assignment decks (Theater, Downtown, Market, Workshop) and place face-down on the Dark Alley slots';
           }
-        }
-        
-        // Academy SA deck instruction
-        const academySAInstruction = $('#academy-sa-deck-instruction');
-        if (academySAInstruction) {
-          if (hasAcademy) {
-            academySAInstruction.classList.remove('hidden');
-          } else {
-            academySAInstruction.classList.add('hidden');
-          }
+          saDecksInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${saText}</span>`;
         }
       }
       
@@ -3500,12 +3516,12 @@
         if (gameState.expansions.academy) {
           if (fameInstruction) fameInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place your Fame marker on <strong>3 Fame</strong> (Academy)</span>`;
           if (coinsInstruction) coinsInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Take <strong>12 Coins</strong> and <strong>1 Shard</strong> (Academy)</span>`;
-          if (disksInstruction) disksInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place your Magician disk, <strong>Protégé disk</strong>, and 1 Apprentice disk on their respective slots on your Player Board (Academy)</span>`;
+          if (disksInstruction) disksInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place your Magician disk, <strong>Protégé disk</strong>, Specialist disk, and 1 Apprentice disk on their respective slots on your Player Board (Academy)</span>`;
           if (assignmentInstruction) assignmentInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Take your permanent Assignment cards: 2× Theater, 1× Workshop, 1× Market Row, 1× Downtown, 1× Dark Alley, <strong>1× Academy</strong> (Academy)</span>`;
         } else {
           if (fameInstruction) fameInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place your Fame marker on <strong>5 Fame</strong></span>`;
           if (coinsInstruction) coinsInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Take <strong>10 Coins</strong> and <strong>1 Shard</strong></span>`;
-          if (disksInstruction) disksInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place your Magician disk and 1 Apprentice disk on their respective slots on your Player Board</span>`;
+          if (disksInstruction) disksInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place your Magician disk, Specialist disk, and 1 Apprentice disk on their respective slots on your Player Board</span>`;
           if (assignmentInstruction) assignmentInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Take your permanent Assignment cards: 2× Theater, 1× Workshop, 1× Market Row, 1× Downtown, 1× Dark Alley</span>`;
         }
         
@@ -3781,7 +3797,7 @@
         card.dataset.magician = magician.id;
         card.innerHTML = `
           <div class="title" style="color: ${color};">${magician.name}</div>
-          <div class="description" style="font-size: 0.8rem;">${magician.ability}</div>
+          <div class="description" style="font-size: 0.8rem;">${getMagicianAbility(magician)}</div>
         `;
         card.addEventListener('click', () => quickSelectPlayerMagician(magician));
         container.appendChild(card);
@@ -3922,10 +3938,10 @@
       
       content.innerHTML = `
         ${academyPlayerSetupNote}
-        ${boardAction(`Heir's Poster: <strong>${gameState.heirMagician.name}</strong>`)}
+        ${boardAction(`Place the Heir's Poster: <strong>${gameState.heirMagician.name}</strong>`)}
         ${academyHeirSetupNote}
         
-        ${boardAction(`Heir's Characters (left to right):`)}
+        ${boardAction(`Place the Heir's Characters (left to right):`)}
         <div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;">
           <div style="margin-bottom: 6px;">${characterIcons}</div>
           <div style="color: var(--text-secondary); font-size: 0.85rem;">${characterNames}</div>
@@ -3935,12 +3951,12 @@
         ${dawnShardAction}
         ${challengeRuleNote}
         
-        ${boardAction(`Heir's Trick: <strong>${trick.name}</strong> with <strong>${trickMarkers} Trick marker(s)</strong> (Prepared)`)}
+        ${boardAction(`Place Heir's Trick: <strong>${trick.name}</strong> with <strong>${trickMarkers} Trick marker(s)</strong> (Prepared)`)}
         ${elektraNote}
         
         ${noteBox(`If you chose the Engineer as your specialist, choose a Level 1 Trick and place it on the Engineer's Board Extension. Mark it with a Symbol Marker.`)}
         
-        ${boardAction(`Shopping List: <strong>${shoppingList}</strong>`)}
+        ${boardAction(`Place in Shopping List: <strong>${shoppingList}</strong>`)}
       `;
     }
     
@@ -4230,7 +4246,7 @@
         card.dataset.school = gameState.playerSchool;
         card.innerHTML = `
           <div class="title" style="color: ${color};">${magician.name}</div>
-          <div class="description" style="font-size: 0.85rem; line-height: 1.4;">${magician.ability}</div>
+          <div class="description" style="font-size: 0.85rem; line-height: 1.4;">${getMagicianAbility(magician)}</div>
         `;
         card.addEventListener('click', () => selectPlayerMagician(magician));
         container.appendChild(card);
@@ -4688,12 +4704,20 @@
       
       // Combine base prophecies with Academy prophecies if expansion is enabled
       const hasAcademy = gameState.expansions?.academy;
-      const affectBothProphecies = hasAcademy 
+      const removedIds = (gameState.removedProphecies || []).map(p => p.id);
+      
+      let affectBothProphecies = hasAcademy 
         ? [...PROPHECIES.affectBoth, ...PROPHECIES.academyAffectBoth]
-        : PROPHECIES.affectBoth;
-      const heirIgnoresProphecies = hasAcademy
+        : [...PROPHECIES.affectBoth];
+      let heirIgnoresProphecies = hasAcademy
         ? [...PROPHECIES.heirIgnores, ...PROPHECIES.academyHeirIgnores]
-        : PROPHECIES.heirIgnores;
+        : [...PROPHECIES.heirIgnores];
+      
+      // Filter out randomly removed prophecies (Academy expansion)
+      if (removedIds.length > 0) {
+        affectBothProphecies = affectBothProphecies.filter(p => !removedIds.includes(p.id));
+        heirIgnoresProphecies = heirIgnoresProphecies.filter(p => !removedIds.includes(p.id));
+      }
       
       const affectBothHtml = buildSection(affectBothProphecies, 'affect-both');
       const heirIgnoresHtml = buildSection(heirIgnoresProphecies, 'heir-ignores');
@@ -4961,13 +4985,13 @@
       'p04': ['downtown'],                        // Hiring characters costs 1 AP
       'p05': ['downtown', 'workshop'],            // Learning tricks costs 1 AP
       'p06': ['downtown'],                        // Drawing cards costs 1 AP
-      'p07': ['theater', 'place-characters'],     // +2 Fame setting up Mechanical trick
-      'p08': ['theater', 'place-characters'],     // +2 Fame setting up Escape trick
-      'p09': ['theater', 'place-characters'],     // +2 Fame setting up Spiritual trick
-      'p10': ['theater', 'place-characters'],     // +2 Fame setting up Optical trick
-      'p11': ['theater', 'place-characters', 'performance'],  // Saturday +1 yield
-      'p12': ['theater', 'place-characters', 'performance'],  // Friday -1 yield
-      'p13': ['theater', 'place-characters', 'performance'],  // Thu/Sun no yield modifiers
+      'p07': ['theater'],                         // +2 Fame setting up Mechanical trick
+      'p08': ['theater'],                         // +2 Fame setting up Escape trick
+      'p09': ['theater'],                         // +2 Fame setting up Spiritual trick
+      'p10': ['theater'],                         // +2 Fame setting up Optical trick
+      'p11': ['theater', 'performance'],          // Saturday +1 yield
+      'p12': ['theater', 'performance'],          // Friday -1 yield
+      'p13': ['theater', 'performance'],          // Thu/Sun no yield modifiers
       'p14': ['performance'],                     // Double performer bonus
       'p16': ['performance'],                     // Coins count as Fame during performance
       'p17': ['theater'],                         // Enhance at Theater
@@ -5047,7 +5071,7 @@
           <img src="assets/images/prophecies/${gameState.activeProphecy.icon}" alt="" style="width: 36px; height: 36px; border-radius: 4px;">
           <div>
             <div style="color: var(--prophecy); font-weight: 600; font-size: 0.85rem;">🔮 ${gameState.activeProphecy.name}</div>
-            <span class="prophecy-badge badge-affect-both">⚡ AFFECTS HEIR</span>
+            <span class="prophecy-badge badge-affect-both">⚡ AFFECTS BOTH</span>
           </div>
         </div>
         <div style="color: var(--text-secondary); font-size: 0.9rem;">${description}</div>
@@ -5521,7 +5545,7 @@
          <p style="margin-top: 15px;"><strong>How many Special Assignment cards did you use this turn?</strong></p>
          <p style="color: var(--text-secondary); font-size: 0.9rem;">Count the SA cards you assigned to your characters during Assignment phase.</p>
          
-         <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: center; flex-wrap: wrap;">
+         <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: flex-start; flex-wrap: wrap;">
            ${[0,1,2,3,4].map(n => `
              <button class="btn sa-count-btn" data-count="${n}" style="min-width: 50px;">${n}</button>
            `).join('')}
@@ -5583,8 +5607,8 @@
         const color = schoolColors[gameState.playerMagician.school] || 'var(--amber)';
         
         playerMagicianReminder = `<div style="background: rgba(212, 168, 71, 0.1); border: 1px solid ${color}; padding: 10px 14px; margin: 12px 0; border-radius: 6px;">
-          <div style="color: ${color}; font-weight: 600; font-size: 0.85rem;">✨ ${gameState.playerMagician.name} (${gameState.playerMagician.title})</div>
-          <div style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 4px;">${gameState.playerMagician.ability}</div>
+          <div style="color: ${color}; font-weight: 600; font-size: 0.85rem;">✨ ${gameState.playerMagician.name} (${getMagicianTitle(gameState.playerMagician)})</div>
+          <div style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 4px;">${getMagicianAbility(gameState.playerMagician)}</div>
         </div>`;
       }
       
@@ -5747,7 +5771,7 @@
          
          <div style="background: var(--bg-card); padding: 15px; border-radius: 6px; margin: 15px 0;">
            <label style="display: block; margin-bottom: 12px;"><strong>💎 Shards for the Heir</strong></label>
-           <div class="shard-selector" style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+           <div class="shard-selector" style="display: flex; gap: 10px; justify-content: flex-start; flex-wrap: wrap;">
              ${[0,1,2,3,4,5].map(n => `
                <button class="btn shard-btn${n === 0 ? ' btn-selected' : ''}" data-shards="${n}" style="min-width: 50px;">${n}</button>
              `).join('')}
@@ -5819,7 +5843,7 @@
       );
     }
 
-    function showContestedCheck() {
+    function showContestedCheck(fromBackButton = false) {
       // Check for contested locations
       const exceptionBox = (text) => `<div style="background: var(--exception-bg); border-left: 3px solid var(--exception); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--exception); font-weight: 600;">⚠️ EXCEPTION:</span> ${text}</div>`;
       
@@ -5839,7 +5863,8 @@
       const isP22SecondPlacement = isP22Active && gameState.heirP22FirstPlacementDone;
       
       // Skip contested check on Heir's last character - no strategic choice to make
-      if (CONFIG.SKIP_CONTESTED_ON_LAST_HEIR_CHARACTER && isLastCharacter) {
+      // BUT don't skip if user pressed Back button (they may need to change their choice)
+      if (CONFIG.SKIP_CONTESTED_ON_LAST_HEIR_CHARACTER && isLastCharacter && !fromBackButton) {
         showSelectPriorityLocation();
         return;
       }
@@ -5938,7 +5963,7 @@
          <div class="location-button-grid">
            ${locationButtonsHtml}
          </div>`,
-        [{ text: 'Back', action: () => showContestedCheck() }]
+        [{ text: 'Back', action: () => showContestedCheck(true) }]
       );
       
       // Attach event listeners to location buttons
@@ -5991,7 +6016,7 @@
          <div class="location-button-grid">
            ${locationButtonsHtml}
          </div>`,
-        [{ text: 'Back', action: () => showContestedCheck() }]
+        [{ text: 'Back', action: () => showContestedCheck(true) }]
       );
       
       // Attach event listeners and add End Heir Placements button
@@ -6180,7 +6205,7 @@
          ${opticoReminder}
          <p><strong>How many Action Points does this Character have?</strong></p>
          <p style="color: var(--text-secondary); font-size: 0.9rem;">Include the slot's AP modifier and the Character's base AP.</p>
-         <div class="ap-selector" style="display: flex; gap: 10px; margin-top: 20px; justify-content: center; flex-wrap: wrap;">
+         <div class="ap-selector" style="display: flex; gap: 10px; margin-top: 20px; justify-content: flex-start; flex-wrap: wrap;">
            ${[1,2,3,4,5].map(ap => `
              <button class="btn ap-btn" data-ap="${ap}" style="min-width: 50px;">${ap} AP</button>
            `).join('')}
@@ -6542,19 +6567,19 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 12px 8px;
+            padding: 8px 4px;
             background: ${isNew ? 'rgba(212, 168, 71, 0.15)' : 'var(--bg-card)'};
             border: 2px solid ${isNew ? 'var(--amber)' : 'var(--border)'};
             border-radius: 6px;
-            min-width: 90px;
-            max-width: 110px;
+            flex: 1;
+            min-width: 0;
             text-align: center;
             ${isNew ? 'box-shadow: 0 0 10px rgba(212, 168, 71, 0.3);' : ''}
           ">
-            <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;">Slot ${index + 1}</div>
-            <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 6px; line-height: 1.2;">${trick.name}</div>
-            <div style="font-size: 0.8rem; color: var(--text-secondary);">${trick.fame}★ ${trick.coins}🪙${trick.shards > 0 ? ' ' + trick.shards + '💎' : ''}</div>
-            ${isNew ? '<div style="color: var(--amber); font-size: 0.75rem; margin-top: 6px; font-weight: 600;">NEW</div>' : ''}
+            <div style="font-size: 0.65rem; color: var(--text-muted); margin-bottom: 2px;">Slot ${index + 1}</div>
+            <div style="font-weight: 600; font-size: 0.75rem; margin-bottom: 4px; line-height: 1.2; word-break: break-word;">${trick.name}</div>
+            <div style="font-size: 0.7rem; color: var(--text-secondary);">${trick.fame}★ ${trick.coins}🪙${trick.shards > 0 ? ' ' + trick.shards + '💎' : ''}</div>
+            ${isNew ? '<div style="color: var(--amber); font-size: 0.65rem; margin-top: 4px; font-weight: 600;">NEW</div>' : ''}
           </div>`;
       }).join('');
       
@@ -6567,7 +6592,7 @@
          ${boardAction(`Add one of each Component type to the Heir's Shopping List (if not already there): <strong>${shoppingListDisplay}</strong>`)}
          
          <p style="margin: 15px 0;"><strong>Trick Order (highest yield on left):</strong></p>
-         <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 15px;">
+         <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 15px;">
            ${trickOrderHtml}
          </div>
          <div style="display: flex; justify-content: center; gap: 20px; color: var(--text-muted); font-size: 0.85rem;">
@@ -6640,7 +6665,7 @@
          ${opticoReminder}
          <p style="margin-top: 15px;"><strong>How many Action Points does this Character have?</strong></p>
          <p style="color: var(--text-secondary); font-size: 0.9rem;">Include the slot's AP modifier and the Character's base AP.</p>
-         <div class="ap-selector" style="display: flex; gap: 10px; margin-top: 20px; justify-content: center; flex-wrap: wrap;">
+         <div class="ap-selector" style="display: flex; gap: 10px; margin-top: 20px; justify-content: flex-start; flex-wrap: wrap;">
            ${[1,2,3,4,5].map(ap => `
              <button class="btn ap-btn" data-ap="${ap}" style="min-width: 50px;">${ap} AP</button>
            `).join('')}
@@ -6902,7 +6927,7 @@
          ${opticoReminder}
          <p><strong>How many Action Points does this Character have?</strong></p>
          <p style="color: var(--text-secondary); font-size: 0.9rem;">Include the slot's AP modifier and the Character's base AP.</p>
-         <div class="ap-selector" style="display: flex; gap: 10px; margin-top: 20px; justify-content: center; flex-wrap: wrap;">
+         <div class="ap-selector" style="display: flex; gap: 10px; margin-top: 20px; justify-content: flex-start; flex-wrap: wrap;">
            ${[1,2,3,4,5].map(ap => `
              <button class="btn ap-btn" data-ap="${ap}" style="min-width: 50px;">${ap} AP</button>
            `).join('')}
@@ -7266,7 +7291,7 @@
          ${opticoReminder}
          ${exceptionBox("Ignore the +1/−1 AP slot modifier for the Heir. Use only the Character's base AP.")}
          <p style="margin: 15px 0;"><strong>How many Action Points does this Character have?</strong></p>
-         <div class="ap-selector" style="display: flex; gap: 10px; margin-top: 20px; justify-content: center; flex-wrap: wrap;">
+         <div class="ap-selector" style="display: flex; gap: 10px; margin-top: 20px; justify-content: flex-start; flex-wrap: wrap;">
            ${[1,2,3].map(ap => `
              <button class="btn ap-btn" data-ap="${ap}" style="min-width: 50px;">${ap} AP</button>
            `).join('')}
@@ -7832,7 +7857,7 @@
          <p style="margin-top: 15px;"><strong>How many Action Points does this Character have?</strong></p>
          <p style="color: var(--text-secondary); font-size: 0.9rem;">Include the slot's AP modifier and the Character's base AP.</p>
          
-         <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: center; flex-wrap: wrap;">
+         <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: flex-start; flex-wrap: wrap;">
            ${[1,2,3,4,5].map(ap => `
              <button class="btn academy-ap-btn" data-ap="${ap}" style="min-width: 50px;">${ap} AP</button>
            `).join('')}
@@ -8910,19 +8935,19 @@
            <p style="margin-bottom: 15px;"><strong>What's the Performance card bonus?</strong></p>
            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 6px;">Look at the bottom of the card and select the matching bonus:</p>
            
-           <div class="bonus-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px;">
-             <button class="btn bonus-btn" data-fame="1" data-shards="0" data-coins="0">1★</button>
-             <button class="btn bonus-btn" data-fame="2" data-shards="0" data-coins="0">2★</button>
-             <button class="btn bonus-btn" data-fame="3" data-shards="0" data-coins="0">3★</button>
-             <button class="btn bonus-btn" data-fame="4" data-shards="0" data-coins="0">4★</button>
-             <button class="btn bonus-btn" data-fame="0" data-shards="0" data-coins="1">1🪙</button>
-             <button class="btn bonus-btn" data-fame="0" data-shards="0" data-coins="2">2🪙</button>
-             <button class="btn bonus-btn" data-fame="0" data-shards="0" data-coins="3">3🪙</button>
-             <button class="btn bonus-btn" data-fame="0" data-shards="1" data-coins="0">1💎</button>
-             <button class="btn bonus-btn" data-fame="2" data-shards="0" data-coins="2">2★ 2🪙</button>
-             <button class="btn bonus-btn" data-fame="2" data-shards="1" data-coins="0">2★ 1💎</button>
-             <button class="btn bonus-btn" data-fame="1" data-shards="1" data-coins="0">1★ 1💎</button>
-             <button class="btn bonus-btn" data-fame="0" data-shards="1" data-coins="1">1🪙 1💎</button>
+           <div class="bonus-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px;">
+             <button class="btn bonus-btn" data-fame="1" data-shards="0" data-coins="0" style="white-space: nowrap; padding: 10px 8px; width: 100%;">1★</button>
+             <button class="btn bonus-btn" data-fame="2" data-shards="0" data-coins="0" style="white-space: nowrap; padding: 10px 8px; width: 100%;">2★</button>
+             <button class="btn bonus-btn" data-fame="3" data-shards="0" data-coins="0" style="white-space: nowrap; padding: 10px 8px; width: 100%;">3★</button>
+             <button class="btn bonus-btn" data-fame="4" data-shards="0" data-coins="0" style="white-space: nowrap; padding: 10px 8px; width: 100%;">4★</button>
+             <button class="btn bonus-btn" data-fame="0" data-shards="0" data-coins="1" style="white-space: nowrap; padding: 10px 8px; width: 100%;">1🪙</button>
+             <button class="btn bonus-btn" data-fame="0" data-shards="0" data-coins="2" style="white-space: nowrap; padding: 10px 8px; width: 100%;">2🪙</button>
+             <button class="btn bonus-btn" data-fame="0" data-shards="0" data-coins="3" style="white-space: nowrap; padding: 10px 8px; width: 100%;">3🪙</button>
+             <button class="btn bonus-btn" data-fame="0" data-shards="1" data-coins="0" style="white-space: nowrap; padding: 10px 8px; width: 100%;">1💎</button>
+             <button class="btn bonus-btn" data-fame="2" data-shards="0" data-coins="2" style="white-space: nowrap; padding: 10px 8px; width: 100%;">2★ 2🪙</button>
+             <button class="btn bonus-btn" data-fame="2" data-shards="1" data-coins="0" style="white-space: nowrap; padding: 10px 8px; width: 100%;">2★ 1💎</button>
+             <button class="btn bonus-btn" data-fame="1" data-shards="1" data-coins="0" style="white-space: nowrap; padding: 10px 8px; width: 100%;">1★ 1💎</button>
+             <button class="btn bonus-btn" data-fame="0" data-shards="1" data-coins="1" style="white-space: nowrap; padding: 10px 8px; width: 100%;">1🪙 1💎</button>
            </div>
            <p id="selected-bonus-display" style="margin-top: 10px; color: var(--text-secondary); font-size: 0.9rem;">Bonus: <strong>none selected</strong></p>
          </div>`,
@@ -9790,9 +9815,10 @@
          ${gameState.expansions?.academy ? `<div style="background: rgba(100, 149, 237, 0.1); border: 1px solid var(--info); padding: 10px; border-radius: 6px; margin: 12px 0;">
            <p style="color: var(--info); font-weight: 600; margin-bottom: 8px;">📚 Academy: Practice Room Abilities</p>
            <ul style="margin-left: 20px; color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">
-             <li><strong>Stay on Card:</strong> If your Trick has this ability, its marker stays on the Performance card (don't remove it)</li>
-             <li><strong>Double Marker:</strong> You may have 2 markers of the same Trick on one Performance card</li>
-             <li><strong>Free Rotate:</strong> Marker doesn't need to be in a Link circle</li>
+             <li><strong>Extra Marker:</strong> When you Prepare this Trick, it gains 1 additional Trick Marker (max 5 total)</li>
+             <li><strong>Stay on Card:</strong> Do not remove this Trick's marker from the Performance card after the Performance phase. If you have 2 markers of this Trick, still remove one.</li>
+             <li><strong>Free Rotate:</strong> When placing this Trick's marker, the corner doesn't have to be in a Link circle — the marker can be oriented freely</li>
+             <li><strong>Double Marker:</strong> You may have up to 2 of this Trick's markers on one Performance card</li>
            </ul>
          </div>` : ''}`,
         [
@@ -10241,14 +10267,14 @@
          <div style="background: var(--bg-card); padding: 15px; border-radius: 6px; margin: 15px 0;">
            <div style="margin-bottom: 20px;">
              <p style="margin-bottom: 8px; color: var(--text-secondary);">How many Contraptions did you <strong>NOT</strong> reactivate this turn?</p>
-             <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+             <div style="display: flex; gap: 10px; justify-content: flex-start; flex-wrap: wrap;">
                ${[0,1,2,3,4].map(n => `<button class="btn dawn-unreactivated-btn${n === 0 ? ' btn-selected' : ''}" data-count="${n}" style="min-width: 50px;">${n}</button>`).join('')}
              </div>
            </div>
            
            <div>
              <p style="margin-bottom: 8px; color: var(--text-secondary);">How many <strong>empty</strong> Contraption slots do you have?</p>
-             <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+             <div style="display: flex; gap: 10px; justify-content: flex-start; flex-wrap: wrap;">
                ${[0,1,2,3,4].map(n => `<button class="btn dawn-empty-btn${n === 0 ? ' btn-selected' : ''}" data-count="${n}" style="min-width: 50px;">${n}</button>`).join('')}
              </div>
            </div>
@@ -10257,26 +10283,24 @@
          ${infoBox("If the Heir gains neither Fame nor Coins from this rule, it gains 1 Shard instead.")}
          
          <div id="dawn-board-actions">
-           ${boardAction(`No change to Heir's resources`, 'dawn-board-action-result')}
+           ${boardAction(`No change to Heir's resources`)}
          </div>`,
         [{ text: 'Apply & Continue', action: () => applyDawnChallengeRule(selectedUnreactivated, selectedEmptySlots), id: 'dawn-continue-btn' }]
       );
       
       setTimeout(() => {
         const updateBoardAction = () => {
-          const actionDiv = $('#dawn-board-action-result');
-          if (!actionDiv) return;
+          const containerDiv = $('#dawn-board-actions');
+          if (!containerDiv) return;
           
-          let actionText = '';
+          let html = '';
           if (selectedUnreactivated > 0 || selectedEmptySlots > 0) {
-            const parts = [];
             if (selectedUnreactivated > 0) {
-              parts.push(`Update Heir's Fame (${currentFame}★ → ${currentFame + selectedUnreactivated}★)`);
+              html += boardAction(`Update Heir's Fame (${currentFame}★ → ${currentFame + selectedUnreactivated}★)`);
             }
             if (selectedEmptySlots > 0) {
-              parts.push(`Update Heir's Coins (${currentCoins} → ${currentCoins + selectedEmptySlots})`);
+              html += boardAction(`Update Heir's Coins (${currentCoins} → ${currentCoins + selectedEmptySlots})`);
             }
-            actionText = parts.join('</span></div><div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">');
           } else {
             // Check for p19/p20 effects on shard gain
             const isExtraShard = gameState.activeProphecy?.id === 'p19';
@@ -10287,15 +10311,13 @@
             let shardText = `Update Heir's Shards (${currentShards} → ${currentShards + shardGain})`;
             if (isExtraShard) shardText += ' <span style="color: var(--amber);">(+1 from p19)</span>';
             
+            html += boardAction(shardText);
             if (fameGain > 0) {
-              actionText = shardText + '</span></div><div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">' + 
-                `Update Heir's Fame (${currentFame}★ → ${currentFame + fameGain}★) <span style="color: var(--amber);">(p20 Shards Give Fame)</span>`;
-            } else {
-              actionText = shardText;
+              html += boardAction(`Update Heir's Fame (${currentFame}★ → ${currentFame + fameGain}★) <span style="color: var(--amber);">(p20 Shards Give Fame)</span>`);
             }
           }
           
-          actionDiv.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${actionText}</span>`;
+          containerDiv.innerHTML = html;
         };
         
         // Unreactivated buttons
