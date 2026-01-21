@@ -1166,7 +1166,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.14.22-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.14.23-beta</p>
       <button class="restart-btn hidden" id="restart-btn">↺ New Game</button>
     </header>
 
@@ -2157,6 +2157,10 @@
       if (gameState.expansions?.academy && magician.academyAbility) {
         return magician.academyAbility;
       }
+      // Dynamic update for Gentleman player ability to include Academy
+      if (gameState.expansions?.academy && magician.id === 'gentleman') {
+        return 'Whenever the Magician is placed on a Downtown, Market Row, Dark Alley or Academy slot, you receive Fame equal to the number of Trick cards you have.';
+      }
       return magician.ability;
     };
     
@@ -2165,6 +2169,18 @@
         return magician.academyTitle;
       }
       return magician.title;
+    };
+    
+    // Get prophecy description with dynamic Academy text when expansion enabled
+    const getProphecyDescription = (prophecy) => {
+      if (!prophecy) return '';
+      
+      // p21: Add Academy to the +2 slot locations when Academy enabled
+      if (gameState.expansions?.academy && prophecy.id === 'p21') {
+        return 'You have to pay 3 Coins to use the +2 Action Point Slots at the Downtown, Market Row, Dark Alley and Academy.';
+      }
+      
+      return prophecy.description;
     };
 
     // Component tiers
@@ -4486,7 +4502,7 @@
           prophecyCard.style.borderColor = 'var(--prophecy)';
         }
         
-        $('#prophecy-desc').textContent = gameState.activeProphecy.description;
+        $('#prophecy-desc').textContent = getProphecyDescription(gameState.activeProphecy);
       } else {
         prophecyCard.style.display = 'none';
         prophecyCard.style.borderColor = '';
@@ -4777,7 +4793,7 @@
             <div class="prophecy-item ${categoryClass}" 
                  data-prophecy-id="${prophecy.id}"
                  data-prophecy-name="${prophecy.name}"
-                 data-prophecy-desc="${prophecy.description.replace(/"/g, '&quot;')}">
+                 data-prophecy-desc="${getProphecyDescription(prophecy).replace(/"/g, '&quot;')}">
               <img src="assets/images/prophecies/${prophecy.icon}" alt="${prophecy.name}">
             </div>
           `;
@@ -5109,7 +5125,7 @@
         : '<span class="prophecy-badge badge-affect-both">⚡ AFFECTS BOTH</span>';
       
       // Get the description from the main PROPHECIES data (single source of truth)
-      const description = gameState.activeProphecy.description;
+      const description = getProphecyDescription(gameState.activeProphecy);
       
       return `<div style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(236, 72, 153, 0.15)); border: 2px solid var(--prophecy); padding: 10px 14px; margin: 12px 0; border-radius: 6px;">
         <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
@@ -5147,7 +5163,7 @@
       const relevantProphecies = contextMap[context] || [];
       if (!relevantProphecies.includes(gameState.activeProphecy.id)) return '';
       
-      const description = gameState.activeProphecy.description;
+      const description = getProphecyDescription(gameState.activeProphecy);
       
       return `<div style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(236, 72, 153, 0.15)); border: 2px solid var(--prophecy); padding: 10px 14px; margin: 12px 0; border-radius: 6px;">
         <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
@@ -5712,7 +5728,7 @@
               ${badgeHtml}
             </div>
           </div>
-          <div style="color: var(--text-secondary); font-size: 0.9rem;">${gameState.activeProphecy.description}</div>
+          <div style="color: var(--text-secondary); font-size: 0.9rem;">${getProphecyDescription(gameState.activeProphecy)}</div>
         </div>`;
       }
       
