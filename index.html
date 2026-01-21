@@ -1166,7 +1166,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.14.18-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.14.21-beta</p>
       <button class="restart-btn hidden" id="restart-btn">↺ New Game</button>
     </header>
 
@@ -2132,23 +2132,23 @@
     const MAGICIANS = {
       mechanical: [
         { id: 'mechaniker', name: 'The Mechaniker', title: 'Mechanical Enhancement', ability: 'Once per turn, one of your Apprentices receives an additional Action Point when placed at any Location except for the Theater.', soloAbility: 'The first Apprentice the Heir places every turn has +1 AP.' },
-        { id: 'elektra', name: 'Elektra', title: 'Supercharge', ability: 'You may choose to pile two markers of the same Trick on a Trick slot when you set up a Trick. It counts as one Trick and Link bonuses are paid only once. When performed, this Trick Yields 1/2/3 additional Fame point(s) and Coin(s) depending on its Level (1/2/3).', soloAbility: 'All of the Heir\'s Tricks that have 2 or 3 Trick markers are Prepared with one less Trick marker, but all of its Tricks score +1/+2/+3 on all Yields based on their Level.' },
-        { id: 'geert', name: 'Geert van Augustin', title: "Magoria's Benefactor", ability: 'When you Renovate, you may choose a Coin-Fame ratio one Fame Threshold higher than your current Fame. When you spend 6+ Coins on Renovate, you may immediately Advertise free (if you haven\'t already) for 2 Fame.', soloAbility: 'When Renovating, the Heir will always choose the most expensive renovation regardless of Coins. It also gains 1 Shard each time it renovates.' }
+        { id: 'elektra', name: 'Elektra', title: 'Supercharge', ability: 'You may choose to pile two markers of the same Trick on a Trick slot when you set up a Trick. It counts as one Trick and Link bonuses are paid only once. When performed, this Trick Yields 1/2/3 additional Fame point(s) and Coin(s) depending on its Level (1/2/3).', soloAbility: 'All of the Heir\'s Tricks that have 2 or 3 Trick markers are Prepared with one less Trick marker, but all of its Tricks score +1/+2/+3 on all Yields (Fame, Coin and Shard), based on their Level.' },
+        { id: 'geert', name: 'Geert van Augustin', title: "Magoria's Benefactor", ability: 'When you use the \'Renovate\' Action, you may choose a Coin-Fame ratio with a Fame Threshold one level higher than your current Fame. Whenever you spend 6 or more Coins on a \'Renovate\' Action, you may immediately Advertise without spending any Coins, if you haven\'t already. You receive the usual 2 Fame.', soloAbility: 'When Renovating, the Heir will always choose the most expensive renovation where its Fame exceeds the renovation\'s Fame Threshold, regardless of how many Coins the Heir has. It also gains 1 Shard each time it renovates.' }
       ],
       optical: [
-        { id: 'optico', name: 'The Great Optico', title: 'Mimesis', ability: 'Once per turn, you may use one of your Permanent Assignment cards with an effect of an opponent\'s revealed Special Assignment card of the same Location. You may use either the copied card\'s printed ability or gain its +1 Action Point bonus instead.', soloAbility: 'The first X non-Apprentice Characters that the Heir places every turn gain +1 AP, where X is the number of Special Assignment cards you used that turn.' },
-        { id: 'gentleman', name: 'The Gentleman', title: 'Magic for the Masses', ability: 'Whenever the Magician is placed on a Downtown, Market Row or Dark Alley slot, you receive Fame equal to the number of Trick cards you have.', soloAbility: 'Whenever the Heir places its Magician on a Downtown, Market Row, or Dark Alley slot, it receives Fame equal to the number of Trick cards it has.' },
-        { id: 'lumenia', name: 'Lumenia the Radiant', title: 'Luminous Bonds', ability: 'You receive 1 additional Fame or Coin (but not Shard) for each Link you create when setting up Tricks in the Theater.', soloAbility: 'The Heir receives 1 additional Fame (but not Shard) for each Link it creates when setting up Tricks in the Theater.' }
+        { id: 'optico', name: 'The Great Optico', title: 'Mimesis', ability: 'Once per turn, you may use one of your Permanent Assignment cards with an effect of an opponent\'s revealed Special Assignment card of the same Location. You may use either the copied card\'s printed ability or gain its +1 Action Point bonus instead.', soloAbility: 'The first X non-Apprentice Characters (Specialists, Protégé) that the Heir places every turn gain +1 AP, where X is the number of Special Assignment cards you used that turn.' },
+        { id: 'gentleman', name: 'The Gentleman', title: 'Magic for the Masses', ability: 'Whenever the Magician is placed on a Downtown, Market Row or Dark Alley slot, you receive Fame equal to the number of Trick cards you have.', soloAbility: 'Whenever the Heir places its Magician on a Downtown, Market Row, Dark Alley or Academy slot, it receives Fame equal to the number of Trick cards it has.' },
+        { id: 'lumenia', name: 'Lumenia the Radiant', title: 'Luminous Bonds', ability: 'You receive 1 additional Fame or Coin (but not Shard) for each Link you create when you set up Tricks in the Theater.', soloAbility: 'The Heir receives 1 additional Fame (but not Shard) for each Link it creates when setting up Tricks in the Theater.' }
       ],
       escape: [
-        { id: 'chains', name: 'Master of Chains', title: 'Breaking Free', ability: 'Before the Performance phase, you may take a special Reschedule Action without placing any Characters. Unlike the normal Reschedule Action, you receive the Link bonuses if you create Link(s) with this placement.', soloAbility: 'The first Trick placed by the Heir each turn can be oriented freely: the corner corresponding to the Trick\'s category does not have to be in a Link circle.', academyTitle: 'The Secret Combination', academyAbility: 'When you Perform, each Trick Link with your Trick marker in it awards a Performer Bonus of 2 Fame instead of 1.' },
-        { id: 'redlotus', name: 'Red Lotus', title: 'Trick Steal', ability: 'You may choose to receive the Yield of an opponent\'s Trick in the same Performance instead of your own Trick\'s Yield, as long as you are the Performer and the opponent\'s Trick has the same or lower Fame Threshold as yours. The opponent receives one less Fame for the Trick stolen this way.', soloAbility: 'When the Heir performs, it gets +1 Fame for each Trick you have on its selected Performance card.' },
-        { id: 'bernard', name: 'Professor Bernard', title: 'Mentor of Magicians', ability: 'When receiving Yield from a Trick in Classroom, you may remove that Trick from Workshop and set it aside. Replace its markers with your special markers. You benefit from this Trick in Classroom phase but it doesn\'t occupy a Workshop slot. (Max 2 Tricks)', soloAbility: 'During the Classroom phase, the Heir gains 3 Coins for each marker in the Classrooms (regardless of the owner).' }
+        { id: 'chains', name: 'Master of Chains', title: 'Breaking Free', ability: 'Before the \'Performance\' phase, you may take a special \'Reschedule\' Action without placing any Characters. Unlike the normal \'Reschedule\' Action, you receive the Link bonuses if you create Link(s) with this placement.', soloAbility: 'The first Trick placed by the Heir each turn can be oriented freely: the corner corresponding to the Trick\'s category does not have to be in a Link circle.', academyTitle: 'The Secret Combination', academyAbility: 'When you Perform, each Trick Link with your Trick marker in it awards a Performer Bonus of 2 Fame instead of 1.' },
+        { id: 'redlotus', name: 'The Red Lotus', title: 'Trick Steal', ability: 'You may choose to receive the Yield of an opponent\'s Trick in the same Performance instead of your own Trick\'s Yield, as long as you are the Performer and the opponent\'s Trick has the same or lower Fame Threshold as yours. The opponent receives one less Fame for the Trick stolen this way.', soloAbility: 'When the Heir performs, it gets +1 Fame for each Trick you have on its selected Performance card.' },
+        { id: 'bernard', name: 'Professor Bernard', title: 'Mentor of Magicians', ability: 'Whenever you receive the Yield of one of your Tricks in the Classroom (during a \'Classroom\' phase), you may remove that Trick from your Workshop and set it aside. Replace its Symbol marker and its Academy marker in the Classroom with your own special markers. Until the end of the game, you will benefit from this Trick in the \'Classroom\' phase, but it does not occupy a slot in your Workshop. You may do this with up to 2 of your Tricks. NOTE: Tricks set aside this way are ignored during the endgame scoring.', soloAbility: 'During the Classroom phase, the Heir gains 3 Coins for each marker in the Classrooms (regardless of the owner).' }
       ],
       spiritual: [
         { id: 'priestess', name: 'Priestess of Mysticism', title: 'Fate Weaving', ability: 'For 1 Dark Alley Action Point, you may discard the Active Prophecy, then replace it with any of the Pending Prophecies and draw a new one in its place.', soloAbility: 'If the Heir rotates the Dark Alley Prophecies, it will swap the next turn\'s Prophecy with a randomly drawn one.', academyTitle: 'Déjà Vu', academyAbility: 'During the "Discard Special Assignment Cards" subphase, you may pay 1 Shard. If you do, you may return one of your placed Special Assignment cards to your hand instead of discarding it.' },
         { id: 'yoruba', name: 'Yoruba Spiritmaster', title: 'Soul Possession', ability: 'Once per turn, before an opponent chooses a card to Perform, you may pay one Shard. If you do, you may choose the card to Perform for that player. The chosen card must have at least one of the opponent\'s Trick markers on it.', soloAbility: 'The Heir always performs first, regardless of Theater workday assignment.' },
-        { id: 'anjali', name: 'Anjali', title: 'Whisperer of Secrets', ability: 'During Assignment phase, place 1 Coin on any of your Protégé\'s Secrets. Before placing an Apprentice, you may spend that Coin to apply that Secret\'s ability to the Apprentice. Return unspent Coins during Return Characters.', soloAbility: 'At the beginning of the End Turn phase, the Heir gains 2 Coins for each Secret its Protégé has.' }
+        { id: 'anjali', name: 'Anjali', title: 'Whisperer of Secrets', ability: 'During the \'Assignment\' phase, you may place 1 Coin onto as many Secrets learned by your Protégé, up to all of them, as you wish. Before placing an Apprentice during the \'Place Characters\' phase, you may spend the Coin from one Secret. If you do, the ability granted by that Secret also applies to your Apprentice during its placement. During the \'Return Characters\' subphase, return all Coins that are still on the Secrets to the general supply.', soloAbility: 'At the beginning of the End Turn phase (before the pay Wages subphase), the Heir gains 2 Coins for each Secret its Protégé has.' }
       ]
     };
     
@@ -3453,6 +3453,82 @@
       }
     }
     
+    // Update school card descriptions based on Academy expansion
+    // Shows magician names for player schools, and magician names (with Academy) or "Favorite: X Tricks" for Heir
+    function updateSchoolDescriptions() {
+      const hasAcademy = gameState.expansions?.academy;
+      
+      // Magician names by school (base game)
+      const baseMagicians = {
+        mechanical: ['The Mechaniker', 'Elektra'],
+        spiritual: ['Priestess of Mysticism', 'Yoruba Spiritmaster'],
+        escape: ['Master of Chains', 'Red Lotus'],
+        optical: ['The Great Optico', 'The Gentleman']
+      };
+      
+      // Academy magicians by school
+      const academyMagicians = {
+        mechanical: ['Geert van Augustin'],
+        spiritual: ['Anjali'],
+        escape: ['Professor Bernard'],
+        optical: ['Lumenia the Radiant']
+      };
+      
+      // Build description text for each school
+      const getPlayerDescription = (school) => {
+        const base = baseMagicians[school].join(', ');
+        if (hasAcademy) {
+          return `${base}, ${academyMagicians[school][0]}`;
+        }
+        return base;
+      };
+      
+      const getHeirDescription = (school) => {
+        // Heir shows magician names too (same as player)
+        return getPlayerDescription(school);
+      };
+      
+      // Update Full Setup - Player School (page 4)
+      ['mechanical', 'spiritual', 'escape', 'optical'].forEach(school => {
+        const playerCard = $(`#player-school-options .option-card[data-school="${school}"] .description`);
+        if (playerCard) {
+          playerCard.textContent = getPlayerDescription(school);
+        }
+        
+        // Update Full Setup - Heir School (page 6)
+        const heirCard = $(`#heir-school-options .option-card[data-school="${school}"] .description`);
+        if (heirCard) {
+          heirCard.textContent = getHeirDescription(school);
+        }
+        
+        // Update Quick Setup - Player School
+        const quickPlayerCard = $(`#quick-player-school-options .option-card[data-school="${school}"]`);
+        if (quickPlayerCard) {
+          let descEl = quickPlayerCard.querySelector('.description');
+          if (!descEl) {
+            // Create description element if it doesn't exist
+            descEl = document.createElement('div');
+            descEl.className = 'description';
+            quickPlayerCard.appendChild(descEl);
+          }
+          descEl.textContent = getPlayerDescription(school);
+        }
+        
+        // Update Quick Setup - Heir School
+        const quickHeirCard = $(`#quick-heir-school-options .option-card[data-school="${school}"]`);
+        if (quickHeirCard) {
+          let descEl = quickHeirCard.querySelector('.description');
+          if (!descEl) {
+            // Create description element if it doesn't exist
+            descEl = document.createElement('div');
+            descEl.className = 'description';
+            quickHeirCard.appendChild(descEl);
+          }
+          descEl.textContent = getHeirDescription(school);
+        }
+      });
+    }
+    
     function updateSetupPageContent(pageNum) {
       // Update dynamic content on certain pages
       if (pageNum === 2) {
@@ -3486,6 +3562,11 @@
           }
           saDecksInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">${saText}</span>`;
         }
+      }
+      
+      if (pageNum === 4) {
+        // Update school descriptions based on Academy expansion
+        updateSchoolDescriptions();
       }
       
       if (pageNum === 5) {
@@ -3600,6 +3681,8 @@
     function startQuickSetup() {
       setupMode = 'quick';
       showSetupPage('quick');
+      // Update school descriptions based on Academy expansion
+      updateSchoolDescriptions();
     }
     
     // Quick Setup selection handlers
@@ -4209,7 +4292,7 @@
         card.dataset.magician = mag.id;
         card.innerHTML = `
           <div class="title" style="color: ${color};">${mag.name}</div>
-          <div class="description">${mag.ability || ''}</div>
+          <div class="description">${mag.soloAbility || ''}</div>
         `;
         card.addEventListener('click', () => selectHeirMagician(mag, school));
         container.appendChild(card);
@@ -6096,7 +6179,7 @@
         `Turn ${gameState.currentTurn} — ${locationName}`,
         `<p><strong>Is this the Magician being placed?</strong></p>
          
-         ${magicianAbilityBox(`<strong>The Gentleman:</strong> When the Magician goes to Downtown, Market Row, or Dark Alley, the Heir gains Fame equal to the number of Tricks it has.`)}
+         ${magicianAbilityBox(`<strong>The Gentleman:</strong> When the Magician goes to Downtown, Market Row, Dark Alley or Academy, the Heir gains Fame equal to the number of Tricks it has.`)}
          
          <div style="background: var(--bg-card); padding: 15px; border-radius: 6px; margin: 15px 0;">
            <p>The Heir has <strong>${trickCount} Trick(s)</strong></p>
@@ -7537,8 +7620,8 @@
       };
       const activeSchoolProphecy = schoolProphecyMap[gameState.activeProphecy?.id];
       
-      // Get prophecy reminder for theater phase
-      const prophecyReminder = getProphecyReminderHtml('theater');
+      // Get prophecy reminder for Heir theater action (only shows "affects both" prophecies)
+      const prophecyReminder = getHeirProphecyReminderHtml('heir-theater-nonmagician');
       
       // Note about multiple tricks on same card (show if more markers remaining)
       let multiTrickNote = '';
@@ -7849,6 +7932,17 @@
     }
     
     function showAcademyInput() {
+      // Check for The Gentleman's ability first
+      const isGentleman = gameState.heirMagician?.id === 'gentleman';
+      
+      if (isGentleman) {
+        showGentlemanMagicianCheck('academy', showAcademyAPInput);
+      } else {
+        showAcademyAPInput();
+      }
+    }
+    
+    function showAcademyAPInput() {
       // Academy location - ask for AP like other locations
       setActionContent(
         `Turn ${gameState.currentTurn} — Academy`,
@@ -7906,8 +8000,8 @@
         return;
       }
       
-      // p30 reminder for player (Heir ignores - uses coin flip)
-      const prophecyReminder = getProphecyReminderHtml('academy');
+      // Show prophecy reminder for Heir academy action (only shows "affects both" prophecies like p28, p29, p32)
+      const prophecyReminder = getHeirProphecyReminderHtml('heir-academy');
       
       // Heir will learn a secret - use coin flip like Dark Alley
       setActionContent(
@@ -11358,6 +11452,12 @@
       const isExtraShard = gameState.activeProphecy?.id === 'p19';
       const isShardsGiveFame = gameState.activeProphecy?.id === 'p20';
       
+      // Check if player is Bernard - remind about set aside tricks
+      const isPlayerBernard = gameState.playerMagician?.id === 'bernard';
+      const bernardReminder = isPlayerBernard 
+        ? magicianAbilityBox(`<strong>Professor Bernard reminder:</strong> Tricks you set aside using your ability are <strong>ignored</strong> during endgame scoring — do not count their end-game bonuses.`)
+        : '';
+      
       // Restore previous values if going back
       const prevCount = endGameTempData.trickCount || 0;
       const prevFame = endGameTempData.trickFame || 0;
@@ -11369,6 +11469,7 @@
         `<p><strong>Tricks Remaining on Performance Cards</strong></p>
          
          ${prophecyReminder}
+         ${bernardReminder}
          
          ${infoBox("The Heir receives the Yield of Tricks still on Performance cards, but <strong>minus 1 Fame and 1 Coin per Trick</strong>. Enter the <strong>raw values</strong> from the cards — the app will calculate the adjustment.")}
          
@@ -11776,6 +11877,9 @@
             
             // Update prophecy removal display (Academy adds p31)
             updateProphecyRemovalDisplay();
+            
+            // Update school descriptions (Academy adds magicians)
+            updateSchoolDescriptions();
             
             // Update Quick Setup summary if visible
             if (optionsSelector.includes('quick')) {
