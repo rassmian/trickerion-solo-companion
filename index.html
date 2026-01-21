@@ -1166,7 +1166,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.14.21-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.14.22-beta</p>
       <button class="restart-btn hidden" id="restart-btn">↺ New Game</button>
     </header>
 
@@ -8597,7 +8597,7 @@
           [
             { text: 'Yes — Heir is performing', action: () => {
               gameState.performanceOrder = 'heir-first';
-              showPerformanceCardSelection();
+              checkPlayerYorubaAbility();
             }},
             { text: 'No — Heir is not performing', action: () => {
               gameState.performanceOrder = 'heir-first';
@@ -8652,7 +8652,7 @@
              <li>It has Trick markers on at least one Performance card</li>
            </ul>`,
           [
-            { text: 'Yes — Heir is performing', action: () => showPerformanceCardSelection() },
+            { text: 'Yes — Heir is performing', action: () => checkPlayerYorubaAbility() },
             { text: 'No — Heir is not performing', action: () => askIfPlayerPerforming() }
           ]
         );
@@ -8672,6 +8672,99 @@
       if (turn === 1) return 1;
       if (turn === 2) return 2;
       return 3; // Turn 3 onwards: steady state of 3 cards
+    }
+    
+    // Check if player is Yoruba Spiritmaster and wants to force Heir's performance card choice
+    function checkPlayerYorubaAbility() {
+      const isPlayerYoruba = gameState.playerMagician?.id === 'yoruba';
+      const playerShards = gameState.heir.shards; // Note: We don't track player shards, so this is informational only
+      
+      if (!isPlayerYoruba) {
+        showPerformanceCardSelection();
+        return;
+      }
+      
+      const cardCount = getPerformanceCardCount();
+      
+      // Build card selection UI
+      const cardButtonsHtml = [1,2,3,4,5].filter(i => i <= cardCount).map(i => 
+        `<button class="btn yoruba-card-btn" data-card="${i}" style="min-width: 60px; margin: 4px;">${i}</button>`
+      ).join('');
+      
+      setActionContent(
+        `Turn ${gameState.currentTurn} — Yoruba Spiritmaster Ability`,
+        `${magicianAbilityBox(`<strong>Yoruba Spiritmaster (Soul Possession):</strong> Once per turn, before the Heir chooses a card to Perform, you may pay <strong>1 Shard</strong>. If you do, you may choose the card for the Heir to Perform. The chosen card must have at least one of the Heir's Trick markers on it.`)}
+         
+         <p style="margin-top: 15px;"><strong>Do you want to use Soul Possession?</strong></p>
+         <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 8px;">Pay 1 Shard to force the Heir to perform on a specific card.</p>
+         
+         <div id="yoruba-card-selection" style="display: none; background: var(--bg-card); padding: 15px; border-radius: 6px; margin: 15px 0;">
+           <p style="margin-bottom: 10px;"><strong>Which card must the Heir perform on?</strong></p>
+           <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 10px;">Select a card that has at least one of the Heir's Trick markers:</p>
+           <div style="display: flex; justify-content: flex-start; flex-wrap: wrap;">
+             ${cardButtonsHtml}
+           </div>
+           <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 10px;">Card 1 = newest (Thursday side), Card ${cardCount} = oldest</p>
+         </div>`,
+        [
+          { text: 'Yes — Pay 1 Shard to choose', action: () => {
+            // Show card selection
+            const selectionDiv = $('#yoruba-card-selection');
+            if (selectionDiv) selectionDiv.style.display = 'block';
+          }},
+          { text: 'No — Let Heir choose normally', action: () => showPerformanceCardSelection() }
+        ]
+      );
+      
+      // Add click handlers for card buttons
+      setTimeout(() => {
+        $$('.yoruba-card-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const cardNum = parseInt(btn.dataset.card);
+            
+            // Store the forced card choice
+            gameState.yorubaForcedCard = cardNum;
+            
+            // Show confirmation and continue
+            setActionContent(
+              `Turn ${gameState.currentTurn} — Soul Possession Used`,
+              `${magicianAbilityBox(`<strong>Yoruba Spiritmaster:</strong> You paid 1 Shard to force the Heir's choice.`)}
+               
+               ${boardAction("Pay 1 Shard from your supply")}
+               
+               <p style="margin-top: 15px;">The Heir <strong>must</strong> perform on <strong>Card ${cardNum}</strong>.</p>
+               
+               <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 10px;">The Heir will perform on this card (if it has their Trick markers) instead of choosing based on priority rules.</p>`,
+              [{ text: 'Continue to Performance', action: () => showPerformanceCardSelectionWithForcedCard(cardNum) }]
+            );
+          });
+        });
+      }, 0);
+    }
+    
+    // Show performance card selection with a forced card from Yoruba
+    function showPerformanceCardSelectionWithForcedCard(forcedCard) {
+      const cardCount = getPerformanceCardCount();
+      
+      setActionContent(
+        `Turn ${gameState.currentTurn} — Performance (Heir)`,
+        `${magicianAbilityBox(`<strong>Soul Possession:</strong> The Heir must perform on <strong>Card ${forcedCard}</strong>.`)}
+         
+         <p style="margin-top: 15px;">Does the Heir have Trick markers on Card ${forcedCard}?</p>
+         
+         ${infoBox("If the Heir has no markers on the forced card, Soul Possession has no effect and normal rules apply.")}`,
+        [
+          { text: `Yes — Heir performs on Card ${forcedCard}`, action: () => {
+            // Go directly to performance wizard with the forced card
+            gameState.heirSelectedCards = [forcedCard];
+            showHeirPerformanceWizard();
+          }},
+          { text: 'No markers on that card — Use normal selection', action: () => {
+            gameState.yorubaForcedCard = null;
+            showPerformanceCardSelection();
+          }}
+        ]
+      );
     }
     
     function showPerformanceCardSelection() {
@@ -9803,8 +9896,53 @@
          
          ${infoBox("You perform if your Magician is in a Performance slot (Theater) and you have Trick markers on at least one Performance card.")}`,
         [
-          { text: 'Yes — I am performing', action: () => showPlayerPerformanceScreen() },
+          { text: 'Yes — I am performing', action: () => checkRedLotusAbility() },
           { text: 'No — I am not performing', action: () => advancePhase() }
+        ]
+      );
+    }
+    
+    // Check if player is Red Lotus and wants to use Trick Steal ability
+    function checkRedLotusAbility() {
+      const isRedLotus = gameState.playerMagician?.id === 'redlotus';
+      
+      if (!isRedLotus) {
+        showPlayerPerformanceScreen();
+        return;
+      }
+      
+      // Red Lotus: Ask if player wants to steal Heir's trick
+      const currentFame = gameState.heir.fame;
+      
+      setActionContent(
+        `Turn ${gameState.currentTurn} — The Red Lotus Ability`,
+        `${magicianAbilityBox(`<strong>The Red Lotus (Trick Steal):</strong> You may choose to receive the Yield of the Heir's Trick in the same Performance instead of your own Trick's Yield, as long as you are the Performer and the Heir's Trick has the same or lower Fame Threshold as yours. <strong>The Heir receives one less Fame</strong> for the Trick stolen this way.`)}
+         
+         <p style="margin-top: 15px;"><strong>Did you use Trick Steal this Performance?</strong></p>
+         
+         <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 10px;">If you stole an Heir trick's yield, the Heir loses 1 Fame as a penalty.</p>
+         
+         <div style="background: var(--bg-card); padding: 15px; border-radius: 6px; margin: 15px 0;">
+           <p>Heir's current Fame: <strong>${currentFame}</strong></p>
+           <p style="color: var(--text-secondary); margin-top: 8px;">If stolen → <strong>${Math.max(0, currentFame - 1)} Fame</strong> (−1 penalty)</p>
+         </div>`,
+        [
+          { text: 'Yes — I stole a trick (−1 Heir Fame)', action: () => {
+            gameState.heir.fame = Math.max(0, gameState.heir.fame - 1);
+            updateGameDisplay();
+            
+            // Show confirmation then continue
+            setActionContent(
+              `Turn ${gameState.currentTurn} — Trick Steal Applied`,
+              `${magicianAbilityBox(`<strong>The Red Lotus:</strong> Heir loses 1 Fame for the stolen trick.`)}
+               
+               ${boardAction(`Update Heir's Fame (${currentFame} → ${gameState.heir.fame})`)}
+               
+               <p style="margin-top: 15px; color: var(--text-secondary);">Remember: You receive the Heir's trick yield instead of your own trick's yield.</p>`,
+              [{ text: 'Continue to Performance', action: () => showPlayerPerformanceScreen() }]
+            );
+          }},
+          { text: 'No — Continue normally', action: () => showPlayerPerformanceScreen() }
         ]
       );
     }
@@ -9978,7 +10116,7 @@
          
          ${infoBox("The Heir ignores Thursday/Sunday yield modifiers — it always receives base Yields.")}`,
         [
-          { text: 'Yes — Heir is performing', action: () => showPerformanceCardSelection() },
+          { text: 'Yes — Heir is performing', action: () => checkPlayerYorubaAbility() },
           { text: 'No — Heir is not performing', action: () => advancePhase() }
         ]
       );
