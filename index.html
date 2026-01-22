@@ -6583,14 +6583,39 @@
       
       // Check if Heir needs to return a trick (4 slots max)
       const needsToReturn = gameState.heir.tricks.length >= 4;
-      let returnNote = '';
+      
       if (needsToReturn) {
-        const lowestYieldTrick = gameState.heir.tricks[gameState.heir.tricks.length - 1];
-        returnNote = `<div style="background: var(--exception-bg); border-left: 3px solid var(--exception); padding: 8px 12px; margin: 15px 0; border-radius: 0 4px 4px 0;">
-          <span style="color: var(--exception); font-weight: 600;">⚠️ SLOTS FULL:</span> The Heir has 4 tricks. Before learning a new one, return <strong>${lowestYieldTrick.name}</strong> (rightmost/lowest yield).
-        </div>
-        <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Return <strong>${lowestYieldTrick.name}</strong> card, its Symbol marker, and all its Trick markers (including from Theater) to Dahlgaard's Residence</span></div>`;
+        // Show separate SLOTS FULL screen first
+        showSlotFullWarning(trickInfo, availableTricks);
+      } else {
+        // Go directly to trick selection
+        showTrickSelectionButtons(trickInfo, availableTricks);
       }
+    }
+    
+    function showSlotFullWarning(trickInfo, availableTricks) {
+      const lowestYieldTrick = gameState.heir.tricks[gameState.heir.tricks.length - 1];
+      
+      setActionContent(
+        `Turn ${gameState.currentTurn} — Downtown (Slots Full)`,
+        `<p>The Heir will learn a new trick, but all 4 trick slots are full.</p>
+         
+         <div style="background: var(--exception-bg); border-left: 3px solid var(--exception); padding: 8px 12px; margin: 15px 0; border-radius: 0 4px 4px 0;">
+           <span style="color: var(--exception); font-weight: 600;">⚠️ SLOTS FULL:</span> Before learning a new trick, return <strong>${lowestYieldTrick.name}</strong> (rightmost/lowest yield).
+         </div>
+         
+         ${boardAction(`Return <strong>${lowestYieldTrick.name}</strong> card, its Symbol marker, and all its Trick markers (including from Theater) to Dahlgaard's Residence`)}
+         
+         <p style="margin-top: 15px; color: var(--text-secondary); font-size: 0.9rem;">Once you have returned the trick, continue to select the new trick.</p>`,
+        [
+          { text: 'Continue — Select New Trick', action: () => showTrickSelectionButtons(trickInfo, availableTricks) }
+        ]
+      );
+    }
+    
+    function showTrickSelectionButtons(trickInfo, availableTricks) {
+      const { level, school } = trickInfo;
+      const schoolDisplay = school.charAt(0).toUpperCase() + school.slice(1);
       
       // Build buttons for each available trick
       const trickButtons = availableTricks.map(trick => `
@@ -6610,8 +6635,6 @@
       setActionContent(
         `Turn ${gameState.currentTurn} — Downtown (Heir Takes Trick)`,
         `${trickInstruction}
-         
-         ${returnNote}
          
          <div style="margin: 20px 0;">
            ${trickButtons}
@@ -6658,28 +6681,50 @@
       const newComponentTypes = getUniqueComponentTypes(newTrick.components);
       const shoppingListDisplay = newComponentTypes.join(', ');
       
-      // Show the current order of tricks (sorted by yield) - horizontal like cards on board
-      const trickOrderHtml = gameState.heir.tricks.map((trick, index) => {
-        const isNew = trick.id === newTrick.id;
-        return `
-          <div style="
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 8px 4px;
-            background: ${isNew ? 'rgba(212, 168, 71, 0.15)' : 'var(--bg-card)'};
-            border: 2px solid ${isNew ? 'var(--amber)' : 'var(--border)'};
-            border-radius: 6px;
-            flex: 1;
-            min-width: 0;
-            text-align: center;
-            ${isNew ? 'box-shadow: 0 0 10px rgba(212, 168, 71, 0.3);' : ''}
-          ">
-            <div style="font-size: 0.65rem; color: var(--text-muted); margin-bottom: 2px;">Slot ${index + 1}</div>
-            <div style="font-weight: 600; font-size: 0.75rem; margin-bottom: 4px; line-height: 1.2; word-break: break-word;">${trick.name}</div>
-            <div style="font-size: 0.7rem; color: var(--text-secondary);">${trick.fame}★ ${trick.coins}🪙${trick.shards > 0 ? ' ' + trick.shards + '💎' : ''}</div>
-            ${isNew ? '<div style="color: var(--amber); font-size: 0.65rem; margin-top: 4px; font-weight: 600;">NEW</div>' : ''}
-          </div>`;
+      // Show the current order of tricks (sorted by yield) - fixed 4 slots like physical board
+      const trickOrderHtml = [1,2,3,4].map(slotNum => {
+        const index = slotNum - 1;
+        const trick = gameState.heir.tricks[index];
+        
+        if (trick) {
+          const isNew = trick.id === newTrick.id;
+          return `
+            <div style="
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              padding: 5px 3px;
+              background: ${isNew ? 'rgba(212, 168, 71, 0.15)' : 'var(--bg-card)'};
+              border: 2px solid ${isNew ? 'var(--amber)' : 'var(--border)'};
+              border-radius: 6px;
+              width: 75px;
+              height: 95px;
+              text-align: center;
+              ${isNew ? 'box-shadow: 0 0 10px rgba(212, 168, 71, 0.3);' : ''}
+            ">
+              <div style="font-size: 0.55rem; color: var(--text-muted); margin-bottom: 1px;">Slot ${slotNum}</div>
+              <div style="font-weight: 600; font-size: 0.55rem; margin-bottom: 2px; line-height: 1.15; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; flex: 1; display: flex; align-items: center;">${trick.name}</div>
+              <div style="font-size: 0.6rem; color: var(--text-secondary);">${trick.fame}★ ${trick.coins}🪙${trick.shards > 0 ? ' ' + trick.shards + '💎' : ''}</div>
+              ${isNew ? '<div style="color: var(--amber); font-size: 0.55rem; margin-top: 1px; font-weight: 600;">NEW</div>' : ''}
+            </div>`;
+        } else {
+          // Empty slot
+          return `
+            <div style="
+              width: 75px;
+              height: 95px;
+              background: transparent;
+              border: 2px dashed var(--border);
+              border-radius: 6px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: var(--text-muted);
+              font-size: 0.8rem;
+              opacity: 0.4;
+            ">—</div>`;
+        }
       }).join('');
       
       setActionContent(
@@ -8693,7 +8738,6 @@
     // Check if player is Yoruba Spiritmaster and wants to force Heir's performance card choice
     function checkPlayerYorubaAbility() {
       const isPlayerYoruba = gameState.playerMagician?.id === 'yoruba';
-      const playerShards = gameState.heir.shards; // Note: We don't track player shards, so this is informational only
       
       if (!isPlayerYoruba) {
         showPerformanceCardSelection();
@@ -8702,10 +8746,48 @@
       
       const cardCount = getPerformanceCardCount();
       
-      // Build card selection UI
-      const cardButtonsHtml = [1,2,3,4,5].filter(i => i <= cardCount).map(i => 
-        `<button class="btn yoruba-card-btn" data-card="${i}" style="min-width: 60px; margin: 4px;">${i}</button>`
-      ).join('');
+      // Build visual card slots matching Heir performance selection style
+      const cardSlotsHtml = `
+        <div style="display: flex; justify-content: center; gap: 8px; margin: 20px 0; flex-wrap: wrap;">
+          ${[1,2,3,4,5].map(i => {
+            const hasCard = i <= cardCount;
+            
+            if (hasCard) {
+              return `<div class="yoruba-card-slot" data-slot="${i}" style="
+                width: 50px;
+                height: 70px;
+                background: var(--bg-card);
+                border: 2px solid var(--border);
+                border-radius: 4px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: var(--text-secondary);
+                font-weight: 600;
+                font-size: 0.9rem;
+                cursor: pointer;
+                transition: all 0.15s ease;
+              ">${i}</div>`;
+            } else {
+              return `<div style="
+                width: 50px;
+                height: 70px;
+                background: transparent;
+                border: 2px dashed var(--border);
+                border-radius: 4px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: var(--text-muted);
+                font-size: 0.8rem;
+                opacity: 0.4;
+              ">—</div>`;
+            }
+          }).join('')}
+        </div>
+        <p style="text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 10px;">
+          ← Slot 1 (newest) — Slot 5 (oldest) →
+        </p>`;
       
       setActionContent(
         `Turn ${gameState.currentTurn} — Yoruba Spiritmaster Ability`,
@@ -8717,28 +8799,47 @@
          <div id="yoruba-card-selection" style="display: none; background: var(--bg-card); padding: 15px; border-radius: 6px; margin: 15px 0;">
            <p style="margin-bottom: 10px;"><strong>Which card must the Heir perform on?</strong></p>
            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 10px;">Select a card that has at least one of the Heir's Trick markers:</p>
-           <div style="display: flex; justify-content: flex-start; flex-wrap: wrap;">
-             ${cardButtonsHtml}
-           </div>
-           <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 10px;">Card 1 = newest (Thursday side), Card ${cardCount} = oldest</p>
+           
+           ${cardSlotsHtml}
+           
+           <p id="yoruba-selected-text" style="text-align: center; color: var(--text-secondary); font-size: 0.9rem; margin-top: 10px;">
+             No card selected
+           </p>
          </div>`,
         [
           { text: 'Yes — Pay 1 Shard to choose', action: () => {
             // Show card selection
             const selectionDiv = $('#yoruba-card-selection');
             if (selectionDiv) selectionDiv.style.display = 'block';
-          }},
+          }, id: 'yoruba-yes-btn' },
           { text: 'No — Let Heir choose normally', action: () => showPerformanceCardSelection() }
         ]
       );
       
-      // Add click handlers for card buttons
+      // Add click handlers for card slots (single-select)
       setTimeout(() => {
-        $$('.yoruba-card-btn').forEach(btn => {
-          btn.addEventListener('click', () => {
-            const cardNum = parseInt(btn.dataset.card);
+        let selectedCard = null;
+        
+        $$('.yoruba-card-slot').forEach(slot => {
+          slot.addEventListener('click', () => {
+            const cardNum = parseInt(slot.dataset.slot);
             
-            // Store the forced card choice
+            // Deselect any previously selected card
+            $$('.yoruba-card-slot').forEach(s => {
+              s.classList.remove('slot-selected');
+              s.dataset.selected = 'false';
+            });
+            
+            // Select this card
+            slot.classList.add('slot-selected');
+            slot.dataset.selected = 'true';
+            selectedCard = cardNum;
+            
+            // Update selection text
+            const selText = $('#yoruba-selected-text');
+            if (selText) selText.textContent = `Card ${cardNum} selected`;
+            
+            // Store the forced card choice and show confirmation
             gameState.yorubaForcedCard = cardNum;
             
             // Show confirmation and continue
@@ -8771,9 +8872,8 @@
          ${infoBox("If the Heir has no markers on the forced card, Soul Possession has no effect and normal rules apply.")}`,
         [
           { text: `Yes — Heir performs on Card ${forcedCard}`, action: () => {
-            // Go directly to performance wizard with the forced card
-            gameState.heirSelectedCards = [forcedCard];
-            showHeirPerformanceWizard();
+            // Go directly to single card performance with the forced card
+            showSingleCardPerformance(forcedCard);
           }},
           { text: 'No markers on that card — Use normal selection', action: () => {
             gameState.yorubaForcedCard = null;
@@ -12497,6 +12597,45 @@
       testP07Theater: function() {
         this.theaterComplete('p07');
         console.log('\n📝 TEST: Verify p07 shows standard design + school trick input');
+      },
+      
+      // Jump to Downtown with 4 tricks to test SLOTS FULL
+      // Usage: debug.slotsFull()
+      slotsFull: function() {
+        // Set up minimal game state
+        gameState.currentTurn = 4;
+        gameState.difficulty = gameState.difficulty || 'normal';
+        gameState.heirMagician = gameState.heirMagician || { id: 'yoruba', name: 'Yoruba Spiritmaster', school: 'spiritual' };
+        gameState.playerMagician = gameState.playerMagician || { id: 'elektra', name: 'Elektra', school: 'optical' };
+        gameState.heir = gameState.heir || {};
+        gameState.heir.fame = 40;
+        gameState.heir.coins = 10;
+        gameState.heir.shards = 2;
+        gameState.heir.characters = ['magician', 'engineer', 'apprentice'];
+        gameState.heir.shoppingList = ['Glass', 'Metal', 'Wood'];
+        gameState.heir.specialAssignments = { theater: 0, downtown: 0, market: 0, darkAlley: 0, workshop: 0, academy: 0 };
+        
+        // Add 4 tricks to heir (fills all slots)
+        gameState.heir.tricks = [
+          { id: 'future_sight', name: 'Future Sight', fame: 4, coins: 1, shards: 0, markers: 2, school: 'spiritual', level: 2, currentMarkers: 2, prepared: true },
+          { id: 'window_otherworld', name: 'Window to the Otherworld', fame: 3, coins: 2, shards: 0, markers: 2, school: 'spiritual', level: 1, currentMarkers: 2, prepared: true },
+          { id: 'spirit_hand', name: 'Spirit Hand', fame: 2, coins: 1, shards: 1, markers: 2, school: 'spiritual', level: 1, currentMarkers: 2, prepared: true },
+          { id: 'sawing_assistant', name: 'Sawing the Assistant in Half', fame: 1, coins: 5, shards: 0, markers: 3, school: 'spiritual', level: 2, currentMarkers: 3, prepared: true }
+        ];
+        
+        // Set player has no tricks in this school
+        gameState.player = gameState.player || {};
+        gameState.player.tricks = [];
+        
+        showScreen('game-screen');
+        updateGameDisplay();
+        
+        // Go to heir trick selection with Level 3 Mechanical tricks
+        const trickInfo = { level: 3, school: 'mechanical' };
+        showDowntownHeirTrickSelection(trickInfo);
+        
+        console.log('🎮 Jumped to Downtown with 4 tricks (SLOTS FULL test)');
+        console.log('📝 TEST: Should see separate SLOTS FULL screen before trick selection');
       },
       
       // Jump to Downtown Final Instructions to test Take Coins board action
