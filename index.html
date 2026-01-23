@@ -1248,7 +1248,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.15.6-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.15.7-beta</p>
       <button class="restart-btn hidden" id="restart-btn">↺ New Game</button>
     </header>
 
@@ -6912,35 +6912,311 @@
       const wagonLocationNames = { downtown: 'Downtown', market: 'Market Row', darkalley: 'Dark Alley', academy: 'Academy' };
       const wagonName = wagonLocationNames[gameState.wagonLocation];
       
-      // Build the priority list HTML
-      const priorityListHtml = `
-        <ol style="color: var(--text-secondary); line-height: 2; padding-left: 20px; margin: 15px 0;">
-          <li><strong>Enchant</strong> leftmost non-enchanted Trick<br>
-            <span style="font-size: 0.85rem; color: var(--text-muted);">Pick type from offer Heir has most of (cheaper breaks ties)</span></li>
-          <li><strong>Take Arcane Worker</strong> → Remove from play → <strong>Hire Apprentice</strong> instead<br>
-            <span style="font-size: 0.85rem; color: var(--text-muted);">Only if Worker on offer AND Heir has empty Apprentice slot</span></li>
-          <li><strong>Set Enchantment die</strong> to type Heir has most enchanted Tricks of<br>
-            <span style="font-size: 0.85rem; color: var(--text-muted);">Only if Ready stance AND ≥1 enchanted Trick AND dice not already locked. <strong>After setting, dice are locked for the turn.</strong></span></li>
-          <li><strong>Gain 1 Arcane Shard</strong><br>
-            <span style="font-size: 0.85rem; color: var(--text-muted);">If supply empty: +1 Fame, +1 Coin instead</span></li>
-          <li><strong>Gain 1 Arcane Shard</strong><br>
-            <span style="font-size: 0.85rem; color: var(--text-muted);">If supply empty: +1 Fame, +1 Coin instead</span></li>
-          <li><strong>Gain 3 Fame</strong></li>
-        </ol>`;
+      // Track selected actions
+      const selectedActions = [];
+      
+      // Action definitions
+      const arcanistActions = [
+        { id: 1, name: 'Enchant leftmost non-enchanted Trick', note: 'Pick type from offer Heir has most of (cheaper breaks ties)', needsFollowup: 'enchant' },
+        { id: 2, name: 'Take Arcane Worker → Hire Apprentice', note: 'Only if Worker on offer AND Heir has empty Apprentice slot', needsFollowup: 'apprentice' },
+        { id: 3, name: 'Set Enchantment die to type Heir has most enchanted Tricks of', note: 'Only if Ready stance AND ≥1 enchanted Trick AND dice not locked', needsFollowup: 'setdie' },
+        { id: 4, name: 'Gain 1 Arcane Shard', note: 'If supply empty: +1 Fame, +1 Coin instead', needsFollowup: 'shard' },
+        { id: 5, name: 'Gain 1 Arcane Shard', note: 'If supply empty: +1 Fame, +1 Coin instead', needsFollowup: 'shard' },
+        { id: 6, name: 'Gain 3 Fame', note: null, needsFollowup: null }
+      ];
+      
+      const renderActionList = () => {
+        return arcanistActions.map(action => {
+          const isSelected = selectedActions.includes(action.id);
+          const selectedIndex = selectedActions.indexOf(action.id);
+          const isDisabled = selectedActions.length >= actionCount && !isSelected;
+          
+          const selectedClass = isSelected ? 'btn-selected' : '';
+          const disabledStyle = isDisabled ? 'opacity: 0.5; pointer-events: none;' : '';
+          
+          const checkmark = isSelected 
+            ? `<span style="color: var(--amber); font-weight: bold; min-width: 24px;">${selectedIndex + 1}.</span>` 
+            : `<span style="color: var(--text-muted); min-width: 24px;">${action.id}.</span>`;
+          
+          return `
+            <button class="btn arcanist-action-btn ${selectedClass}" data-action-id="${action.id}" 
+                    style="display: flex; align-items: flex-start; width: 100%; text-align: left; padding: 12px; margin-bottom: 8px; ${disabledStyle}">
+              ${checkmark}
+              <div style="flex: 1;">
+                ${action.name}
+                ${action.note ? `<div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; font-weight: normal;">${action.note}</div>` : ''}
+              </div>
+            </button>
+          `;
+        }).join('');
+      };
+      
+      const updateDisplay = () => {
+        const listContainer = document.getElementById('arcanist-action-list');
+        if (listContainer) {
+          listContainer.innerHTML = renderActionList();
+          attachActionListeners();
+        }
+        
+        const continueBtn = document.getElementById('arcanist-continue-btn');
+        if (continueBtn) {
+          continueBtn.disabled = selectedActions.length !== actionCount;
+        }
+        
+        const selectionStatus = document.getElementById('selection-status');
+        if (selectionStatus) {
+          selectionStatus.textContent = `Selected: ${selectedActions.length} / ${actionCount}`;
+          selectionStatus.style.color = selectedActions.length === actionCount ? 'var(--success)' : 'var(--text-muted)';
+        }
+      };
+      
+      const attachActionListeners = () => {
+        document.querySelectorAll('.arcanist-action-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const actionId = parseInt(btn.dataset.actionId);
+            const index = selectedActions.indexOf(actionId);
+            
+            if (index > -1) {
+              // Deselect
+              selectedActions.splice(index, 1);
+            } else if (selectedActions.length < actionCount) {
+              // Select
+              selectedActions.push(actionId);
+            }
+            
+            updateDisplay();
+          });
+        });
+      };
       
       setActionContent(
         `Turn ${gameState.currentTurn} — Arcanist Actions`,
-        `${infoBox(`The Heir is at <strong>${wagonName}</strong> which has the <strong>Wagon</strong>. After normal location actions, perform <strong>${actionCount}</strong> Arcanist action${actionCount > 1 ? 's' : ''} from this priority list.`)}
+        `${infoBox(`The Heir is at <strong>${wagonName}</strong> which has the <strong>Wagon</strong>. After normal location actions, select <strong>${actionCount}</strong> Arcanist action${actionCount > 1 ? 's' : ''} the Heir performed.`)}
         
-        <p><strong>Heir's Arcanist Priority List</strong> (${difficulty} difficulty = ${actionCount} action${actionCount > 1 ? 's' : ''}):</p>
-        ${priorityListHtml}
+        <p><strong>Select ${actionCount} action${actionCount > 1 ? 's' : ''}</strong> (${difficulty} difficulty):</p>
+        <p id="selection-status" style="font-size: 0.9rem; margin-bottom: 15px;">Selected: 0 / ${actionCount}</p>
         
-        ${boardAction(`Perform the top <strong>${actionCount}</strong> applicable action${actionCount > 1 ? 's' : ''} from the list above for the Heir`)}
+        <div id="arcanist-action-list">
+          ${renderActionList()}
+        </div>
         
         ${noteBox(`<strong>Remember:</strong> The Heir does NOT physically take Enchantment tiles. When enchanting, just note the TYPE for dice trigger purposes.`)}`,
         [
+          { text: 'Continue →', action: () => processArcanistActions(selectedActions), id: 'arcanist-continue-btn', disabled: true }
+        ]
+      );
+      
+      setTimeout(() => {
+        attachActionListeners();
+      }, 0);
+    }
+    
+    function processArcanistActions(selectedActions) {
+      // Process actions that need follow-up questions
+      // Actions: 1=enchant, 2=apprentice, 3=setdie, 4=shard, 5=shard, 6=fame
+      
+      // Store for processing
+      window.arcanistActionsToProcess = [...selectedActions];
+      window.arcanistResults = {
+        enchantType: null,
+        apprenticeHired: false,
+        dieType: null,
+        shardsGained: 0,
+        shardsFailed: 0, // Times shard was unavailable
+        fameGained: 0,
+        coinsGained: 0
+      };
+      
+      processNextArcanistAction();
+    }
+    
+    function processNextArcanistAction() {
+      const actions = window.arcanistActionsToProcess;
+      
+      if (actions.length === 0) {
+        // All done - show summary
+        showArcanistActionsSummary();
+        return;
+      }
+      
+      const actionId = actions.shift();
+      
+      switch (actionId) {
+        case 1: // Enchant Trick
+          showArcanistEnchantPicker();
+          break;
+        case 2: // Arcane Worker → Apprentice
+          showArcanistApprenticeConfirm();
+          break;
+        case 3: // Set Enchantment die
+          showArcanistSetDiePicker();
+          break;
+        case 4: // Gain Shard (first)
+        case 5: // Gain Shard (second)
+          showArcanistShardCheck();
+          break;
+        case 6: // Gain 3 Fame
+          window.arcanistResults.fameGained += 3;
+          processNextArcanistAction();
+          break;
+      }
+    }
+    
+    function showArcanistEnchantPicker() {
+      setActionContent(
+        `Turn ${gameState.currentTurn} — Arcanist: Enchant Trick`,
+        `<p><strong>Which Enchantment type did the Heir use?</strong></p>
+         <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;">Pick the type the Heir has most of on the Arcanist board offer (cheaper breaks ties).</p>
+         
+         ${getEnchantmentDieHtml('arcanist-enchant-btn')}`,
+        [
+          { text: 'Continue →', action: () => {
+            const enchantType = window.arcanistSelectedEnchant;
+            if (enchantType) {
+              window.arcanistResults.enchantType = enchantType;
+              // Track enchanted trick (use generic ID since we don't track specific tricks)
+              const trickId = 'trick_' + Date.now();
+              gameState.heir.enchantedTricks = gameState.heir.enchantedTricks || {};
+              gameState.heir.enchantedTricks[trickId] = enchantType;
+            }
+            processNextArcanistAction();
+          }, id: 'enchant-continue-btn', disabled: true }
+        ]
+      );
+      
+      setTimeout(() => {
+        attachDieButtonListeners('arcanist-enchant-btn', (value) => {
+          window.arcanistSelectedEnchant = value;
+          const btn = document.getElementById('enchant-continue-btn');
+          if (btn) btn.disabled = false;
+        });
+      }, 0);
+    }
+    
+    function showArcanistApprenticeConfirm() {
+      window.arcanistResults.apprenticeHired = true;
+      gameState.heir.pendingCharacters.push('apprentice');
+      
+      // No question needed - just proceed
+      processNextArcanistAction();
+    }
+    
+    function showArcanistSetDiePicker() {
+      setActionContent(
+        `Turn ${gameState.currentTurn} — Arcanist: Set Enchantment Die`,
+        `<p><strong>Which type did the Heir set the Enchantment die to?</strong></p>
+         <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;">The Heir sets it to the type they have the most enchanted Tricks of.</p>
+         
+         ${getEnchantmentDieHtml('arcanist-setdie-btn')}
+         
+         ${noteBox(`After setting, the dice are <strong>locked for the turn</strong>.`)}`,
+        [
+          { text: 'Continue →', action: () => {
+            window.arcanistResults.dieType = window.arcanistSelectedDie;
+            processNextArcanistAction();
+          }, id: 'setdie-continue-btn', disabled: true }
+        ]
+      );
+      
+      setTimeout(() => {
+        attachDieButtonListeners('arcanist-setdie-btn', (value) => {
+          window.arcanistSelectedDie = value;
+          const btn = document.getElementById('setdie-continue-btn');
+          if (btn) btn.disabled = false;
+        });
+      }, 0);
+    }
+    
+    function showArcanistShardCheck() {
+      setActionContent(
+        `Turn ${gameState.currentTurn} — Arcanist: Gain Arcane Shard`,
+        `<p><strong>Is the Arcane Shard supply empty?</strong></p>
+         <p style="color: var(--text-muted); font-size: 0.9rem;">Check the Arcane Shard supply on the Arcanist board.</p>
+         
+         <div style="background: var(--bg-card); padding: 15px; border-radius: 6px; margin: 15px 0;">
+           <p><strong>If supply has Shards:</strong> Heir gains 1 Arcane Shard</p>
+           <p style="margin-top: 10px;"><strong>If supply is empty:</strong> Heir gains +1 Fame, +1 Coin instead</p>
+         </div>`,
+        [
+          { text: 'Shards Available — Gain Shard', action: () => {
+            window.arcanistResults.shardsGained += 1;
+            gameState.heir.shards += 1;
+            processNextArcanistAction();
+          }},
+          { text: 'Supply Empty — Gain Fame + Coin', action: () => {
+            window.arcanistResults.shardsFailed += 1;
+            window.arcanistResults.fameGained += 1;
+            window.arcanistResults.coinsGained += 1;
+            gameState.heir.fame += 1;
+            gameState.heir.coins += 1;
+            processNextArcanistAction();
+          }}
+        ]
+      );
+    }
+    
+    function showArcanistActionsSummary() {
+      const results = window.arcanistResults;
+      const enchantNames = { scrolls: 'Parchment Scrolls', runes: 'Stone Runes', amulets: 'Amulet Necklaces' };
+      
+      let boardActions = [];
+      
+      // Enchant action
+      if (results.enchantType) {
+        boardActions.push(`Note: Heir's leftmost non-enchanted Trick is now enchanted with <strong>${enchantNames[results.enchantType]}</strong>`);
+      }
+      
+      // Apprentice hired
+      if (results.apprenticeHired) {
+        boardActions.push(`Add an Apprentice disk <img src="assets/images/characters/apprentice.png" alt="Apprentice" style="width: 24px; height: 24px; vertical-align: middle;"> next to the Heir's board (joins at end of turn)`);
+      }
+      
+      // Set die
+      if (results.dieType) {
+        boardActions.push(`Set the Enchantment die to show <strong>${enchantNames[results.dieType]}</strong> (dice now locked for turn)`);
+      }
+      
+      // Shards gained
+      if (results.shardsGained > 0) {
+        const prevShards = gameState.heir.shards - results.shardsGained;
+        boardActions.push(`Update Heir's Shards (${prevShards} → ${gameState.heir.shards})`);
+      }
+      
+      // Fame/Coins from failed shard attempts or Gain 3 Fame action
+      const totalFame = results.fameGained;
+      const totalCoins = results.coinsGained;
+      
+      if (totalFame > 0 || totalCoins > 0) {
+        const prevFame = gameState.heir.fame - totalFame;
+        const prevCoins = gameState.heir.coins - totalCoins;
+        
+        if (totalFame > 0 && totalCoins > 0) {
+          boardActions.push(`Update Heir's Fame (${prevFame} → ${gameState.heir.fame}) and Coins (${prevCoins} → ${gameState.heir.coins})`);
+        } else if (totalFame > 0) {
+          boardActions.push(`Update Heir's Fame (${prevFame} → ${gameState.heir.fame})`);
+        } else {
+          boardActions.push(`Update Heir's Coins (${prevCoins} → ${gameState.heir.coins})`);
+        }
+      }
+      
+      // Build board actions HTML
+      const boardActionsHtml = boardActions.map(action => boardAction(action)).join('');
+      
+      setActionContent(
+        `Turn ${gameState.currentTurn} — Arcanist Actions Complete`,
+        `<p><strong>Arcanist actions completed:</strong></p>
+         
+         ${boardActionsHtml || '<p style="color: var(--text-muted);">No board updates needed.</p>'}`,
+        [
           { text: 'Done — Continue', action: () => {
-            gameState.heirCurrentLocation = null; // Clear the tracking
+            // Clean up
+            delete window.arcanistActionsToProcess;
+            delete window.arcanistResults;
+            delete window.arcanistSelectedEnchant;
+            delete window.arcanistSelectedDie;
+            
+            updateGameDisplay();
+            gameState.heirCurrentLocation = null;
             continueAfterHeirPlacement();
           }}
         ]
