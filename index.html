@@ -1248,7 +1248,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.15.7-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.15.8-beta</p>
       <button class="restart-btn hidden" id="restart-btn">↺ New Game</button>
     </header>
 
@@ -1442,6 +1442,50 @@
                     <img src="assets/images/prophecies/p22.png" alt="Place Two Characters" style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--danger);">
                     <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 3px;">Place Two</div>
                     <div style="font-size: 0.55rem; color: var(--danger);">(Arcane)</div>
+                  </div>
+                </div>
+                
+                <!-- Academy prophecy additions (shown when Academy enabled) -->
+                <div id="quick-academy-prophecy-add" class="hidden">
+                  <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Add these 4 Academy prophecy tokens:</span></div>
+                  
+                  <div style="display: flex; justify-content: center; gap: 15px; margin: 10px 0 20px 0; flex-wrap: wrap;">
+                    <div style="text-align: center;">
+                      <img src="assets/images/prophecies/p28.png" alt="Renovate Fame Bonus" style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--success);">
+                      <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 3px;">Renovate Fame</div>
+                    </div>
+                    <div style="text-align: center;">
+                      <img src="assets/images/prophecies/p29.png" alt="Practice Coins" style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--success);">
+                      <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 3px;">Practice Coins</div>
+                    </div>
+                    <div style="text-align: center;">
+                      <img src="assets/images/prophecies/p30.png" alt="Secret Draw 3" style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--success);">
+                      <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 3px;">Secret Draw 3</div>
+                    </div>
+                    <div style="text-align: center;">
+                      <img src="assets/images/prophecies/p32.png" alt="Teach Immediate Yield" style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--success);">
+                      <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 3px;">Teach Yield</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Arcane prophecy additions (shown when Arcane enabled) -->
+                <div id="quick-arcane-prophecy-add" class="hidden">
+                  <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Add these 3 Arcane Arts prophecy tokens:</span></div>
+                  
+                  <div style="display: flex; justify-content: center; gap: 15px; margin: 10px 0 20px 0; flex-wrap: wrap;">
+                    <div style="text-align: center;">
+                      <img src="assets/images/prophecies/p35.png" alt="Ignore Arcane Wages" style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--success);">
+                      <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 3px;">Ignore Wages</div>
+                    </div>
+                    <div style="text-align: center;">
+                      <img src="assets/images/prophecies/p36.png" alt="All Enchantments Trigger" style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--success);">
+                      <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 3px;">All Trigger</div>
+                    </div>
+                    <div style="text-align: center;">
+                      <img src="assets/images/prophecies/p37.png" alt="Double Reward" style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--success);">
+                      <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 3px;">Double Reward</div>
+                    </div>
                   </div>
                 </div>
                 
@@ -1945,6 +1989,50 @@
               <div id="full-p22-removal-icon" class="hidden" style="text-align: center;">
                 <img src="assets/images/prophecies/p22.png" alt="Place Two Characters" style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--danger);">
                 <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px;">Place Two<br>(Arcane)</div>
+              </div>
+            </div>
+            
+            <!-- Academy prophecy additions (shown when Academy enabled) -->
+            <div id="full-academy-prophecy-add" class="hidden">
+              <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Add these 4 Academy prophecy tokens:</span></div>
+              
+              <div style="display: flex; justify-content: center; gap: 20px; margin: 15px 0; flex-wrap: wrap;">
+                <div style="text-align: center;">
+                  <img src="assets/images/prophecies/p28.png" alt="Renovate Fame Bonus" style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--success);">
+                  <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px;">Renovate<br>Fame Bonus</div>
+                </div>
+                <div style="text-align: center;">
+                  <img src="assets/images/prophecies/p29.png" alt="Practice Coins" style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--success);">
+                  <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px;">Practice<br>Coins</div>
+                </div>
+                <div style="text-align: center;">
+                  <img src="assets/images/prophecies/p30.png" alt="Secret Draw 3" style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--success);">
+                  <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px;">Secret<br>Draw 3</div>
+                </div>
+                <div style="text-align: center;">
+                  <img src="assets/images/prophecies/p32.png" alt="Teach Immediate Yield" style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--success);">
+                  <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px;">Teach<br>Immediate Yield</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Arcane prophecy additions (shown when Arcane enabled) -->
+            <div id="full-arcane-prophecy-add" class="hidden">
+              <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Add these 3 Arcane Arts prophecy tokens:</span></div>
+              
+              <div style="display: flex; justify-content: center; gap: 20px; margin: 15px 0; flex-wrap: wrap;">
+                <div style="text-align: center;">
+                  <img src="assets/images/prophecies/p35.png" alt="Ignore Arcane Wages" style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--success);">
+                  <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px;">Ignore<br>Arcane Wages</div>
+                </div>
+                <div style="text-align: center;">
+                  <img src="assets/images/prophecies/p36.png" alt="All Enchantments Trigger" style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--success);">
+                  <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px;">All Enchantments<br>Trigger</div>
+                </div>
+                <div style="text-align: center;">
+                  <img src="assets/images/prophecies/p37.png" alt="Double Reward" style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--success);">
+                  <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px;">Double<br>Reward</div>
+                </div>
               </div>
             </div>
             
@@ -3916,6 +4004,17 @@
       if (academyBoardSetup) academyBoardSetup.classList.toggle('hidden', !hasAcademy);
       if (fullAcademyProphecySection) fullAcademyProphecySection.classList.toggle('hidden', !hasAcademy);
       
+      // Show/hide prophecy addition sections
+      const academyProphecyAdd = $('#quick-academy-prophecy-add');
+      const arcaneProphecyAdd = $('#quick-arcane-prophecy-add');
+      const fullAcademyProphecyAdd = $('#full-academy-prophecy-add');
+      const fullArcaneProphecyAdd = $('#full-arcane-prophecy-add');
+      
+      if (academyProphecyAdd) academyProphecyAdd.classList.toggle('hidden', !hasAcademy);
+      if (arcaneProphecyAdd) arcaneProphecyAdd.classList.toggle('hidden', !hasArcane);
+      if (fullAcademyProphecyAdd) fullAcademyProphecyAdd.classList.toggle('hidden', !hasAcademy);
+      if (fullArcaneProphecyAdd) fullArcaneProphecyAdd.classList.toggle('hidden', !hasArcane);
+      
       // Show/hide Arcane board setup section
       const arcaneBoardSetup = $('#quick-arcane-board-setup');
       if (arcaneBoardSetup) arcaneBoardSetup.classList.toggle('hidden', !hasArcane);
@@ -5407,14 +5506,28 @@
       
       // Combine base prophecies with Academy prophecies if expansion is enabled
       const hasAcademy = gameState.expansions?.academy;
+      const hasArcane = gameState.expansions?.arcane;
       const removedIds = (gameState.removedProphecies || []).map(p => p.id);
       
-      let affectBothProphecies = hasAcademy 
-        ? [...PROPHECIES.affectBoth, ...PROPHECIES.academyAffectBoth]
-        : [...PROPHECIES.affectBoth];
-      let heirIgnoresProphecies = hasAcademy
-        ? [...PROPHECIES.heirIgnores, ...PROPHECIES.academyHeirIgnores]
-        : [...PROPHECIES.heirIgnores];
+      let affectBothProphecies = [...PROPHECIES.affectBoth];
+      let heirIgnoresProphecies = [...PROPHECIES.heirIgnores];
+      
+      // Add Academy prophecies
+      if (hasAcademy) {
+        affectBothProphecies = [...affectBothProphecies, ...PROPHECIES.academyAffectBoth];
+        heirIgnoresProphecies = [...heirIgnoresProphecies, ...PROPHECIES.academyHeirIgnores];
+      }
+      
+      // Add Arcane prophecies and remove conflicting ones
+      if (hasArcane) {
+        affectBothProphecies = [...affectBothProphecies, ...PROPHECIES.arcaneAffectBoth];
+        heirIgnoresProphecies = [...heirIgnoresProphecies, ...PROPHECIES.arcaneHeirIgnores];
+        
+        // Remove prophecies that conflict with Arcane Arts (p17, p18, p22)
+        const arcaneRemovedIds = PROPHECIES.arcaneRemoved.map(p => p.id);
+        affectBothProphecies = affectBothProphecies.filter(p => !arcaneRemovedIds.includes(p.id));
+        heirIgnoresProphecies = heirIgnoresProphecies.filter(p => !arcaneRemovedIds.includes(p.id));
+      }
       
       // Filter out randomly removed prophecies (Academy expansion)
       if (removedIds.length > 0) {
