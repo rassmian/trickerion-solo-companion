@@ -411,6 +411,88 @@
       box-shadow: 0 0 10px rgba(212, 168, 71, 0.3);
     }
 
+    /* Arcane Die Selection Buttons */
+    .die-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 8px;
+      background: var(--bg-card);
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-height: 100px;
+    }
+
+    .die-btn:hover {
+      border-color: var(--amber);
+      background: rgba(212, 168, 71, 0.1);
+    }
+
+    .die-btn.selected {
+      border-color: var(--amber);
+      background: rgba(212, 168, 71, 0.2);
+      box-shadow: 0 0 12px rgba(212, 168, 71, 0.3);
+    }
+
+    .die-btn img {
+      width: 56px;
+      height: 56px;
+      object-fit: contain;
+      border-radius: 6px;
+      margin-bottom: 6px;
+    }
+
+    .die-btn .die-label {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    .die-btn.selected .die-label {
+      color: var(--amber);
+      font-weight: 600;
+    }
+
+    /* Die grid layouts */
+    .die-grid {
+      display: grid;
+      gap: 10px;
+      margin: 15px 0;
+    }
+
+    .die-grid.enchant-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .die-grid.reward-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    @media (max-width: 400px) {
+      .die-grid.reward-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .die-btn {
+        padding: 10px 6px;
+        min-height: 90px;
+      }
+      
+      .die-btn img {
+        width: 48px;
+        height: 48px;
+      }
+      
+      .die-btn .die-label {
+        font-size: 0.7rem;
+      }
+    }
+
     .btn-container {
       text-align: center;
       margin-top: 30px;
@@ -1166,7 +1248,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.14.24-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.15.6-beta</p>
       <button class="restart-btn hidden" id="restart-btn">↺ New Game</button>
     </header>
 
@@ -1212,6 +1294,8 @@
               <div id="quick-dawn-options-container"></div>
               <!-- Academy options container - populated by JS -->
               <div id="quick-academy-options-container"></div>
+              <!-- Arcane Arts options container - populated by JS -->
+              <div id="quick-arcane-options-container"></div>
             </div>
             
             <!-- Your Magician -->
@@ -1344,6 +1428,21 @@
                     <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 3px;">Skip Assign</div>
                     <div style="font-size: 0.55rem; color: var(--danger);">(Academy)</div>
                   </div>
+                  <div id="p17-removal-icon" class="hidden" style="text-align: center;">
+                    <img src="assets/images/prophecies/p17.png" alt="Enhance Theater" style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--danger);">
+                    <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 3px;">Enhance Theater</div>
+                    <div style="font-size: 0.55rem; color: var(--danger);">(Arcane)</div>
+                  </div>
+                  <div id="p18-removal-icon" class="hidden" style="text-align: center;">
+                    <img src="assets/images/prophecies/p18.png" alt="Enhance 2 AP" style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--danger);">
+                    <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 3px;">Enhance 2 AP</div>
+                    <div style="font-size: 0.55rem; color: var(--danger);">(Arcane)</div>
+                  </div>
+                  <div id="p22-removal-icon" class="hidden" style="text-align: center;">
+                    <img src="assets/images/prophecies/p22.png" alt="Place Two Characters" style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--danger);">
+                    <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 3px;">Place Two</div>
+                    <div style="font-size: 0.55rem; color: var(--danger);">(Arcane)</div>
+                  </div>
                 </div>
                 
                 <!-- Academy random prophecy removal (shown when Academy enabled) -->
@@ -1372,6 +1471,31 @@
                 
                 <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Shuffle Secrets, draw 2 to Academy board slots</span></div>
               </div>
+              
+              <!-- Arcane Arts Board Setup (shown when Arcane enabled) -->
+              <div id="quick-arcane-board-setup" class="hidden" style="margin-top: 20px;">
+                <h4 style="color: var(--amber); margin-bottom: 10px;">Arcane Arts Setup</h4>
+                
+                <div id="quick-arcanist-board-instruction" style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place <strong>Arcanist board</strong> near the main board (use the side without Academy icon)</span></div>
+                
+                <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Shuffle all 12 <strong>Enchantments</strong> into the cloth bag. Draw 2 and place on the left and right offer slots (middle slot empty for solo)</span></div>
+                
+                <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place <strong>4 Arcane Shards</strong> in supply (return rest to box)</span></div>
+                
+                <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place <strong>4 Arcane Workers</strong> (Golem, Specter, Trickster, Shapeshifter) and their Unique Assignment cards next to the Arcanist board</span></div>
+                
+                <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place <strong>2 Arcane dice</strong> (Enchantment die + Reward die) next to the Arcanist board</span></div>
+                
+                <!-- Wagon starting location selection -->
+                <div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ WAGON SETUP:</span> <span style="color: var(--text-secondary);">Select the Wagon's starting location:</span></div>
+                
+                <div style="margin: 15px 0;">
+                  <label style="color: var(--text-primary); font-weight: 500; display: block; margin-bottom: 8px;">Wagon Starting Location:</label>
+                  <div id="quick-wagon-location-options" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                    <!-- Populated by updateWagonLocationOptions() -->
+                  </div>
+                </div>
+              </div>
             </div>
             
             <div class="setup-nav">
@@ -1393,6 +1517,8 @@
             <div id="dawn-options-container"></div>
             <!-- Academy options container - populated by JS -->
             <div id="academy-options-container"></div>
+            <!-- Arcane Arts options container - populated by JS -->
+            <div id="arcane-options-container"></div>
             
             <div class="setup-nav">
               <button class="btn" onclick="showSetupPage(0)">← Back</button>
@@ -1450,7 +1576,39 @@
             
             <div class="setup-nav">
               <button class="btn" onclick="showSetupPage(2)">← Back</button>
-              <button class="btn" onclick="showSetupPage(3)">Continue →</button>
+              <button class="btn" onclick="continueFromAcademySetup()">Continue →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- PAGE: Arcane Arts Setup (only shown when Arcane expansion enabled) -->
+        <div class="setup-page hidden" id="setup-page-arcane">
+          <div class="setup-section">
+            <h2 style="color: var(--amber); margin-bottom: 20px;">📋 Arcane Arts Board Setup</h2>
+            
+            <div id="full-arcanist-board-instruction" style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place the <strong>Arcanist board</strong> near the Main Game Board (use the side without Academy icon)</span></div>
+            
+            <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Shuffle all 12 <strong>Enchantments</strong> into the cloth bag. Draw 2 and place on the left and right offer slots (middle slot stays empty for solo)</span></div>
+            
+            <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place <strong>4 Arcane Shards</strong> in supply (return remaining to box)</span></div>
+            
+            <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place the <strong>4 Arcane Workers</strong> (Golem, Specter, Trickster, Shapeshifter) and their Unique Assignment cards next to the Arcanist board</span></div>
+            
+            <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place the <strong>2 Arcane dice</strong> (Enchantment die + Reward die) next to the Arcanist board</span></div>
+            
+            <!-- Wagon starting location selection -->
+            <div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 15px 0 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ WAGON SETUP:</span> <span style="color: var(--text-secondary);">Randomly determine the Wagon's starting location using your permanent Assignment cards (shuffle Downtown, Market Row, Dark Alley, and Academy if enabled).</span></div>
+            
+            <div style="margin: 15px 0;">
+              <label style="color: var(--text-primary); font-weight: 500; display: block; margin-bottom: 8px;">Select Wagon Starting Location:</label>
+              <div id="full-wagon-location-options" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                <!-- Populated by updateFullSetupWagonOptions() -->
+              </div>
+            </div>
+            
+            <div class="setup-nav">
+              <button class="btn" id="arcane-back-btn">← Back</button>
+              <button class="btn" id="arcane-continue-btn" disabled>Continue →</button>
             </div>
           </div>
         </div>
@@ -1776,6 +1934,18 @@
                 <img src="assets/images/prophecies/p31.png" alt="Skip Assignment" style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--danger);">
                 <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px;">Skip Assignment<br>(Academy)</div>
               </div>
+              <div id="full-p17-removal-icon" class="hidden" style="text-align: center;">
+                <img src="assets/images/prophecies/p17.png" alt="Enhance Theater" style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--danger);">
+                <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px;">Enhance Theater<br>(Arcane)</div>
+              </div>
+              <div id="full-p18-removal-icon" class="hidden" style="text-align: center;">
+                <img src="assets/images/prophecies/p18.png" alt="Enhance 2 AP" style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--danger);">
+                <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px;">Enhance 2 AP<br>(Arcane)</div>
+              </div>
+              <div id="full-p22-removal-icon" class="hidden" style="text-align: center;">
+                <img src="assets/images/prophecies/p22.png" alt="Place Two Characters" style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--danger);">
+                <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px;">Place Two<br>(Arcane)</div>
+              </div>
             </div>
             
             <!-- Academy random prophecy removal (shown when Academy enabled) -->
@@ -1883,6 +2053,27 @@
             <div class="state-row">
               <span class="state-label">Protégé AP</span>
               <span class="state-count" id="heir-protege-ap-display">1</span>
+            </div>
+          </div>
+
+          <!-- Arcane Arts Stats (only shown when Arcane expansion enabled) -->
+          <div class="state-card" id="arcane-stats-card" style="display: none;">
+            <h3>🔮 Arcane Arts</h3>
+            <div class="state-row">
+              <span class="state-label">Wagon</span>
+              <span class="state-count" id="wagon-location-display" style="font-size: 0.85rem;">—</span>
+            </div>
+            <div class="state-row">
+              <span class="state-label">Arcane Shards</span>
+              <span class="state-count" id="heir-arcane-shards-display">0</span>
+            </div>
+            <div class="state-row">
+              <span class="state-label">Supply</span>
+              <span class="state-count" id="arcane-shards-supply-display">4</span>
+            </div>
+            <div class="state-row">
+              <span class="state-label">Worker Offer</span>
+              <span class="state-count" id="arcane-worker-offer-display" style="font-size: 0.85rem;">—</span>
             </div>
           </div>
 
@@ -2048,9 +2239,8 @@
       { 
         id: 'arcane', 
         title: 'With Arcane Arts', 
-        description: 'Adds Familiars, Arcane cards, and new tricks',
-        comingSoon: true,
-        disabled: true
+        description: 'Adds Wagon, Enchantments, Arcane Shards, and Arcane Workers',
+        disabled: false
       }
     ];
 
@@ -2068,6 +2258,19 @@
         'Add Academy Assignment cards to the Heir\'s Plan deck',
         'Include the blue Academy die (5 dice total)',
         'Set up the Academy board with Classroom and Practice Room tiles'
+      ]
+    };
+
+    const ARCANE_OPTIONS_INFO = {
+      note: 'Adds the Arcanist board with Wagon marker, Enchantments, Arcane Shards, Arcane Workers, and 2 Arcane dice. The Heir can perform Arcanist actions at the Wagon location.',
+      warningWithDawn: 'Mixing Arcane Arts with Dawn of Technology and/or Magician Powers can lead to more swingy developments and potentially looser economies, which some players might not enjoy.',
+      setupChanges: [
+        'Place the Arcanist board near the Main Game Board',
+        'Randomly determine Wagon starting location',
+        'Place 2 Enchantments on offer (middle slot empty for solo)',
+        'Place 4 Arcane Shards in supply',
+        'Place 4 Arcane Workers and their cards next to the board',
+        'Place 2 Arcane dice next to the Arcanist board'
       ]
     };
 
@@ -2126,7 +2329,26 @@
                 </div>
               </div>`;
       
-      return { cardsHtml, dawnOptionsHtml, academyOptionsHtml };
+      const arcaneOptionsHtml = `
+              <div id="${prefix}arcane-options" class="hidden" style="margin-top: 20px; padding: 15px; background: var(--bg-card); border-radius: 6px; border: 1px solid var(--border);">
+                <h3 style="color: var(--amber); margin-bottom: 10px; font-size: 1rem;">Arcane Arts Options</h3>
+                <div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin-bottom: 15px; border-radius: 0 4px 4px 0;">
+                  <span style="color: var(--info); font-weight: 600;">ℹ️ NOTE:</span> 
+                  <span style="color: var(--text-secondary);">${ARCANE_OPTIONS_INFO.note}</span>
+                </div>
+                <div id="${prefix}arcane-dawn-warning" class="hidden" style="background: var(--warning-bg); border-left: 3px solid var(--warning); padding: 8px 12px; margin-bottom: 15px; border-radius: 0 4px 4px 0;">
+                  <span style="color: var(--warning); font-weight: 600;">⚠️ WARNING:</span> 
+                  <span style="color: var(--text-secondary);">${ARCANE_OPTIONS_INFO.warningWithDawn}</span>
+                </div>
+                <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                  <p style="margin: 0 0 8px 0; font-weight: 500; color: var(--text-primary);">Setup Changes:</p>
+                  <ul style="margin: 0; padding-left: 20px;">
+                    ${ARCANE_OPTIONS_INFO.setupChanges.map(c => `<li>${c}</li>`).join('')}
+                  </ul>
+                </div>
+              </div>`;
+      
+      return { cardsHtml, dawnOptionsHtml, academyOptionsHtml, arcaneOptionsHtml };
     }
 
     const MAGICIANS = {
@@ -2251,16 +2473,49 @@
       // ACADEMY EXPANSION - Removed (1) - p31 is removed when Academy is enabled
       academyRemoved: [
         { id: 'p31', name: 'Skip Assignment', icon: 'p31.png', description: 'If you Advertised, skip the "Assignment" phase. Instead, place an Assignment card under a Character when placing it.', reason: 'Heir uses Plan deck, not Assignment phase' }
+      ],
+      
+      // ARCANE ARTS EXPANSION - Heir Ignores (1)
+      arcaneHeirIgnores: [
+        { id: 'p35', name: 'Ignore Arcane Wages', icon: 'p35.png', description: 'Ignore the salary of the Arcane Workers.' }
+      ],
+      
+      // ARCANE ARTS EXPANSION - Affect Both (2)
+      arcaneAffectBoth: [
+        { id: 'p36', name: 'All Enchantments Trigger', icon: 'p36.png', description: 'Ignore the Enchantment Die — every Enchantment on your performed tricks (or in any Classroom) triggers this turn.' },
+        { id: 'p37', name: 'Double Reward', icon: 'p37.png', description: 'When an Enchantment is triggered, receive the benefit shown on the Reward die twice.' }
+      ],
+      
+      // ARCANE ARTS EXPANSION - Removed (3) - p17, p18, p22 removed when Arcane Arts enabled
+      // Note: p23 is already removed in base solo mode
+      arcaneRemoved: [
+        { id: 'p17', name: 'Enhance Theater', icon: 'p17.png', description: 'You may use "Enhance Character" in the Theater.', reason: 'Arcane Shards already allow Theater enhancement' },
+        { id: 'p18', name: 'Enhance 2 AP', icon: 'p18.png', description: 'You receive 2 Action Points instead of 1 when you use "Enhance Character".', reason: 'Arcane Shards give +2 AP at non-Theater locations' },
+        { id: 'p22', name: 'Place Two Characters', icon: 'p22.png', description: 'You may place two Characters on each of your turns during the "Place Characters" phase.', reason: 'Conflicts with Golem (must be first/last) and Specter placement rules' }
       ]
     };
     
     // Helper to get all valid prophecies for solo play (excludes removed ones)
-    // Now a function to dynamically include Academy prophecies when expansion is enabled
+    // Now a function to dynamically include expansion prophecies when enabled
     const getValidProphecies = () => {
       let prophecies = [...PROPHECIES.heirIgnores, ...PROPHECIES.affectBoth];
+      
+      // Add Academy prophecies if Academy enabled
       if (gameState.expansions?.academy) {
         prophecies = [...prophecies, ...PROPHECIES.academyHeirIgnores, ...PROPHECIES.academyAffectBoth];
       }
+      
+      // Add Arcane Arts prophecies if Arcane enabled
+      if (gameState.expansions?.arcane) {
+        prophecies = [...prophecies, ...PROPHECIES.arcaneHeirIgnores, ...PROPHECIES.arcaneAffectBoth];
+      }
+      
+      // Filter out Arcane-removed prophecies (p17, p18, p22) if Arcane enabled
+      if (gameState.expansions?.arcane) {
+        const arcaneRemovedIds = PROPHECIES.arcaneRemoved.map(p => p.id);
+        prophecies = prophecies.filter(p => !arcaneRemovedIds.includes(p.id));
+      }
+      
       // Filter out randomly removed prophecies (Academy expansion)
       if (gameState.removedProphecies?.length > 0) {
         const removedIds = gameState.removedProphecies.map(p => p.id);
@@ -2919,12 +3174,97 @@
 
     const noteBox = (text) => infoBox(text, 'NOTE');
 
+    // Arcane Worker wages reminder for End Turn (player only - Heir never has Arcane Workers)
+    const getArcaneWorkerWagesHtml = () => {
+      if (!gameState.expansions.arcane) return '';
+      
+      const isP35Active = gameState.activeProphecy?.id === 'p35';
+      
+      let content = `<div style="background: rgba(138, 43, 226, 0.1); border: 1px solid #8a2be2; padding: 10px; border-radius: 6px; margin: 8px 0;">
+        <p style="color: #8a2be2; font-weight: 600; margin-bottom: 8px;">🔮 Arcane Worker Wages</p>`;
+      
+      if (isP35Active) {
+        content += `<div style="background: rgba(138, 43, 226, 0.2); border-left: 3px solid #8a2be2; padding: 8px 12px; margin: 4px 0; border-radius: 0 4px 4px 0;">
+          <span style="color: #8a2be2; font-weight: 600;">🔮 p35 Active:</span> <span style="color: var(--text-primary);">Ignore Arcane Worker wages this turn!</span>
+        </div>`;
+      } else {
+        content += `<p style="margin: 4px 0; color: var(--text-secondary);">If you have any Arcane Workers, pay their wages:</p>
+        <ul style="margin: 8px 0 4px 0; padding-left: 20px; color: var(--text-secondary);">
+          <li><strong>Specter / Golem:</strong> 1 Trickerion Shard each (or lose 4 Fame)</li>
+          <li><strong>Trickster / Shapeshifter:</strong> 1 Coin each</li>
+        </ul>`;
+      }
+      
+      content += `</div>`;
+      return content;
+    };
+
     const magicianAbilityBox = (text) => {
       return `<div style="background: rgba(180, 100, 200, 0.15); border-left: 3px solid #a6c; padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: #a6c; font-weight: 600;">✨ MAGICIAN ABILITY:</span> ${text}</div>`;
     };
 
     const magicianBox = (text) => {
       return `<div style="background: rgba(180, 100, 200, 0.15); border-left: 3px solid #a6c; padding: 4px 12px; margin: 4px 0; border-radius: 0 4px 4px 0;"><span style="color: #a6c; font-weight: 600;">✨</span> ${text}</div>`;
+    };
+
+    // Arcane Die Selection HTML Generators
+    const getEnchantmentDieHtml = (btnClass = 'enchant-die-btn') => {
+      return `
+        <div class="die-grid enchant-grid">
+          <button class="die-btn ${btnClass}" data-value="scrolls">
+            <img src="assets/images/arcane/enchant_scrolls.png" alt="Scrolls">
+            <span class="die-label">Scrolls<br>(1-2)</span>
+          </button>
+          <button class="die-btn ${btnClass}" data-value="runes">
+            <img src="assets/images/arcane/enchant_runes.png" alt="Runes">
+            <span class="die-label">Runes<br>(3-4)</span>
+          </button>
+          <button class="die-btn ${btnClass}" data-value="amulets">
+            <img src="assets/images/arcane/enchant_amulets.png" alt="Amulets">
+            <span class="die-label">Amulets<br>(5-6)</span>
+          </button>
+        </div>
+      `;
+    };
+
+    const getRewardDieHtml = (btnClass = 'reward-die-btn') => {
+      return `
+        <div class="die-grid reward-grid">
+          <button class="die-btn ${btnClass}" data-value="1">
+            <img src="assets/images/arcane/reward_sa.png" alt="SA Cards">
+            <span class="die-label">Draw 2 SA,<br>keep 1</span>
+          </button>
+          <button class="die-btn ${btnClass}" data-value="2">
+            <img src="assets/images/arcane/reward_coin_fame.png" alt="+1 Coin, +1 Fame">
+            <span class="die-label">+1 Coin<br>+1 Fame</span>
+          </button>
+          <button class="die-btn ${btnClass}" data-value="3">
+            <img src="assets/images/arcane/reward_coins.png" alt="+3 Coins">
+            <span class="die-label">+3 Coins</span>
+          </button>
+          <button class="die-btn ${btnClass}" data-value="4">
+            <img src="assets/images/arcane/reward_fame_level.png" alt="Fame = Level">
+            <span class="die-label">Fame =<br>Trick Level</span>
+          </button>
+          <button class="die-btn ${btnClass}" data-value="5">
+            <img src="assets/images/arcane/reward_shard.png" alt="+1 Arcane Shard">
+            <span class="die-label">+1 Arcane<br>Shard</span>
+          </button>
+        </div>
+      `;
+    };
+
+    // Helper to attach die button selection behavior
+    const attachDieButtonListeners = (btnClass, onSelect) => {
+      document.querySelectorAll(`.${btnClass}`).forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const target = e.currentTarget;
+          document.querySelectorAll(`.${btnClass}`).forEach(b => b.classList.remove('selected'));
+          target.classList.add('selected');
+          const value = target.dataset.value;
+          if (onSelect) onSelect(value);
+        });
+      });
     };
 
     // Stepper input for touch-friendly number entry
@@ -3002,14 +3342,27 @@
       // Performance phase tracking
       performanceOrder: null, // 'heir-first' or 'player-first', set during Performance phase
       
+      // Arcane Arts expansion state
+      wagonLocation: null, // 'downtown', 'academy', 'market', 'darkalley' - set during setup
+      arcaneDice: {
+        enchantment: null, // 'scrolls', 'runes', 'amulets' - set each turn
+        reward: null // 1-6 representing die face - set each turn
+      },
+      arcaneDiceLocked: false, // true when dice have been set by Arcanist action
+      arcaneWorkerOnOffer: null, // 'golem', 'specter', 'trickster', 'shapeshifter', or null
+      arcaneWorkersRemaining: [], // Initialized to all 4 workers during setup
+      arcaneShardsSupply: 0, // Set to 4 during setup (solo/2-player)
+      
       // Heir state
       heir: {
         fame: 5,
         coins: 0,
         shards: 0,
+        arcaneShards: 0, // Arcane Arts: Heir's charged shards (worth 2 Fame each at end)
         stance: null, // null until Assignment phase, then 'defensive', 'neutral', or 'aggressive'
         characters: [], // ['magician', 'protege', 'engineer', 'apprentice', ...]
         tricks: [], // [{ ...trickData, markers: X }, ...]
+        enchantedTricks: {}, // Arcane Arts: { trickId: 'enchantmentType' } e.g., { 'card-trick': 'scrolls' }
         shoppingList: [], // ['Metal', 'Wood', ...]
         specialAssignments: { theater: 0, downtown: 0, market: 0, workshop: 0, academy: 0 },
         pendingCharacters: [], // Characters hired this turn, join at end of turn
@@ -3310,8 +3663,104 @@
           selectRandomPropheciesToRemove();
         }
         showSetupPage('academy');
+      } else if (gameState.expansions.arcane) {
+        showSetupPage('arcane');
+        initializeFullSetupArcane();
       } else {
         showSetupPage(3);
+      }
+    }
+    
+    function continueFromAcademySetup() {
+      if (gameState.expansions.arcane) {
+        showSetupPage('arcane');
+        initializeFullSetupArcane();
+      } else {
+        showSetupPage(3);
+      }
+    }
+    
+    function initializeFullSetupArcane() {
+      // Update Arcanist board instruction based on Academy
+      const hasAcademy = gameState.expansions.academy;
+      const arcanistBoardInstruction = $('#full-arcanist-board-instruction');
+      if (arcanistBoardInstruction) {
+        const boardSide = hasAcademy ? 'with Academy icon' : 'without Academy icon';
+        arcanistBoardInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place the <strong>Arcanist board</strong> near the Main Game Board (use the side ${boardSide})</span>`;
+      }
+      
+      // Populate wagon location options
+      updateFullSetupWagonOptions();
+      
+      // Set up navigation buttons
+      const backBtn = $('#arcane-back-btn');
+      const continueBtn = $('#arcane-continue-btn');
+      
+      if (backBtn) {
+        backBtn.onclick = () => {
+          if (gameState.expansions.academy) {
+            showSetupPage('academy');
+          } else {
+            showSetupPage(2);
+          }
+        };
+      }
+      
+      if (continueBtn) {
+        continueBtn.onclick = () => showSetupPage(3);
+        // Enable/disable based on wagon selection
+        continueBtn.disabled = !gameState.wagonLocation;
+      }
+    }
+    
+    function updateFullSetupWagonOptions() {
+      const hasAcademy = gameState.expansions?.academy;
+      const container = $('#full-wagon-location-options');
+      if (!container) return;
+      
+      // Valid wagon locations: Downtown, Market Row, Dark Alley, + Academy if enabled
+      const locations = [
+        { id: 'downtown', name: 'Downtown' },
+        { id: 'market', name: 'Market Row' },
+        { id: 'darkalley', name: 'Dark Alley' }
+      ];
+      
+      if (hasAcademy) {
+        // Academy is second in the rotation (after Downtown) per spec
+        locations.splice(1, 0, { id: 'academy', name: 'Academy' });
+      }
+      
+      container.innerHTML = locations.map(loc => `
+        <button class="btn wagon-location-btn ${gameState.wagonLocation === loc.id ? 'selected' : ''}" 
+                data-location="${loc.id}"
+                style="${gameState.wagonLocation === loc.id ? 'background: var(--amber); color: var(--bg-dark);' : ''}">
+          ${loc.name}
+        </button>
+      `).join('') + `
+        <button class="btn-randomize" style="margin-left: 10px;">🎲 Random</button>
+      `;
+      
+      // Add click handlers for location buttons
+      container.querySelectorAll('.wagon-location-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          gameState.wagonLocation = btn.dataset.location;
+          updateFullSetupWagonOptions();
+          // Enable continue button
+          const continueBtn = $('#arcane-continue-btn');
+          if (continueBtn) continueBtn.disabled = false;
+        });
+      });
+      
+      // Add click handler for random button
+      const randomBtn = container.querySelector('.btn-randomize');
+      if (randomBtn) {
+        randomBtn.addEventListener('click', () => {
+          const randomIndex = Math.floor(Math.random() * locations.length);
+          gameState.wagonLocation = locations[randomIndex].id;
+          updateFullSetupWagonOptions();
+          const continueBtn = $('#arcane-continue-btn');
+          if (continueBtn) continueBtn.disabled = false;
+        });
       }
     }
     
@@ -3319,10 +3768,16 @@
     function selectRandomPropheciesToRemove() {
       // Get all base prophecies that are eligible for random removal
       // Exclude p15, p23, p24 (already removed in solo mode)
-      const eligibleProphecies = [
+      let eligibleProphecies = [
         ...PROPHECIES.heirIgnores,
         ...PROPHECIES.affectBoth
       ];
+      
+      // If Arcane Arts is also enabled, exclude p17, p18, p22 (they're already removed)
+      if (gameState.expansions.arcane) {
+        const arcaneRemovedIds = PROPHECIES.arcaneRemoved.map(p => p.id);
+        eligibleProphecies = eligibleProphecies.filter(p => !arcaneRemovedIds.includes(p.id));
+      }
       
       // Shuffle and pick 3
       const shuffled = [...eligibleProphecies].sort(() => Math.random() - 0.5);
@@ -3419,31 +3874,88 @@
     // Update prophecy removal display based on Academy expansion
     function updateProphecyRemovalDisplay() {
       const hasAcademy = gameState.expansions.academy;
+      const hasArcane = gameState.expansions.arcane;
+      
+      // Calculate total base removals: 3 always + 1 for Academy (p31) + 3 for Arcane (p17, p18, p22)
+      let baseRemovals = 3;
+      if (hasAcademy) baseRemovals += 1;
+      if (hasArcane) baseRemovals += 3;
       
       // Update Quick Setup prophecy info text
       const prophecyInfoText = $('#prophecy-setup-text');
       const p31Icon = $('#p31-removal-icon');
+      const p17Icon = $('#p17-removal-icon');
+      const p18Icon = $('#p18-removal-icon');
+      const p22Icon = $('#p22-removal-icon');
       const academyProphecySection = $('#quick-academy-prophecy-section');
       const academyBoardSetup = $('#quick-academy-board-setup');
       
       // Full Setup page 13 elements
       const fullRemoveInstruction = $('#full-prophecy-remove-instruction');
       const fullP31Icon = $('#full-p31-removal-icon');
+      const fullP17Icon = $('#full-p17-removal-icon');
+      const fullP18Icon = $('#full-p18-removal-icon');
+      const fullP22Icon = $('#full-p22-removal-icon');
       const fullShuffleInstruction = $('#full-prophecy-shuffle-instruction');
       const fullAcademyProphecySection = $('#full-academy-prophecy-section');
       
+      // Show/hide Academy p31 icons
+      if (p31Icon) p31Icon.classList.toggle('hidden', !hasAcademy);
+      if (fullP31Icon) fullP31Icon.classList.toggle('hidden', !hasAcademy);
+      
+      // Show/hide Arcane p17, p18, p22 icons
+      if (p17Icon) p17Icon.classList.toggle('hidden', !hasArcane);
+      if (p18Icon) p18Icon.classList.toggle('hidden', !hasArcane);
+      if (p22Icon) p22Icon.classList.toggle('hidden', !hasArcane);
+      if (fullP17Icon) fullP17Icon.classList.toggle('hidden', !hasArcane);
+      if (fullP18Icon) fullP18Icon.classList.toggle('hidden', !hasArcane);
+      if (fullP22Icon) fullP22Icon.classList.toggle('hidden', !hasArcane);
+      
+      // Show/hide Academy prophecy sections
+      if (academyProphecySection) academyProphecySection.classList.toggle('hidden', !hasAcademy);
+      if (academyBoardSetup) academyBoardSetup.classList.toggle('hidden', !hasAcademy);
+      if (fullAcademyProphecySection) fullAcademyProphecySection.classList.toggle('hidden', !hasAcademy);
+      
+      // Show/hide Arcane board setup section
+      const arcaneBoardSetup = $('#quick-arcane-board-setup');
+      if (arcaneBoardSetup) arcaneBoardSetup.classList.toggle('hidden', !hasArcane);
+      
+      // Update Arcanist board instruction based on Academy
+      const arcanistBoardInstruction = $('#quick-arcanist-board-instruction');
+      if (arcanistBoardInstruction && hasArcane) {
+        const boardSide = hasAcademy ? 'with Academy icon' : 'without Academy icon';
+        arcanistBoardInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place <strong>Arcanist board</strong> near the main board (use the side ${boardSide})</span>`;
+      }
+      
+      // Update wagon location options when Arcane is enabled/disabled
+      if (hasArcane) {
+        updateWagonLocationOptions();
+      } else {
+        gameState.wagonLocation = null;
+      }
+      
+      // Calculate remaining prophecies after removal
+      // Base: 27 prophecies - 3 always removed = 24
+      // Academy adds 6 new, removes p31 + 3 random = net +2 remaining
+      // Arcane adds 3 new (p35, p36, p37), removes 3 (p17, p18, p22) = net 0
+      let totalProphecies = 27; // Base game total
+      let remaining = 24; // After base 3 removed
+      
       if (hasAcademy) {
-        // With Academy: remove 7 total (3 base + p31 + 3 random), shuffle 27
-        if (prophecyInfoText) prophecyInfoText.textContent = 'Remove these 4 tokens (plus 3 random below), shuffle remaining 27, draw 3 to Pending slots. No Active Prophecy on Turn 1.';
-        if (p31Icon) p31Icon.classList.remove('hidden');
-        if (academyProphecySection) academyProphecySection.classList.remove('hidden');
-        if (academyBoardSetup) academyBoardSetup.classList.remove('hidden');
-        
-        // Full Setup page 13
-        if (fullRemoveInstruction) fullRemoveInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Remove these <strong>4</strong> Prophecy tokens from the game (includes p31 for Academy):</span>`;
-        if (fullP31Icon) fullP31Icon.classList.remove('hidden');
-        if (fullAcademyProphecySection) fullAcademyProphecySection.classList.remove('hidden');
-        if (fullShuffleInstruction) fullShuffleInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Shuffle the remaining <strong>27</strong> Prophecy tokens face-down (Academy adds 6 new prophecies, 3 removed randomly)</span>`;
+        totalProphecies += 6; // Academy adds 6 new
+        remaining = totalProphecies - baseRemovals - 3; // -3 random for Academy
+      }
+      if (hasArcane) {
+        totalProphecies += 3; // Arcane adds p35, p36, p37
+        remaining = totalProphecies - baseRemovals - (hasAcademy ? 3 : 0);
+      }
+      
+      // Update prophecy setup text
+      if (hasAcademy) {
+        // With Academy: need to remove additional random prophecies
+        if (prophecyInfoText) prophecyInfoText.textContent = `Remove these ${baseRemovals} tokens (plus 3 random below), shuffle remaining ${remaining}, draw 3 to Pending slots. No Active Prophecy on Turn 1.`;
+        if (fullRemoveInstruction) fullRemoveInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Remove these <strong>${baseRemovals}</strong> Prophecy tokens from the game:</span>`;
+        if (fullShuffleInstruction) fullShuffleInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Shuffle the remaining <strong>${remaining}</strong> Prophecy tokens face-down</span>`;
         
         // Initialize random prophecies if not already done
         if (gameState.removedProphecies.length === 0) {
@@ -3453,20 +3965,74 @@
           updateFullSetupProphecyRemoval();
         }
       } else {
-        if (prophecyInfoText) prophecyInfoText.textContent = 'Remove these 3 tokens, shuffle remaining 24, draw 3 to Pending slots. No Active Prophecy on Turn 1.';
-        if (p31Icon) p31Icon.classList.add('hidden');
-        if (academyProphecySection) academyProphecySection.classList.add('hidden');
-        if (academyBoardSetup) academyBoardSetup.classList.add('hidden');
-        
-        // Full Setup page 13
-        if (fullRemoveInstruction) fullRemoveInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Remove these 3 Prophecy tokens from the game:</span>`;
-        if (fullP31Icon) fullP31Icon.classList.add('hidden');
-        if (fullAcademyProphecySection) fullAcademyProphecySection.classList.add('hidden');
-        if (fullShuffleInstruction) fullShuffleInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Shuffle the remaining 24 Prophecy tokens face-down</span>`;
+        if (prophecyInfoText) prophecyInfoText.textContent = `Remove these ${baseRemovals} tokens, shuffle remaining ${remaining}, draw 3 to Pending slots. No Active Prophecy on Turn 1.`;
+        if (fullRemoveInstruction) fullRemoveInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Remove these ${baseRemovals} Prophecy tokens from the game:</span>`;
+        if (fullShuffleInstruction) fullShuffleInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Shuffle the remaining ${remaining} Prophecy tokens face-down</span>`;
         
         // Clear removed prophecies when Academy is disabled
         gameState.removedProphecies = [];
       }
+    }
+    
+    // Update wagon location options for Arcane Arts setup
+    function updateWagonLocationOptions() {
+      const hasAcademy = gameState.expansions?.academy;
+      const container = $('#quick-wagon-location-options');
+      
+      // Also update Full Setup wagon options if present
+      const fullContainer = $('#full-wagon-location-options');
+      
+      // Valid wagon locations: Downtown, Market Row, Dark Alley, + Academy if enabled
+      const locations = [
+        { id: 'downtown', name: 'Downtown' },
+        { id: 'market', name: 'Market Row' },
+        { id: 'darkalley', name: 'Dark Alley' }
+      ];
+      
+      if (hasAcademy) {
+        // Academy is second in the rotation (after Downtown) per spec
+        locations.splice(1, 0, { id: 'academy', name: 'Academy' });
+      }
+      
+      // Helper to populate a container with wagon buttons
+      const populateContainer = (cont) => {
+        if (!cont) return;
+        
+        cont.innerHTML = locations.map(loc => `
+          <button class="btn wagon-location-btn ${gameState.wagonLocation === loc.id ? 'selected' : ''}" 
+                  data-location="${loc.id}"
+                  style="${gameState.wagonLocation === loc.id ? 'background: var(--amber); color: var(--bg-dark);' : ''}">
+            ${loc.name}
+          </button>
+        `).join('');
+        
+        // Add click handlers
+        cont.querySelectorAll('.wagon-location-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            gameState.wagonLocation = btn.dataset.location;
+            updateWagonLocationOptions(); // Re-render to show selection
+            updateQuickSetupSummary(); // Update the summary
+          });
+        });
+        
+        // Add randomize button if not present
+        if (!cont.querySelector('.btn-randomize-wagon')) {
+          const randomBtn = document.createElement('button');
+          randomBtn.className = 'btn-randomize btn-randomize-wagon';
+          randomBtn.textContent = '🎲 Random';
+          randomBtn.style.marginLeft = '10px';
+          randomBtn.addEventListener('click', () => {
+            const randomIndex = Math.floor(Math.random() * locations.length);
+            gameState.wagonLocation = locations[randomIndex].id;
+            updateWagonLocationOptions();
+            updateQuickSetupSummary();
+          });
+          cont.appendChild(randomBtn);
+        }
+      };
+      
+      populateContainer(container);
+      populateContainer(fullContainer);
     }
     
     // Update school card descriptions based on Academy expansion
@@ -3968,16 +4534,23 @@
       const content = $('#quick-summary-content');
       const beginBtn = $('#quick-start-game-btn');
       
-      // Check if all selections are made
-      const canStart = gameState.difficulty && 
+      // Check if base selections are made (excluding wagon location)
+      const baseSelectionsComplete = gameState.difficulty && 
                        gameState.playerSchool && 
                        gameState.playerMagician && 
                        gameState.heirMagician && 
                        gameState.heir.tricks.length > 0;
       
+      // Check if ALL selections are made (including wagon if Arcane enabled)
+      let canStart = baseSelectionsComplete;
+      if (gameState.expansions.arcane && !gameState.wagonLocation) {
+        canStart = false;
+      }
+      
       if (beginBtn) beginBtn.disabled = !canStart;
       
-      if (!canStart || !summary || !content) {
+      // Show summary when base selections complete (even if wagon not yet selected)
+      if (!baseSelectionsComplete || !summary || !content) {
         if (summary) summary.style.display = 'none';
         return;
       }
@@ -4035,6 +4608,12 @@
         ? boardAction(`Use the <strong>6-character side</strong> of the Heir board (Academy)`)
         : '';
       
+      // Arcane-specific content
+      const wagonLocationNames = { downtown: 'Downtown', market: 'Market Row', darkalley: 'Dark Alley', academy: 'Academy' };
+      const arcaneWagonNote = gameState.expansions.arcane && gameState.wagonLocation
+        ? boardAction(`Place <strong>Wagon marker</strong> at <strong>${wagonLocationNames[gameState.wagonLocation]}</strong> (Arcane Arts)`)
+        : '';
+      
       content.innerHTML = `
         ${academyPlayerSetupNote}
         ${boardAction(`Place the Heir's Poster: <strong>${gameState.heirMagician.name}</strong>`)}
@@ -4049,6 +4628,7 @@
         ${boardAction(`Heir starts with <strong>${heirStartingFame} Fame</strong>, 0 Coins, <strong>${heirStartingShards}</strong>`)}
         ${dawnShardAction}
         ${challengeRuleNote}
+        ${arcaneWagonNote}
         
         ${boardAction(`Place Heir's Trick: <strong>${trick.name}</strong> with <strong>${trickMarkers} Trick marker(s)</strong> (Prepared)`)}
         ${elektraNote}
@@ -4469,6 +5049,30 @@
           if (protegeAPDisplay) protegeAPDisplay.textContent = gameState.heir.protegeAP || 1;
         } else {
           academyStatsCard.style.display = 'none';
+        }
+      }
+      
+      // Arcane Arts stats (Wagon, Arcane Shards, Supply, Worker)
+      const arcaneStatsCard = $('#arcane-stats-card');
+      if (arcaneStatsCard) {
+        if (gameState.expansions?.arcane) {
+          arcaneStatsCard.style.display = 'block';
+          const wagonLocationNames = { downtown: 'Downtown', market: 'Market', darkalley: 'Dark Alley', academy: 'Academy' };
+          const wagonDisplay = $('#wagon-location-display');
+          const arcaneShardDisplay = $('#heir-arcane-shards-display');
+          const supplyDisplay = $('#arcane-shards-supply-display');
+          const workerOfferDisplay = $('#arcane-worker-offer-display');
+          
+          if (wagonDisplay) wagonDisplay.textContent = wagonLocationNames[gameState.wagonLocation] || '—';
+          if (arcaneShardDisplay) arcaneShardDisplay.textContent = gameState.heir.arcaneShards || 0;
+          if (supplyDisplay) supplyDisplay.textContent = gameState.arcaneShardsSupply || 0;
+          if (workerOfferDisplay) {
+            workerOfferDisplay.textContent = gameState.arcaneWorkerOnOffer 
+              ? capitalizeFirst(gameState.arcaneWorkerOnOffer) 
+              : 'None';
+          }
+        } else {
+          arcaneStatsCard.style.display = 'none';
         }
       }
       
@@ -5028,6 +5632,18 @@
         gameState.classroomPhaseDone = false;  // Reset each turn
       }
       
+      // Arcane Arts: Initialize expansion state
+      if (gameState.expansions.arcane) {
+        gameState.arcaneShardsSupply = 4; // Solo/2-player uses 4 Arcane Shards
+        gameState.arcaneWorkersRemaining = ['golem', 'specter', 'trickster', 'shapeshifter'];
+        gameState.arcaneWorkerOnOffer = null; // Will be set during first Roll Dice phase
+        gameState.arcaneDice = { enchantment: null, reward: null };
+        gameState.arcaneDiceLocked = false;
+        gameState.heir.arcaneShards = 0;
+        gameState.heir.enchantedTricks = {};
+        // Note: wagonLocation is set during setup screen before game starts
+      }
+      
       // Show restart button
       $('#restart-btn').classList.remove('hidden');
       
@@ -5108,7 +5724,11 @@
       'p30': ['academy'],                         // Secret Draw 3 (heirIgnores)
       'p32': ['academy', 'classroom'],            // Teach Immediate Yield
       'p33': ['performance'],                     // Protégé Backstage Bonus
-      'p34': ['classroom']                        // Double Classroom Yield
+      'p34': ['classroom'],                       // Double Classroom Yield
+      // Arcane Arts expansion prophecies
+      'p35': ['end-turn'],                        // Ignore Arcane Wages
+      'p36': ['performance', 'classroom'],        // All Enchantments Trigger
+      'p37': ['performance', 'classroom']         // Double Reward
     };
 
     function getProphecyReminderHtml(phaseId) {
@@ -5117,9 +5737,10 @@
       const phases = PROPHECY_PHASE_MAP[gameState.activeProphecy.id];
       if (!phases || !phases.includes(phaseId)) return '';
       
-      // Determine if this is player-only or affects both (check both base and Academy heirIgnores)
+      // Determine if this is player-only or affects both (check base, Academy, and Arcane heirIgnores)
       const isHeirIgnores = PROPHECIES.heirIgnores.some(p => p.id === gameState.activeProphecy.id) ||
-                           PROPHECIES.academyHeirIgnores.some(p => p.id === gameState.activeProphecy.id);
+                           PROPHECIES.academyHeirIgnores.some(p => p.id === gameState.activeProphecy.id) ||
+                           PROPHECIES.arcaneHeirIgnores.some(p => p.id === gameState.activeProphecy.id);
       const badgeHtml = isHeirIgnores 
         ? '<span class="prophecy-badge badge-player-only">👤 PLAYER ONLY</span>'
         : '<span class="prophecy-badge badge-affect-both">⚡ AFFECTS BOTH</span>';
@@ -5144,9 +5765,10 @@
     function getHeirProphecyReminderHtml(context) {
       if (!gameState.activeProphecy) return '';
       
-      // Only show prophecies that affect the Heir (not heirIgnores - check both base and Academy)
+      // Only show prophecies that affect the Heir (not heirIgnores - check base, Academy, and Arcane)
       const isHeirIgnores = PROPHECIES.heirIgnores.some(p => p.id === gameState.activeProphecy.id) ||
-                           PROPHECIES.academyHeirIgnores.some(p => p.id === gameState.activeProphecy.id);
+                           PROPHECIES.academyHeirIgnores.some(p => p.id === gameState.activeProphecy.id) ||
+                           PROPHECIES.arcaneHeirIgnores.some(p => p.id === gameState.activeProphecy.id);
       if (isHeirIgnores) return '';
       
       // Map contexts to relevant prophecy IDs
@@ -5155,9 +5777,9 @@
         'heir-market': ['p01', 'p25'],                    // Apprentice AP, 1 Base AP
         'heir-darkalley': ['p01', 'p25'],                 // Apprentice AP, 1 Base AP
         'heir-theater-nonmagician': ['p01', 'p07', 'p08', 'p09', 'p10', 'p19', 'p20', 'p25'],  // Apprentice AP, Fame for trick schools, Shard bonuses, 1 Base AP
-        'heir-performance': ['p14', 'p16', 'p19', 'p20', 'p33'],  // Double performer bonus, Coins as Fame, Shard bonuses, Protégé Backstage
+        'heir-performance': ['p14', 'p16', 'p19', 'p20', 'p33', 'p36', 'p37'],  // Double performer bonus, Coins as Fame, Shard bonuses, Protégé Backstage, Enchantment prophecies
         'heir-academy': ['p28', 'p29', 'p32'],            // Renovate Fame Bonus, Practice Coins, Teach Immediate Yield
-        'heir-classroom': ['p19', 'p20', 'p32', 'p34']    // Shard bonuses, Teach Immediate Yield, Double Classroom Yield
+        'heir-classroom': ['p19', 'p20', 'p32', 'p34', 'p36', 'p37']    // Shard bonuses, Teach Immediate Yield, Double Classroom Yield, Enchantment prophecies
       };
       
       const relevantProphecies = contextMap[context] || [];
@@ -5211,6 +5833,7 @@
       const isFirstTurn = gameState.currentTurn === 1;
       const turnNumber = gameState.currentTurn;
       const hasAcademy = gameState.expansions.academy;
+      const hasArcane = gameState.expansions.arcane;
       
       const diceCount = hasAcademy ? 5 : 4;
       const diceLabel = hasAcademy ? '5 Turn Setup dice' : '4 Turn Setup dice';
@@ -5249,6 +5872,41 @@
           ${boardAction('Move Turn Setup markers to underneath the 2 newly rerolled dice')}
           ${boardAction('Rearrange Blocking tiles on those locations based on new results')}`;
       }
+      
+      // Arcane Arts: Add Arcane dice and worker instructions
+      if (hasArcane) {
+        content += `
+          <h4 style="color: var(--amber); margin: 20px 0 10px 0;">Arcane Arts</h4>
+          ${boardAction('Roll the <strong>2 Arcane dice</strong> (Enchantment die + Reward die) and place next to the Arcanist board')}`;
+        
+        // Arcane Worker rotation
+        if (turnNumber > 1 && gameState.arcaneWorkerOnOffer) {
+          content += boardAction(`Return the <strong>${capitalizeFirst(gameState.arcaneWorkerOnOffer)}</strong> from the Arcanist board offer to the supply`);
+        }
+        
+        // Draw new Arcane Worker if any remain
+        if (gameState.arcaneWorkersRemaining.length > 0) {
+          // Randomly select a worker for the offer
+          const randomIndex = Math.floor(Math.random() * gameState.arcaneWorkersRemaining.length);
+          const newWorker = gameState.arcaneWorkersRemaining[randomIndex];
+          
+          // Update state
+          gameState.arcaneWorkersRemaining = gameState.arcaneWorkersRemaining.filter((_, i) => i !== randomIndex);
+          gameState.arcaneWorkerOnOffer = newWorker;
+          
+          content += boardAction(`Place <strong>${capitalizeFirst(newWorker)}</strong> on the Arcanist board offer slot`);
+        } else {
+          gameState.arcaneWorkerOnOffer = null;
+          content += noteBox('No Arcane Workers remain in supply — skip worker placement');
+        }
+        
+        // Reset dice lock at start of turn
+        gameState.arcaneDiceLocked = false;
+        
+        // Show current wagon location
+        const wagonLocationNames = { downtown: 'Downtown', market: 'Market Row', darkalley: 'Dark Alley', academy: 'Academy' };
+        content += infoBox(`<strong>Wagon Location:</strong> ${wagonLocationNames[gameState.wagonLocation]}`, 'ARCANE');
+      }
 
       // On Turn 2+, show prophecy selection before advancing
       const continueAction = () => {
@@ -5264,6 +5922,12 @@
         content,
         [{ text: gameState.currentTurn >= 2 ? 'Select Prophecy & Continue' : 'Continue to Initiative', action: continueAction }]
       );
+    }
+    
+    // Helper to capitalize first letter
+    function capitalizeFirst(str) {
+      if (!str) return '';
+      return str.charAt(0).toUpperCase() + str.slice(1);
     }
 
     function handleInitiativePhase() {
@@ -5576,28 +6240,63 @@
 
     function getLocationPriorityHtml(stance) {
       const hasAcademy = gameState.expansions.academy;
+      const hasArcane = gameState.expansions.arcane;
+      const wagonLoc = gameState.wagonLocation;
+      
+      // Helper to check if a location is the wagon location
+      const isWagon = (loc) => hasArcane && wagonLoc === loc;
+      
+      // Helper to create a location line (highlighted if wagon)
+      const locLine = (loc, name, extra = '') => {
+        if (isWagon(loc)) {
+          return `<li style="color: var(--amber);"><strong>${name}</strong> <em>(Wagon)</em>${extra}</li>`;
+        }
+        return `<li>${name}${extra}</li>`;
+      };
+      
+      // Academy line (greyed out if expansion not enabled)
       const academyLine = hasAcademy 
-        ? '<li>Academy</li>'
+        ? locLine('academy', 'Academy')
         : '<li style="color: var(--text-muted);"><s>Academy</s> <em>(expansion)</em></li>';
       
       if (stance === 'ready') {
-        return `<ol style="color: var(--text-secondary); line-height: 1.8; padding-left: 20px;">
-          <li>Theater (earliest available day)</li>
-          <li>Downtown</li>
-          ${academyLine}
-          <li>Market Row</li>
-          <li>Dark Alley</li>
-          <li>Workshop</li>
-        </ol>`;
+        // Ready: Theater → Downtown → Academy → Market Row → Dark Alley → Workshop
+        // Wagon location gets promoted to position 2 (after Theater, before others)
+        let lines = [];
+        lines.push('<li>Theater (earliest available day)</li>');
+        lines.push(locLine('downtown', 'Downtown'));
+        
+        // If wagon is NOT at Downtown and NOT at Theater, show it here as #3
+        if (hasArcane && wagonLoc !== 'downtown' && wagonLoc !== 'theater') {
+          const wagonNames = { market: 'Market Row', darkalley: 'Dark Alley', academy: 'Academy' };
+          lines.push(`<li style="color: var(--amber);"><strong>${wagonNames[wagonLoc]}</strong> <em>(Wagon)</em></li>`);
+        }
+        
+        if (!isWagon('academy')) lines.push(academyLine);
+        if (!isWagon('market')) lines.push('<li>Market Row</li>');
+        if (!isWagon('darkalley')) lines.push('<li>Dark Alley</li>');
+        lines.push('<li>Workshop</li>');
+        
+        return `<ol style="color: var(--text-secondary); line-height: 1.8; padding-left: 20px;">${lines.join('')}</ol>`;
       } else {
-        return `<ol style="color: var(--text-secondary); line-height: 1.8; padding-left: 20px;">
-          <li>Downtown</li>
-          ${academyLine}
-          <li>Theater (latest possible day)</li>
-          <li>Market Row</li>
-          <li>Dark Alley</li>
-          <li>Workshop</li>
-        </ol>`;
+        // Busy: Downtown → Academy → Theater → Market Row → Dark Alley → Workshop
+        // Wagon location gets promoted to position 2 (after Downtown, before others)
+        let lines = [];
+        lines.push(locLine('downtown', 'Downtown'));
+        
+        // If wagon is NOT at Downtown, show it here as #2
+        if (hasArcane && wagonLoc !== 'downtown') {
+          const wagonNames = { market: 'Market Row', darkalley: 'Dark Alley', academy: 'Academy', theater: 'Theater' };
+          lines.push(`<li style="color: var(--amber);"><strong>${wagonNames[wagonLoc]}</strong> <em>(Wagon)</em></li>`);
+        }
+        
+        if (!isWagon('academy')) lines.push(academyLine);
+        if (!isWagon('theater')) lines.push('<li>Theater (latest possible day)</li>');
+        if (!isWagon('market')) lines.push('<li>Market Row</li>');
+        if (!isWagon('darkalley')) lines.push('<li>Dark Alley</li>');
+        lines.push('<li>Workshop</li>');
+        
+        return `<ol style="color: var(--text-secondary); line-height: 1.8; padding-left: 20px;">${lines.join('')}</ol>`;
       }
     }
 
@@ -5622,6 +6321,9 @@
       
       // Reset p22 (Place Two Characters) tracking
       gameState.heirP22FirstPlacementDone = false;
+      
+      // Reset Arcane Arts current location tracking
+      gameState.heirCurrentLocation = null;
       
       // Check if Optico is the magician - need to ask about SA cards
       const isOptico = gameState.heirMagician?.id === 'optico';
@@ -6070,11 +6772,23 @@
         $$('.location-grid-btn').forEach(btn => {
           btn.addEventListener('click', () => {
             const actionName = btn.dataset.action;
-            if (actionName === 'showDowntownDiceInput') showDowntownDiceInput();
-            else if (actionName === 'showMarketRowInput') showMarketRowInput();
-            else if (actionName === 'showDarkAlleyInput') showDarkAlleyInput();
-            else if (actionName === 'showTheaterInput') showTheaterInput();
-            else if (actionName === 'showAcademyInput') showAcademyInput();
+            // Track the current location for Arcane Arts wagon detection
+            if (actionName === 'showDowntownDiceInput') {
+              gameState.heirCurrentLocation = 'downtown';
+              showDowntownDiceInput();
+            } else if (actionName === 'showMarketRowInput') {
+              gameState.heirCurrentLocation = 'market';
+              showMarketRowInput();
+            } else if (actionName === 'showDarkAlleyInput') {
+              gameState.heirCurrentLocation = 'darkalley';
+              showDarkAlleyInput();
+            } else if (actionName === 'showTheaterInput') {
+              gameState.heirCurrentLocation = 'theater';
+              showTheaterInput();
+            } else if (actionName === 'showAcademyInput') {
+              gameState.heirCurrentLocation = 'academy';
+              showAcademyInput();
+            }
           });
         });
       }, 0);
@@ -6124,12 +6838,26 @@
         $$('.location-grid-btn').forEach(btn => {
           btn.addEventListener('click', () => {
             const actionName = btn.dataset.action;
-            if (actionName === 'showDowntownDiceInput') showDowntownDiceInput();
-            else if (actionName === 'showMarketRowInput') showMarketRowInput();
-            else if (actionName === 'showDarkAlleyInput') showDarkAlleyInput();
-            else if (actionName === 'showTheaterInput') showTheaterInput();
-            else if (actionName === 'showWorkshopActions') showWorkshopActions();
-            else if (actionName === 'showAcademyInput') showAcademyInput();
+            // Track the current location for Arcane Arts wagon detection
+            if (actionName === 'showDowntownDiceInput') {
+              gameState.heirCurrentLocation = 'downtown';
+              showDowntownDiceInput();
+            } else if (actionName === 'showMarketRowInput') {
+              gameState.heirCurrentLocation = 'market';
+              showMarketRowInput();
+            } else if (actionName === 'showDarkAlleyInput') {
+              gameState.heirCurrentLocation = 'darkalley';
+              showDarkAlleyInput();
+            } else if (actionName === 'showTheaterInput') {
+              gameState.heirCurrentLocation = 'theater';
+              showTheaterInput();
+            } else if (actionName === 'showWorkshopActions') {
+              gameState.heirCurrentLocation = 'workshop';
+              showWorkshopActions();
+            } else if (actionName === 'showAcademyInput') {
+              gameState.heirCurrentLocation = 'academy';
+              showAcademyInput();
+            }
           });
         });
         
@@ -6150,6 +6878,16 @@
       // Heir just finished placing a character
       gameState.heirPlacementsThisTurn = (gameState.heirPlacementsThisTurn || 0) + 1;
       
+      // Check for Arcane Arts: If Heir was at Wagon location, show Arcanist actions
+      if (gameState.expansions.arcane && gameState.heirCurrentLocation === gameState.wagonLocation) {
+        showHeirArcanistActions();
+        return;
+      }
+      
+      continueAfterHeirPlacement();
+    }
+    
+    function continueAfterHeirPlacement() {
       // Check for p22 (Place Two Characters) - Heir places 2 characters per turn
       const isP22Active = gameState.activeProphecy?.id === 'p22';
       const heirCharacterCount = gameState.heir.characters.length;
@@ -6165,6 +6903,48 @@
         gameState.heirP22FirstPlacementDone = false;
         showPlayerTurnScreen();
       }
+    }
+    
+    function showHeirArcanistActions() {
+      // Heir is at the Wagon location - perform Arcanist priority actions
+      const difficulty = gameState.difficulty;
+      const actionCount = difficulty === 'easy' ? 1 : (difficulty === 'normal' ? 2 : 3);
+      const wagonLocationNames = { downtown: 'Downtown', market: 'Market Row', darkalley: 'Dark Alley', academy: 'Academy' };
+      const wagonName = wagonLocationNames[gameState.wagonLocation];
+      
+      // Build the priority list HTML
+      const priorityListHtml = `
+        <ol style="color: var(--text-secondary); line-height: 2; padding-left: 20px; margin: 15px 0;">
+          <li><strong>Enchant</strong> leftmost non-enchanted Trick<br>
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Pick type from offer Heir has most of (cheaper breaks ties)</span></li>
+          <li><strong>Take Arcane Worker</strong> → Remove from play → <strong>Hire Apprentice</strong> instead<br>
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Only if Worker on offer AND Heir has empty Apprentice slot</span></li>
+          <li><strong>Set Enchantment die</strong> to type Heir has most enchanted Tricks of<br>
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Only if Ready stance AND ≥1 enchanted Trick AND dice not already locked. <strong>After setting, dice are locked for the turn.</strong></span></li>
+          <li><strong>Gain 1 Arcane Shard</strong><br>
+            <span style="font-size: 0.85rem; color: var(--text-muted);">If supply empty: +1 Fame, +1 Coin instead</span></li>
+          <li><strong>Gain 1 Arcane Shard</strong><br>
+            <span style="font-size: 0.85rem; color: var(--text-muted);">If supply empty: +1 Fame, +1 Coin instead</span></li>
+          <li><strong>Gain 3 Fame</strong></li>
+        </ol>`;
+      
+      setActionContent(
+        `Turn ${gameState.currentTurn} — Arcanist Actions`,
+        `${infoBox(`The Heir is at <strong>${wagonName}</strong> which has the <strong>Wagon</strong>. After normal location actions, perform <strong>${actionCount}</strong> Arcanist action${actionCount > 1 ? 's' : ''} from this priority list.`)}
+        
+        <p><strong>Heir's Arcanist Priority List</strong> (${difficulty} difficulty = ${actionCount} action${actionCount > 1 ? 's' : ''}):</p>
+        ${priorityListHtml}
+        
+        ${boardAction(`Perform the top <strong>${actionCount}</strong> applicable action${actionCount > 1 ? 's' : ''} from the list above for the Heir`)}
+        
+        ${noteBox(`<strong>Remember:</strong> The Heir does NOT physically take Enchantment tiles. When enchanting, just note the TYPE for dice trigger purposes.`)}`,
+        [
+          { text: 'Done — Continue', action: () => {
+            gameState.heirCurrentLocation = null; // Clear the tracking
+            continueAfterHeirPlacement();
+          }}
+        ]
+      );
     }
 
     function showStanceRecheck() {
@@ -9366,7 +10146,9 @@
       trickCountsByLevel: { level1: 0, level2: 0, level3: 0 },
       cardBonus: { fame: 0, coins: 0, shards: 0 },
       redLotusTricks: 0,
-      playerHasTricksOnCard: false
+      playerHasTricksOnCard: false,
+      // Arcane Arts enchantment triggers
+      enchantmentReward: { fame: 0, coins: 0, shards: 0, arcaneShards: 0, saCard: false }
     };
     
     function showHeirPerformanceStep1_TrickYields(winningCard, results) {
@@ -9634,7 +10416,7 @@
       
       // Skip if p33 not active or no Academy
       if (!isP33Active || !hasAcademy) {
-        showHeirPerformanceStep3_FinalTotals();
+        showHeirPerformanceStep2c_ArcaneEnchantments();
         return;
       }
       
@@ -9652,10 +10434,414 @@
         [
           { text: 'Yes — Protégé is Backstage', action: () => {
             heirPerformanceTempData.p33Bonus = true;
-            showHeirPerformanceStep3_FinalTotals();
+            showHeirPerformanceStep2c_ArcaneEnchantments();
           }},
           { text: 'No — Not Backstage', action: () => {
             heirPerformanceTempData.p33Bonus = false;
+            showHeirPerformanceStep2c_ArcaneEnchantments();
+          }}
+        ]
+      );
+    }
+    
+    // Step 2c: Arcane Enchantment Triggers (only if Arcane Arts enabled)
+    function showHeirPerformanceStep2c_ArcaneEnchantments() {
+      const hasArcane = gameState.expansions?.arcane;
+      
+      // Skip if Arcane Arts not enabled
+      if (!hasArcane) {
+        showHeirPerformanceStep3_FinalTotals();
+        return;
+      }
+      
+      // Check if Heir has any enchanted tricks
+      const enchantedTricks = gameState.heir.enchantedTricks || {};
+      const enchantedCount = Object.keys(enchantedTricks).length;
+      
+      // Skip if Heir has no enchanted tricks
+      if (enchantedCount === 0) {
+        showHeirPerformanceStep3_FinalTotals();
+        return;
+      }
+      
+      // Check for active prophecies
+      const isP36Active = gameState.activeProphecy?.id === 'p36'; // All Enchantments Trigger
+      const isP37Active = gameState.activeProphecy?.id === 'p37'; // Double Reward
+      
+      // Count enchanted tricks by type
+      const typeCounts = { scrolls: 0, runes: 0, amulets: 0 };
+      Object.values(enchantedTricks).forEach(type => {
+        if (typeCounts[type] !== undefined) typeCounts[type]++;
+      });
+      
+      const winningCard = heirPerformanceTempData.winningCard;
+      const cardCount = getPerformanceCardCount();
+      const selectedSlots = heirPerformanceTempData.results.map(r => r.card);
+      const cardSlotsHtml = buildCardSlotsVisual(cardCount, selectedSlots, winningCard);
+      
+      // Build content
+      let content = cardSlotsHtml;
+      
+      // Enchantment type icons/names
+      const typeNames = { scrolls: 'Parchment Scrolls', runes: 'Stone Runes', amulets: 'Amulet Necklaces' };
+      const typeIcons = { scrolls: '📜', runes: '🪨', amulets: '📿' };
+      
+      // Show Heir's enchanted tricks summary
+      content += `
+        <div style="background: var(--bg-card); padding: 12px; border-radius: 6px; margin: 15px 0;">
+          <h4 style="margin: 0 0 10px 0; color: var(--amber);">✨ Heir's Enchanted Tricks</h4>
+          <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+      `;
+      
+      Object.entries(typeCounts).forEach(([type, count]) => {
+        if (count > 0) {
+          content += `<span style="color: var(--text-secondary);">${typeIcons[type]} ${typeNames[type]}: <strong>${count}</strong></span>`;
+        }
+      });
+      
+      content += `
+          </div>
+        </div>
+      `;
+      
+      // If p36 is active, skip dice selection - all enchantments trigger
+      if (isP36Active) {
+        content += `
+          <div style="background: rgba(212, 168, 71, 0.15); border-left: 3px solid var(--amber); padding: 12px; margin: 15px 0; border-radius: 0 4px 4px 0;">
+            <strong style="color: var(--amber);">🔮 p36: All Enchantments Trigger</strong>
+            <p style="margin: 8px 0 0 0; color: var(--text-secondary);">Ignore the Enchantment Die — ALL ${enchantedCount} enchanted trick(s) trigger this turn!</p>
+          </div>
+        `;
+        
+        // Still need to ask for Reward die result
+        content += `
+          <p style="margin: 15px 0;"><strong>What does the Reward Die show?</strong></p>
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 10px;">Select the face showing on the Arcane Reward die.</p>
+          
+          ${getRewardDieHtml('reward-die-btn')}
+        `;
+        
+        setActionContent(
+          `Turn ${gameState.currentTurn} — Performance: Enchantment Triggers`,
+          content,
+          [
+            { text: 'Continue →', action: () => calculateAndApplyEnchantmentRewards(enchantedCount, true), id: 'continue-btn', disabled: true }
+          ]
+        );
+        
+        // Add event listeners for reward die selection
+        setTimeout(() => {
+          attachDieButtonListeners('reward-die-btn', (value) => {
+            gameState.arcaneDice.reward = parseInt(value);
+            const continueBtn = document.getElementById('continue-btn');
+            if (continueBtn) continueBtn.disabled = false;
+          });
+        }, 0);
+        
+      } else {
+        // Normal case - need to select both dice
+        content += `
+          <p style="margin: 15px 0;"><strong>What does the Enchantment Die show?</strong></p>
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 10px;">Select the Enchantment type showing on the die (or that the Heir set).</p>
+          
+          ${getEnchantmentDieHtml('enchant-die-btn')}
+          
+          <div id="matching-tricks-display" style="display: none; background: rgba(74, 158, 107, 0.15); border-left: 3px solid var(--success); padding: 12px; margin: 15px 0; border-radius: 0 4px 4px 0;">
+            <span id="matching-tricks-count" style="color: var(--success); font-weight: 600;"></span>
+          </div>
+          
+          <div id="no-match-display" style="display: none; background: rgba(180, 83, 83, 0.15); border-left: 3px solid var(--danger); padding: 12px; margin: 15px 0; border-radius: 0 4px 4px 0;">
+            <span style="color: var(--danger); font-weight: 600;">No matching Tricks — No Enchantment reward this performance.</span>
+          </div>
+          
+          <div id="reward-die-section" style="display: none;">
+            <p style="margin: 15px 0;"><strong>What does the Reward Die show?</strong></p>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 10px;">Select the face showing on the Arcane Reward die.</p>
+            
+            ${getRewardDieHtml('reward-die-btn')}
+          </div>
+        `;
+        
+        setActionContent(
+          `Turn ${gameState.currentTurn} — Performance: Enchantment Triggers`,
+          content,
+          [
+            { text: 'No Triggers — Skip', action: () => showHeirPerformanceStep3_FinalTotals(), id: 'skip-btn' },
+            { text: 'Continue →', action: () => calculateAndApplyEnchantmentRewards(null, false), id: 'continue-btn', disabled: true }
+          ]
+        );
+        
+        // Add event listeners for die selections
+        setTimeout(() => {
+          let selectedEnchantment = null;
+          let selectedReward = null;
+          let matchingTricks = 0;
+          
+          // Enchantment die selection
+          attachDieButtonListeners('enchant-die-btn', (value) => {
+            selectedEnchantment = value;
+            gameState.arcaneDice.enchantment = selectedEnchantment;
+            
+            // Count matching tricks
+            matchingTricks = typeCounts[selectedEnchantment] || 0;
+            
+            const matchDisplay = document.getElementById('matching-tricks-display');
+            const noMatchDisplay = document.getElementById('no-match-display');
+            const rewardSection = document.getElementById('reward-die-section');
+            const skipBtn = document.getElementById('skip-btn');
+            
+            if (matchingTricks > 0) {
+              matchDisplay.style.display = 'block';
+              noMatchDisplay.style.display = 'none';
+              rewardSection.style.display = 'block';
+              document.getElementById('matching-tricks-count').textContent = 
+                `✓ ${matchingTricks} Heir Trick(s) match! Each will receive the Reward die benefit.`;
+              if (skipBtn) skipBtn.style.display = 'none';
+            } else {
+              matchDisplay.style.display = 'none';
+              noMatchDisplay.style.display = 'block';
+              rewardSection.style.display = 'none';
+              if (skipBtn) skipBtn.style.display = 'inline-block';
+              // Enable continue button when no match (skip)
+              const continueBtn = document.getElementById('continue-btn');
+              if (continueBtn) continueBtn.disabled = false;
+            }
+          });
+          
+          // Reward die selection
+          attachDieButtonListeners('reward-die-btn', (value) => {
+            selectedReward = parseInt(value);
+            gameState.arcaneDice.reward = selectedReward;
+            
+            const continueBtn = document.getElementById('continue-btn');
+            if (continueBtn && selectedEnchantment && matchingTricks > 0) {
+              continueBtn.disabled = false;
+            }
+          });
+        }, 0);
+      }
+    }
+    
+    // Calculate and apply enchantment rewards, then proceed to final totals
+    function calculateAndApplyEnchantmentRewards(forcedTriggerCount, isP36) {
+      const isP37Active = gameState.activeProphecy?.id === 'p37'; // Double Reward
+      const rewardDie = gameState.arcaneDice?.reward || 0;
+      
+      // Determine trigger count
+      let triggerCount = 0;
+      if (isP36 && forcedTriggerCount !== null) {
+        triggerCount = forcedTriggerCount;
+      } else if (!isP36) {
+        const enchantedTricks = gameState.heir.enchantedTricks || {};
+        const selectedType = gameState.arcaneDice?.enchantment;
+        if (selectedType) {
+          triggerCount = Object.values(enchantedTricks).filter(t => t === selectedType).length;
+        }
+      }
+      
+      // If no triggers, skip rewards
+      if (triggerCount === 0) {
+        heirPerformanceTempData.enchantmentReward = { fame: 0, coins: 0, shards: 0, arcaneShards: 0, saCard: false };
+        showHeirPerformanceStep3_FinalTotals();
+        return;
+      }
+      
+      // Calculate base reward (per trigger)
+      let baseReward = { fame: 0, coins: 0, shards: 0, arcaneShards: 0, saCard: false };
+      
+      switch (rewardDie) {
+        case 1:
+          // Draw 2 SA cards, keep 1 - handled via flag
+          baseReward.saCard = true;
+          break;
+        case 2:
+          baseReward.fame = 1;
+          baseReward.coins = 1;
+          break;
+        case 3:
+          baseReward.coins = 3;
+          break;
+        case 4:
+          // Fame = Trick Level - ask for average level
+          // For simplicity, we'll ask this separately or use average
+          // Actually, for Heir we need to track which specific tricks triggered
+          // For now, use level 2 as average approximation
+          baseReward.fame = 2; // Will be adjusted in next step if needed
+          break;
+        case 5:
+        case 6:
+          // Arcane Shard (or +1 Fame +1 Coin if supply empty)
+          if (gameState.arcaneShardsSupply > 0) {
+            baseReward.arcaneShards = 1;
+          } else {
+            baseReward.fame = 1;
+            baseReward.coins = 1;
+          }
+          break;
+      }
+      
+      // Multiply by trigger count
+      let totalReward = {
+        fame: baseReward.fame * triggerCount,
+        coins: baseReward.coins * triggerCount,
+        shards: baseReward.shards * triggerCount,
+        arcaneShards: baseReward.arcaneShards * triggerCount,
+        saCard: baseReward.saCard && triggerCount > 0
+      };
+      
+      // For Arcane Shards, cap by supply
+      if (totalReward.arcaneShards > gameState.arcaneShardsSupply) {
+        const excess = totalReward.arcaneShards - gameState.arcaneShardsSupply;
+        totalReward.arcaneShards = gameState.arcaneShardsSupply;
+        // Convert excess to Fame + Coins
+        totalReward.fame += excess;
+        totalReward.coins += excess;
+      }
+      
+      // Apply p37 (Double Reward)
+      if (isP37Active) {
+        totalReward.fame *= 2;
+        totalReward.coins *= 2;
+        totalReward.shards *= 2;
+        totalReward.arcaneShards *= 2;
+        // Cap Arcane Shards again
+        if (totalReward.arcaneShards > gameState.arcaneShardsSupply) {
+          const excess = totalReward.arcaneShards - gameState.arcaneShardsSupply;
+          totalReward.arcaneShards = gameState.arcaneShardsSupply;
+          totalReward.fame += excess;
+          totalReward.coins += excess;
+        }
+      }
+      
+      // If reward die was 4 (Fame = Level), need to ask for actual levels
+      if (rewardDie === 4) {
+        showEnchantmentLevelInput(triggerCount, isP37Active);
+        return;
+      }
+      
+      // If SA card reward, show SA card instruction
+      if (totalReward.saCard) {
+        showEnchantmentSACardReward(triggerCount, isP37Active, totalReward);
+        return;
+      }
+      
+      // Store rewards and proceed
+      heirPerformanceTempData.enchantmentReward = totalReward;
+      showHeirPerformanceStep3_FinalTotals();
+    }
+    
+    // Handle reward die 4 (Fame = Trick Level) - need to ask for levels
+    function showEnchantmentLevelInput(triggerCount, isP37) {
+      const multiplier = isP37 ? 2 : 1;
+      
+      setActionContent(
+        `Turn ${gameState.currentTurn} — Performance: Enchantment Reward`,
+        `<div style="background: var(--bg-card); padding: 15px; border-radius: 6px; margin: 15px 0;">
+           <h4 style="margin: 0 0 10px 0; color: var(--amber);">✨ Reward Die: Fame = Trick Level</h4>
+           <p style="color: var(--text-secondary);">The Heir gains Fame equal to the Level of each triggered Trick (1/2/3 Fame for L1/L2/L3).</p>
+           ${isP37 ? '<p style="color: var(--amber);">🔮 p37: Double Reward — Fame is doubled!</p>' : ''}
+         </div>
+         
+         <p style="margin: 15px 0;"><strong>How many triggered Tricks at each Level?</strong></p>
+         <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;">${triggerCount} trick(s) triggered total.</p>
+         
+         <div class="stepper-grid" style="margin-bottom: 20px;">
+           <div style="text-align: center;">
+             <label style="display: block; margin-bottom: 8px; font-weight: 600;">Level 1</label>
+             ${createStepper('enchant-level1', 0)}
+             <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 5px;">+${1 * multiplier} Fame each</p>
+           </div>
+           <div style="text-align: center;">
+             <label style="display: block; margin-bottom: 8px; font-weight: 600;">Level 2</label>
+             ${createStepper('enchant-level2', 0)}
+             <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 5px;">+${2 * multiplier} Fame each</p>
+           </div>
+           <div style="text-align: center;">
+             <label style="display: block; margin-bottom: 8px; font-weight: 600;">Level 3</label>
+             ${createStepper('enchant-level3', 0)}
+             <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 5px;">+${3 * multiplier} Fame each</p>
+           </div>
+         </div>`,
+        [
+          { text: 'Continue →', action: () => {
+            const l1 = parseInt($('#enchant-level1')?.dataset?.value) || 0;
+            const l2 = parseInt($('#enchant-level2')?.dataset?.value) || 0;
+            const l3 = parseInt($('#enchant-level3')?.dataset?.value) || 0;
+            const totalFame = ((l1 * 1) + (l2 * 2) + (l3 * 3)) * multiplier;
+            
+            heirPerformanceTempData.enchantmentReward = {
+              fame: totalFame,
+              coins: 0,
+              shards: 0,
+              arcaneShards: 0,
+              saCard: false
+            };
+            showHeirPerformanceStep3_FinalTotals();
+          }}
+        ]
+      );
+      
+      // Attach stepper event listeners
+      setTimeout(() => {
+        document.querySelectorAll('.stepper-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const targetId = e.currentTarget.dataset.target;
+            const valueEl = document.getElementById(targetId);
+            if (!valueEl) return;
+            
+            let currentValue = parseInt(valueEl.dataset.value) || 0;
+            
+            if (e.currentTarget.classList.contains('stepper-plus')) {
+              currentValue++;
+            } else if (e.currentTarget.classList.contains('stepper-minus')) {
+              currentValue = Math.max(0, currentValue - 1);
+            }
+            
+            valueEl.dataset.value = currentValue;
+            valueEl.textContent = currentValue;
+            
+            const container = valueEl.closest('.stepper-container');
+            const minusBtn = container?.querySelector('.stepper-minus');
+            if (minusBtn) minusBtn.disabled = currentValue === 0;
+          });
+        });
+      }, 0);
+    }
+    
+    // Handle SA card reward (die face 1)
+    function showEnchantmentSACardReward(triggerCount, isP37, otherRewards) {
+      const draws = isP37 ? triggerCount * 2 : triggerCount;
+      
+      setActionContent(
+        `Turn ${gameState.currentTurn} — Performance: Enchantment Reward`,
+        `<div style="background: var(--bg-card); padding: 15px; border-radius: 6px; margin: 15px 0;">
+           <h4 style="margin: 0 0 10px 0; color: var(--amber);">✨ Reward Die: Draw SA Cards</h4>
+           <p style="color: var(--text-secondary);">${draws} trigger(s) = draw ${draws * 2} SA cards, keep ${draws}.</p>
+           ${isP37 ? '<p style="color: var(--amber);">🔮 p37: Double Reward — draw/keep doubled!</p>' : ''}
+         </div>
+         
+         ${boardAction(`For each of the ${draws} trigger(s): Draw the top <strong>2 SA cards</strong> from any deck. Use Dark Alley priorities to determine which the Heir keeps.`)}
+         
+         <div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 12px; margin: 15px 0; border-radius: 0 4px 4px 0;">
+           <strong style="color: var(--info);">ℹ️ Dark Alley SA Card Priority:</strong>
+           <ol style="margin: 8px 0 0 20px; color: var(--text-secondary);">
+             <li>Special Assignment targeting Magician</li>
+             <li>Special Assignment with highest Fame reward</li>
+             <li>Special Assignment with highest total yield</li>
+           </ol>
+         </div>
+         
+         ${boardAction('Return unchosen cards to the bottom of their decks')}`,
+        [
+          { text: 'Done — Continue', action: () => {
+            // SA card doesn't add direct resources - just instruction
+            heirPerformanceTempData.enchantmentReward = {
+              fame: otherRewards?.fame || 0,
+              coins: otherRewards?.coins || 0,
+              shards: otherRewards?.shards || 0,
+              arcaneShards: otherRewards?.arcaneShards || 0,
+              saCard: true
+            };
             showHeirPerformanceStep3_FinalTotals();
           }}
         ]
@@ -9732,6 +10918,20 @@
       let finalCoins = baseCoins + p14BonusCoins;
       let finalShards = baseShards + p14BonusShards;
       
+      // Arcane Arts: Enchantment rewards
+      const hasArcane = gameState.expansions?.arcane;
+      const enchantReward = data.enchantmentReward || { fame: 0, coins: 0, shards: 0, arcaneShards: 0, saCard: false };
+      let enchantmentFame = enchantReward.fame || 0;
+      let enchantmentCoins = enchantReward.coins || 0;
+      let enchantmentShards = enchantReward.shards || 0;
+      let enchantmentArcaneShards = enchantReward.arcaneShards || 0;
+      
+      // Add enchantment rewards to totals
+      finalFame += enchantmentFame;
+      finalCoins += enchantmentCoins;
+      finalShards += enchantmentShards;
+      // Arcane Shards are tracked separately from regular shards
+      
       // Apply p19 (Extra Shard)
       let p19ExtraShard = 0;
       if (isExtraShard && finalShards > 0) {
@@ -9779,6 +10979,9 @@
       if (p14BonusFame > 0) {
         fameBreakdown += `<tr style="color: var(--amber);"><td>⚠️ p14 Doubled</td><td style="text-align: right; font-weight: 600;">+${p14BonusFame}</td></tr>`;
       }
+      if (hasArcane && enchantmentFame > 0) {
+        fameBreakdown += `<tr style="color: var(--amber);"><td>✨ Enchantment Reward</td><td style="text-align: right; font-weight: 600;">+${enchantmentFame}</td></tr>`;
+      }
       if (p20BonusFame > 0) {
         fameBreakdown += `<tr style="color: var(--amber);"><td>⚠️ p20 Shards → Fame</td><td style="text-align: right; font-weight: 600;">+${p20BonusFame}</td></tr>`;
       }
@@ -9812,6 +11015,9 @@
       if (p14BonusCoins > 0) {
         coinsBreakdown += `<tr style="color: var(--amber);"><td>⚠️ p14 Doubled</td><td style="text-align: right; font-weight: 600;">+${p14BonusCoins}</td></tr>`;
       }
+      if (hasArcane && enchantmentCoins > 0) {
+        coinsBreakdown += `<tr style="color: var(--amber);"><td>✨ Enchantment Reward</td><td style="text-align: right; font-weight: 600;">+${enchantmentCoins}</td></tr>`;
+      }
       if (p16ConvertedCoins > 0) {
         coinsBreakdown += `<tr style="color: var(--amber);"><td>⚠️ p16 → Fame</td><td style="text-align: right; font-weight: 600; text-decoration: line-through;">-${p16ConvertedCoins}</td></tr>`;
       }
@@ -9839,6 +11045,9 @@
       if (p14BonusShards > 0) {
         shardsBreakdown += `<tr style="color: var(--amber);"><td>⚠️ p14 Doubled</td><td style="text-align: right; font-weight: 600;">+${p14BonusShards}</td></tr>`;
       }
+      if (hasArcane && enchantmentShards > 0) {
+        shardsBreakdown += `<tr style="color: var(--amber);"><td>✨ Enchantment Reward</td><td style="text-align: right; font-weight: 600;">+${enchantmentShards}</td></tr>`;
+      }
       if (p19ExtraShard > 0) {
         shardsBreakdown += `<tr style="color: var(--amber);"><td>⚠️ p19 Extra Shard</td><td style="text-align: right; font-weight: 600;">+${p19ExtraShard}</td></tr>`;
       }
@@ -9847,6 +11056,19 @@
           </table>
         </div>
       `;
+      
+      // Arcane Shards breakdown (only if any gained)
+      let arcaneShardsBreakdown = '';
+      if (hasArcane && enchantmentArcaneShards > 0) {
+        arcaneShardsBreakdown = `
+          <div style="background: var(--bg-card); padding: 12px; border-radius: 6px; margin-bottom: 10px; border: 1px solid var(--amber);">
+            <h4 style="margin: 0 0 10px 0; color: var(--amber);">✨ Arcane Shards</h4>
+            <table style="width: 100%; font-size: 0.9rem;">
+              <tr style="color: var(--amber);"><td>Enchantment Reward</td><td style="text-align: right; font-weight: 600;">+${enchantmentArcaneShards}</td></tr>
+            </table>
+          </div>
+        `;
+      }
       
       // Build card visual
       const cardCount = getPerformanceCardCount();
@@ -9857,6 +11079,7 @@
       const currentFame = gameState.heir.fame;
       const currentCoins = gameState.heir.coins;
       const currentShards = gameState.heir.shards;
+      const currentArcaneShards = gameState.heir.arcaneShards || 0;
       
       // Build conditional board actions
       const fameAction = finalFame > 0 
@@ -9868,35 +11091,72 @@
       const shardsAction = finalShards > 0 
         ? boardAction(`Update the Heir's Shards with <strong>+${finalShards} Shards</strong>. (${currentShards} → ${currentShards + finalShards})`)
         : '';
+      const arcaneShardsAction = (hasArcane && enchantmentArcaneShards > 0)
+        ? boardAction(`Update the Heir's <strong>Arcane Shards</strong> with <strong>+${enchantmentArcaneShards}</strong>. (${currentArcaneShards} → ${currentArcaneShards + enchantmentArcaneShards}) — Take from supply.`)
+        : '';
+      
+      // Build the grid for breakdowns - dynamically add Arcane Shards column if needed
+      const hasArcaneShardReward = hasArcane && enchantmentArcaneShards > 0;
+      const breakdownGrid = hasArcaneShardReward
+        ? `<div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; margin: 15px 0;">
+             ${fameBreakdown}
+             ${coinsBreakdown}
+             ${shardsBreakdown}
+             ${arcaneShardsBreakdown}
+           </div>`
+        : `<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 15px 0;">
+             ${fameBreakdown}
+             ${coinsBreakdown}
+             ${shardsBreakdown}
+           </div>`;
+      
+      // Build totals display - dynamically add Arcane Shards if needed
+      const totalsGrid = hasArcaneShardReward
+        ? `<div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; margin: 15px 0; padding: 15px; background: rgba(212, 168, 71, 0.15); border: 2px solid var(--amber); border-radius: 8px;">
+             <div style="text-align: center;">
+               <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 5px;">TOTAL</div>
+               <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">${finalFame} ★</div>
+             </div>
+             <div style="text-align: center;">
+               <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 5px;">TOTAL</div>
+               <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">${finalCoins} 🪙</div>
+             </div>
+             <div style="text-align: center;">
+               <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 5px;">TOTAL</div>
+               <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">${finalShards} 💎</div>
+             </div>
+             <div style="text-align: center;">
+               <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 5px;">TOTAL</div>
+               <div style="font-size: 1.5rem; font-weight: 700; color: var(--amber);">${enchantmentArcaneShards} ✨</div>
+             </div>
+           </div>`
+        : `<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 15px 0; padding: 15px; background: rgba(212, 168, 71, 0.15); border: 2px solid var(--amber); border-radius: 8px;">
+             <div style="text-align: center;">
+               <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 5px;">TOTAL</div>
+               <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">${finalFame} ★</div>
+             </div>
+             <div style="text-align: center;">
+               <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 5px;">TOTAL</div>
+               <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">${finalCoins} 🪙</div>
+             </div>
+             <div style="text-align: center;">
+               <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 5px;">TOTAL</div>
+               <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">${finalShards} 💎</div>
+             </div>
+           </div>`;
       
       setActionContent(
         `Turn ${gameState.currentTurn} — Performance (Step 3 of 3)`,
         `${cardSlotsHtml}
          
-         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 15px 0;">
-           ${fameBreakdown}
-           ${coinsBreakdown}
-           ${shardsBreakdown}
-         </div>
+         ${breakdownGrid}
          
-         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 15px 0; padding: 15px; background: rgba(212, 168, 71, 0.15); border: 2px solid var(--amber); border-radius: 8px;">
-           <div style="text-align: center;">
-             <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 5px;">TOTAL</div>
-             <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">${finalFame} ★</div>
-           </div>
-           <div style="text-align: center;">
-             <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 5px;">TOTAL</div>
-             <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">${finalCoins} 🪙</div>
-           </div>
-           <div style="text-align: center;">
-             <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 5px;">TOTAL</div>
-             <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">${finalShards} 💎</div>
-           </div>
-         </div>
+         ${totalsGrid}
          
          ${fameAction}
          ${coinsAction}
          ${shardsAction}
+         ${arcaneShardsAction}
          
          ${boardAction("Return ALL of the Heir's Trick markers from card " + winningCard + " back to their Trick cards")}
          
@@ -9914,6 +11174,11 @@
             gameState.heir.fame += finalFame;
             gameState.heir.coins += finalCoins;
             gameState.heir.shards += finalShards;
+            // Update Arcane Shards
+            if (hasArcane && enchantmentArcaneShards > 0) {
+              gameState.heir.arcaneShards = (gameState.heir.arcaneShards || 0) + enchantmentArcaneShards;
+              gameState.arcaneShardsSupply = Math.max(0, (gameState.arcaneShardsSupply || 0) - enchantmentArcaneShards);
+            }
             updateGameDisplay();
             
             // Reset temp data
@@ -9925,7 +11190,8 @@
               trickCountsByLevel: { level1: 0, level2: 0, level3: 0 },
               cardBonus: { fame: 0, coins: 0, shards: 0 },
               redLotusTricks: 0,
-              playerHasTricksOnCard: false
+              playerHasTricksOnCard: false,
+              enchantmentReward: { fame: 0, coins: 0, shards: 0, arcaneShards: 0, saCard: false }
             };
             
             // Route to next phase
@@ -10530,6 +11796,12 @@
       
       updateGameDisplay();
       
+      // Arcane Arts: Check for enchantment triggers in Classroom
+      if (gameState.expansions.arcane) {
+        showClassroomEnchantmentCheck();
+        return;
+      }
+      
       // Bernard: Ask for total markers in Classrooms
       if (isBernard) {
         showBernardClassroomBonus();
@@ -10541,6 +11813,424 @@
       handleEndTurnPhase();
     }
     
+    // Arcane Arts: Classroom Enchantment Trigger Check
+    function showClassroomEnchantmentCheck() {
+      const isP36Active = gameState.activeProphecy?.id === 'p36';
+      const prophecyReminder = getHeirProphecyReminderHtml('heir-classroom');
+      
+      let content = `
+        <div style="background: rgba(138, 43, 226, 0.1); border: 1px solid #8a2be2; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+          <h4 style="margin: 0 0 10px 0; color: #8a2be2;">🔮 Arcane Arts: Classroom Enchantments</h4>
+          <p style="color: var(--text-secondary); margin: 0;">Enchanted Tricks in Classrooms can trigger the Arcane Reward die.</p>
+        </div>
+        
+        ${prophecyReminder}
+        
+        <p style="margin: 15px 0;"><strong>Does the Heir have any enchanted Tricks in Classrooms?</strong></p>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">Check if any of the Heir's Tricks currently in Classroom slots have Enchantment markers.</p>
+      `;
+      
+      if (isP36Active) {
+        content += `
+          <div style="background: rgba(212, 168, 71, 0.15); border-left: 3px solid var(--amber); padding: 12px; margin: 15px 0; border-radius: 0 4px 4px 0;">
+            <strong style="color: var(--amber);">🔮 p36: All Enchantments Trigger</strong>
+            <p style="margin: 8px 0 0 0; color: var(--text-secondary);">If yes, ALL enchanted Tricks in Classrooms will trigger (ignore Enchantment Die).</p>
+          </div>
+        `;
+      }
+      
+      setActionContent(
+        `Turn ${gameState.currentTurn} — Classroom: Enchantment Check`,
+        content,
+        [
+          { text: 'Yes — Heir has enchanted Tricks', action: () => showClassroomEnchantmentTriggers() },
+          { text: 'No — Continue', action: () => continueAfterClassroomEnchantments() }
+        ]
+      );
+    }
+    
+    function showClassroomEnchantmentTriggers() {
+      const isP36Active = gameState.activeProphecy?.id === 'p36';
+      const isP37Active = gameState.activeProphecy?.id === 'p37';
+      
+      let content = `
+        <div style="background: rgba(138, 43, 226, 0.1); border: 1px solid #8a2be2; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+          <h4 style="margin: 0 0 10px 0; color: #8a2be2;">🔮 Classroom Enchantment Triggers</h4>
+        </div>
+      `;
+      
+      if (isP36Active) {
+        // p36: All enchantments trigger - just need reward die and count
+        content += `
+          <div style="background: rgba(212, 168, 71, 0.15); border-left: 3px solid var(--amber); padding: 12px; margin: 15px 0; border-radius: 0 4px 4px 0;">
+            <strong style="color: var(--amber);">🔮 p36: All Enchantments Trigger</strong>
+            <p style="margin: 8px 0 0 0; color: var(--text-secondary);">ALL enchanted Tricks in Classrooms trigger — ignore the Enchantment Die.</p>
+          </div>
+          
+          <p style="margin: 15px 0;"><strong>How many enchanted Tricks does the Heir have in Classrooms?</strong></p>
+          
+          <div style="background: var(--bg-card); padding: 15px; border-radius: 8px; margin: 15px 0;">
+            <div style="text-align: center;">
+              <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 8px;">Enchanted Tricks in Classrooms</label>
+              ${createStepper('classroom-enchanted-count', 1)}
+            </div>
+          </div>
+          
+          <p style="margin: 15px 0;"><strong>What does the Reward Die show?</strong></p>
+          ${getRewardDieHtml('classroom-reward-btn')}
+        `;
+      } else {
+        // Normal: Need enchantment die, reward die, and matching count
+        content += `
+          <p style="margin: 15px 0;"><strong>Step 1: What does the Enchantment Die show?</strong></p>
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 10px;">Select the enchantment type showing on the die.</p>
+          
+          ${getEnchantmentDieHtml('classroom-ench-btn')}
+          
+          <div id="classroom-match-count-section" style="display: none;">
+            <p style="margin: 15px 0;"><strong>Step 2: How many of the Heir's Classroom Tricks have this type?</strong></p>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Count only Tricks with <span id="classroom-selected-type-name">the selected</span> enchantment in Classrooms.</p>
+            
+            <div style="background: var(--bg-card); padding: 15px; border-radius: 8px; margin: 15px 0;">
+              <div style="text-align: center;">
+                <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 8px;">Matching Tricks</label>
+                ${createStepper('classroom-match-count', 0)}
+              </div>
+            </div>
+          </div>
+          
+          <p style="margin: 15px 0;"><strong>Step 3: What does the Reward Die show?</strong></p>
+          ${getRewardDieHtml('classroom-reward-btn')}
+        `;
+      }
+      
+      // p37 reminder
+      if (isP37Active) {
+        content += `<div style="background: rgba(212, 168, 71, 0.15); border-left: 3px solid var(--amber); padding: 12px; margin: 15px 0; border-radius: 0 4px 4px 0;"><strong style="color: var(--amber);">🔮 p37: Double Reward</strong><p style="margin: 8px 0 0 0; color: var(--text-secondary);">All rewards will be doubled!</p></div>`;
+      }
+      
+      setActionContent(
+        `Turn ${gameState.currentTurn} — Classroom: Enchantment Triggers`,
+        content,
+        [
+          { text: 'Calculate Rewards →', action: () => calculateClassroomEnchantmentRewards(), id: 'classroom-continue-btn', disabled: true }
+        ]
+      );
+      
+      // Add event listeners
+      setTimeout(() => {
+        const continueBtn = $('#classroom-continue-btn');
+        let selectedEnchantment = null;
+        let selectedReward = null;
+        
+        const typeNames = { scrolls: 'Scrolls', runes: 'Runes', amulets: 'Amulets' };
+        
+        const updateContinueButton = () => {
+          if (isP36Active) {
+            // For p36: just need reward die selected
+            continueBtn.disabled = !selectedReward;
+          } else {
+            // Normal: need enchantment type and reward die
+            continueBtn.disabled = !(selectedEnchantment && selectedReward);
+          }
+        };
+        
+        // Enchantment die buttons (only for non-p36)
+        if (!isP36Active) {
+          attachDieButtonListeners('classroom-ench-btn', (value) => {
+            selectedEnchantment = value;
+            
+            // Show match count section
+            const matchSection = $('#classroom-match-count-section');
+            if (matchSection) matchSection.style.display = 'block';
+            
+            // Update type name
+            const typeNameEl = $('#classroom-selected-type-name');
+            if (typeNameEl) typeNameEl.textContent = typeNames[selectedEnchantment];
+            
+            updateContinueButton();
+          });
+        }
+        
+        // Reward die buttons
+        attachDieButtonListeners('classroom-reward-btn', (value) => {
+          selectedReward = parseInt(value);
+          updateContinueButton();
+        });
+        
+        // Store selections for use in calculation
+        window.classroomEnchantmentData = {
+          isP36Active,
+          getSelectedEnchantment: () => selectedEnchantment,
+          getSelectedReward: () => selectedReward
+        };
+        
+        // Attach stepper listeners if needed
+        attachStepperListeners(() => {});
+      }, 0);
+    }
+    
+    function calculateClassroomEnchantmentRewards() {
+      const data = window.classroomEnchantmentData || {};
+      const isP36Active = data.isP36Active;
+      const isP37Active = gameState.activeProphecy?.id === 'p37';
+      const rewardDie = data.getSelectedReward ? data.getSelectedReward() : 0;
+      
+      // Determine trigger count
+      let triggerCount = 0;
+      if (isP36Active) {
+        triggerCount = parseInt($('#classroom-enchanted-count')?.dataset?.value) || 1;
+      } else {
+        triggerCount = parseInt($('#classroom-match-count')?.dataset?.value) || 0;
+      }
+      
+      // If no triggers, continue
+      if (triggerCount === 0) {
+        continueAfterClassroomEnchantments();
+        return;
+      }
+      
+      // Calculate base reward (per trigger)
+      let baseReward = { fame: 0, coins: 0, shards: 0, arcaneShards: 0, saCard: false };
+      
+      switch (rewardDie) {
+        case 1:
+          baseReward.saCard = true;
+          break;
+        case 2:
+          baseReward.fame = 1;
+          baseReward.coins = 1;
+          break;
+        case 3:
+          baseReward.coins = 3;
+          break;
+        case 4:
+          // Fame = Trick Level - will ask separately
+          baseReward.fame = 2; // Placeholder
+          break;
+        case 5:
+        case 6:
+          if (gameState.arcaneShardsSupply > 0) {
+            baseReward.arcaneShards = 1;
+          } else {
+            baseReward.fame = 1;
+            baseReward.coins = 1;
+          }
+          break;
+      }
+      
+      // Multiply by trigger count
+      let totalReward = {
+        fame: baseReward.fame * triggerCount,
+        coins: baseReward.coins * triggerCount,
+        shards: baseReward.shards * triggerCount,
+        arcaneShards: baseReward.arcaneShards * triggerCount,
+        saCard: baseReward.saCard && triggerCount > 0
+      };
+      
+      // Cap Arcane Shards by supply
+      if (totalReward.arcaneShards > gameState.arcaneShardsSupply) {
+        const excess = totalReward.arcaneShards - gameState.arcaneShardsSupply;
+        totalReward.arcaneShards = gameState.arcaneShardsSupply;
+        totalReward.fame += excess;
+        totalReward.coins += excess;
+      }
+      
+      // Apply p37 (Double Reward)
+      if (isP37Active) {
+        totalReward.fame *= 2;
+        totalReward.coins *= 2;
+        totalReward.shards *= 2;
+        totalReward.arcaneShards *= 2;
+        if (totalReward.arcaneShards > gameState.arcaneShardsSupply) {
+          const excess = totalReward.arcaneShards - gameState.arcaneShardsSupply;
+          totalReward.arcaneShards = gameState.arcaneShardsSupply;
+          totalReward.fame += excess;
+          totalReward.coins += excess;
+        }
+      }
+      
+      // Store for display
+      window.classroomEnchantmentReward = totalReward;
+      window.classroomEnchantmentTriggerCount = triggerCount;
+      
+      // Handle special cases
+      if (rewardDie === 4) {
+        showClassroomEnchantmentLevelInput(triggerCount, isP37Active);
+        return;
+      }
+      
+      if (totalReward.saCard) {
+        showClassroomEnchantmentSAReward(triggerCount, isP37Active, totalReward);
+        return;
+      }
+      
+      // Show final rewards
+      showClassroomEnchantmentFinalRewards(totalReward, triggerCount);
+    }
+    
+    function showClassroomEnchantmentLevelInput(triggerCount, isP37) {
+      const multiplier = isP37 ? 2 : 1;
+      
+      setActionContent(
+        `Turn ${gameState.currentTurn} — Classroom: Enchantment Reward`,
+        `<div style="background: var(--bg-card); padding: 15px; border-radius: 6px; margin: 15px 0;">
+           <h4 style="margin: 0 0 10px 0; color: #8a2be2;">🔮 Reward Die: Fame = Trick Level</h4>
+           <p style="color: var(--text-secondary);">The Heir gains Fame equal to the Level of each triggered Trick (1/2/3 Fame for L1/L2/L3).</p>
+           ${isP37 ? '<p style="color: var(--amber);">🔮 p37: Double Reward — Fame is doubled!</p>' : ''}
+         </div>
+         
+         <p style="margin: 15px 0;"><strong>How many triggered Tricks at each Level?</strong></p>
+         <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;">${triggerCount} trick(s) triggered total.</p>
+         
+         <div class="stepper-grid" style="margin-bottom: 20px;">
+           <div style="text-align: center;">
+             <label style="display: block; margin-bottom: 8px; font-weight: 600;">Level 1</label>
+             <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px;">${1 * multiplier} Fame each</div>
+             ${createStepper('classroom-level1', 0)}
+           </div>
+           <div style="text-align: center;">
+             <label style="display: block; margin-bottom: 8px; font-weight: 600;">Level 2</label>
+             <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px;">${2 * multiplier} Fame each</div>
+             ${createStepper('classroom-level2', 0)}
+           </div>
+           <div style="text-align: center;">
+             <label style="display: block; margin-bottom: 8px; font-weight: 600;">Level 3</label>
+             <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px;">${3 * multiplier} Fame each</div>
+             ${createStepper('classroom-level3', 0)}
+           </div>
+         </div>
+         
+         <div id="classroom-level-total" style="background: var(--bg-card); padding: 12px; border-radius: 6px; text-align: center;">
+           <strong>Total Fame:</strong> <span id="classroom-level-fame">0</span>
+         </div>`,
+        [
+          { text: 'Apply Rewards', action: () => {
+            const l1 = parseInt($('#classroom-level1')?.dataset?.value) || 0;
+            const l2 = parseInt($('#classroom-level2')?.dataset?.value) || 0;
+            const l3 = parseInt($('#classroom-level3')?.dataset?.value) || 0;
+            const totalFame = (l1 * 1 + l2 * 2 + l3 * 3) * multiplier;
+            
+            const reward = { fame: totalFame, coins: 0, shards: 0, arcaneShards: 0, saCard: false };
+            showClassroomEnchantmentFinalRewards(reward, triggerCount);
+          }}
+        ]
+      );
+      
+      const updateTotal = () => {
+        const l1 = parseInt($('#classroom-level1')?.dataset?.value) || 0;
+        const l2 = parseInt($('#classroom-level2')?.dataset?.value) || 0;
+        const l3 = parseInt($('#classroom-level3')?.dataset?.value) || 0;
+        const totalFame = (l1 * 1 + l2 * 2 + l3 * 3) * multiplier;
+        const fameEl = $('#classroom-level-fame');
+        if (fameEl) fameEl.textContent = totalFame;
+      };
+      
+      attachStepperListeners(updateTotal);
+    }
+    
+    function showClassroomEnchantmentSAReward(triggerCount, isP37, totalReward) {
+      const draws = isP37 ? triggerCount * 2 : triggerCount;
+      
+      setActionContent(
+        `Turn ${gameState.currentTurn} — Classroom: SA Card Reward`,
+        `<div style="background: var(--bg-card); padding: 15px; border-radius: 6px; margin: 15px 0;">
+           <h4 style="margin: 0 0 10px 0; color: #8a2be2;">🔮 Reward Die: Draw SA Cards</h4>
+           <p style="color: var(--text-secondary);">For each trigger, draw 2 SA cards and keep 1.</p>
+           ${isP37 ? '<p style="color: var(--amber);">🔮 p37: Double Reward — Draw twice as many times!</p>' : ''}
+         </div>
+         
+         ${boardAction(`Draw <strong>${draws * 2}</strong> SA cards (top 2 from ${draws} different piles based on Dark Alley priorities)`)}
+         ${boardAction(`Keep <strong>${draws}</strong> card(s) for the Heir, return the rest to pile bottoms`)}
+         
+         ${infoBox(`<strong>Dark Alley Priority:</strong> Theater (if empty) → Downtown → Market → Workshop, take from pile Heir has fewest of.`)}`,
+        [
+          { text: 'Done — Continue', action: () => {
+            // No fame/coins/shards from SA card reward directly
+            const reward = { fame: 0, coins: 0, shards: 0, arcaneShards: 0, saCard: true };
+            showClassroomEnchantmentFinalRewards(reward, triggerCount);
+          }}
+        ]
+      );
+    }
+    
+    function showClassroomEnchantmentFinalRewards(reward, triggerCount) {
+      const isP37Active = gameState.activeProphecy?.id === 'p37';
+      
+      // Apply rewards to Heir
+      const previousFame = gameState.heir.fame;
+      const previousCoins = gameState.heir.coins;
+      const previousArcaneShards = gameState.heir.arcaneShards || 0;
+      
+      gameState.heir.fame += reward.fame;
+      gameState.heir.coins += reward.coins;
+      gameState.heir.shards += reward.shards;
+      
+      if (reward.arcaneShards > 0) {
+        gameState.heir.arcaneShards = (gameState.heir.arcaneShards || 0) + reward.arcaneShards;
+        gameState.arcaneShardsSupply -= reward.arcaneShards;
+      }
+      
+      updateGameDisplay();
+      
+      let content = `
+        <div style="background: rgba(138, 43, 226, 0.1); border: 1px solid #8a2be2; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+          <h4 style="margin: 0 0 10px 0; color: #8a2be2;">🔮 Classroom Enchantment Rewards</h4>
+          <p style="color: var(--text-secondary); margin: 0;">${triggerCount} enchanted Trick(s) triggered${isP37Active ? ' (rewards doubled by p37)' : ''}.</p>
+        </div>
+      `;
+      
+      // Show what was gained
+      let hasRewards = false;
+      if (reward.fame > 0) {
+        content += boardAction(`Update Heir's Fame (${previousFame} → ${gameState.heir.fame})`);
+        hasRewards = true;
+      }
+      if (reward.coins > 0) {
+        content += boardAction(`Add ${reward.coins} Coin(s) to Heir's supply (${previousCoins} → ${gameState.heir.coins})`);
+        hasRewards = true;
+      }
+      if (reward.arcaneShards > 0) {
+        content += boardAction(`Give Heir ${reward.arcaneShards} Arcane Shard(s) from supply (${previousArcaneShards} → ${gameState.heir.arcaneShards})`);
+        hasRewards = true;
+      }
+      if (reward.saCard) {
+        content += infoBox('SA cards were drawn in the previous step.');
+        hasRewards = true;
+      }
+      
+      if (!hasRewards) {
+        content += infoBox('No additional rewards from this trigger.');
+      }
+      
+      setActionContent(
+        `Turn ${gameState.currentTurn} — Classroom: Enchantment Complete`,
+        content,
+        [
+          { text: 'Continue', action: () => continueAfterClassroomEnchantments() }
+        ]
+      );
+    }
+    
+    function continueAfterClassroomEnchantments() {
+      // Clean up
+      delete window.classroomEnchantmentData;
+      delete window.classroomEnchantmentReward;
+      delete window.classroomEnchantmentTriggerCount;
+      
+      const isBernard = gameState.heirMagician?.id === 'bernard';
+      
+      // Bernard: Ask for total markers in Classrooms
+      if (isBernard) {
+        showBernardClassroomBonus();
+        return;
+      }
+      
+      // Mark Classroom phase as done and continue to End Turn
+      gameState.classroomPhaseDone = true;
+      handleEndTurnPhase();
+    }
+
     function showBernardClassroomBonus() {
       const currentCoins = gameState.heir.coins;
       
@@ -10787,6 +12477,9 @@
       // Pay Wages
       content += boardAction("Player pays wages");
       content += noteBox("You pay: 1 Coin per non-Idle Apprentice, 2 Coins per Specialist");
+      
+      // Arcane Worker wages (player only)
+      content += getArcaneWorkerWagesHtml();
       
       if (coinsConverted > 0) {
         content += `
@@ -11110,6 +12803,19 @@
         </div>`;
       }
       
+      // Arcane Arts: Enchantment refill and Wagon movement
+      if (gameState.expansions.arcane) {
+        const wagonLocationNames = { downtown: 'Downtown', academy: 'Academy', market: 'Market Row', darkalley: 'Dark Alley' };
+        const newWagonLocation = getNextWagonLocation();
+        
+        content += `<div style="background: rgba(138, 43, 226, 0.1); border: 1px solid #8a2be2; padding: 10px; border-radius: 6px; margin: 12px 0;">
+          <p style="color: #8a2be2; font-weight: 600; margin-bottom: 8px;">🔮 Arcane Arts: End Turn</p>
+          ${boardAction("Slide remaining <strong>Enchantments</strong> to the left to fill gaps")}
+          ${boardAction("Draw new Enchantments from bag to fill empty slots (keep middle slot empty for solo)")}
+          ${boardAction(`Move <strong>Wagon marker</strong> from ${wagonLocationNames[gameState.wagonLocation]} → <strong>${wagonLocationNames[newWagonLocation]}</strong>`)}
+        </div>`;
+      }
+      
       // Return Assignment Cards
       content += boardAction("Return all Assignment cards (yours and the Heir's) to their respective boards");
       
@@ -11268,6 +12974,9 @@
       content += boardAction("Player pays wages");
       content += noteBox("You pay: 1 Coin per non-Idle Apprentice, 2 Coins per Specialist");
       
+      // Arcane Worker wages (player only)
+      content += getArcaneWorkerWagesHtml();
+      
       if (coinsConverted > 0) {
         content += `
           <div style="background: rgba(212, 168, 71, 0.1); border: 1px solid var(--amber); padding: 10px; border-radius: 6px; margin: 8px 0;">
@@ -11404,6 +13113,9 @@
       // Pay Wages
       content += boardAction("Player pays wages");
       content += noteBox("You pay: 1 Coin per non-Idle Apprentice, 2 Coins per Specialist");
+      
+      // Arcane Worker wages (player only)
+      content += getArcaneWorkerWagesHtml();
       
       // Heir Coin Conversion
       if (coinsConverted > 0) {
@@ -11666,6 +13378,12 @@
         gameState.classroomPhaseDone = false;
       }
       
+      // Arcane Arts: Move wagon to next location
+      if (gameState.expansions.arcane) {
+        gameState.wagonLocation = getNextWagonLocation();
+        gameState.arcaneDiceLocked = false; // Reset dice lock for new turn
+      }
+      
       // Reset downtown dice for new turn (they get re-rolled)
       gameState.downtownDice = {
         trick1: 'x',
@@ -11678,6 +13396,22 @@
       
       updateGameDisplay();
       handlePhase('roll-dice');
+    }
+    
+    // Get the next wagon location in the rotation sequence
+    function getNextWagonLocation() {
+      const hasAcademy = gameState.expansions?.academy;
+      
+      // Rotation sequence per spec:
+      // Without Academy: Downtown → Market Row → Dark Alley → (repeat)
+      // With Academy: Downtown → Academy → Market Row → Dark Alley → (repeat)
+      const sequence = hasAcademy 
+        ? ['downtown', 'academy', 'market', 'darkalley']
+        : ['downtown', 'market', 'darkalley'];
+      
+      const currentIndex = sequence.indexOf(gameState.wagonLocation);
+      const nextIndex = (currentIndex + 1) % sequence.length;
+      return sequence[nextIndex];
     }
 
     function endTurn() {
@@ -11870,6 +13604,12 @@
       // Calculate bonus Fame categories (each capped at 20)
       const totalShards = baseShards + rawTrickShards + p19Bonus;
       const shardFame = Math.min(totalShards, 20);
+      
+      // Arcane Arts: Heir's Arcane Shards are worth 2 Fame each (capped at 20)
+      const hasArcane = gameState.expansions.arcane;
+      const arcaneShards = hasArcane ? (gameState.heir.arcaneShards || 0) : 0;
+      const arcaneShardFame = Math.min(arcaneShards * 2, 20);
+      
       const saFame = Math.min(saCards * 2, 20);
       const l3Fame = Math.min(l3TrickCount * l3Bonus, 20);
       const extraChars = Math.max(0, characterCount - 6);
@@ -11878,8 +13618,8 @@
       // Academy: Banner scoring
       const bannerFame = endGameTempData.bannerFame || 0;
       
-      // Calculate final totals (include p20 bonus Fame and banner Fame)
-      const finalFame = baseFame + adjustedTrickFame + shardFame + saFame + l3Fame + charFame + p20Bonus + bannerFame;
+      // Calculate final totals (include p20 bonus Fame, banner Fame, and Arcane Shard Fame)
+      const finalFame = baseFame + adjustedTrickFame + shardFame + arcaneShardFame + saFame + l3Fame + charFame + p20Bonus + bannerFame;
       const finalCoins = baseCoins + adjustedTrickCoins;
       const finalShards = totalShards;
       
@@ -11895,6 +13635,11 @@
       }
       
       fameBreakdown += `<tr><td>Shards (${totalShards} × 1, max 20)</td><td style="text-align: right; font-weight: 600;">+${shardFame}</td></tr>`;
+      
+      if (hasArcane && arcaneShards > 0) {
+        fameBreakdown += `<tr style="color: var(--info);"><td>✨ Arcane Shards (${arcaneShards} × 2, max 20)</td><td style="text-align: right; font-weight: 600;">+${arcaneShardFame}</td></tr>`;
+      }
+      
       fameBreakdown += `<tr><td>SA Cards (${saCards} × 2, max 20)</td><td style="text-align: right; font-weight: 600;">+${saFame}</td></tr>`;
       
       if (l3TrickCount > 0) {
@@ -12075,25 +13820,29 @@
         const fullOptionsGrid = $('#expansion-options');
         const fullDawnContainer = $('#dawn-options-container');
         const fullAcademyContainer = $('#academy-options-container');
+        const fullArcaneContainer = $('#arcane-options-container');
         if (fullOptionsGrid) fullOptionsGrid.innerHTML = fullSetupHtml.cardsHtml;
         if (fullDawnContainer) fullDawnContainer.innerHTML = fullSetupHtml.dawnOptionsHtml;
         if (fullAcademyContainer) fullAcademyContainer.innerHTML = fullSetupHtml.academyOptionsHtml;
+        if (fullArcaneContainer) fullArcaneContainer.innerHTML = fullSetupHtml.arcaneOptionsHtml;
         
         // Quick Setup
         const quickSetupHtml = generateExpansionOptionsHTML('quick');
         const quickOptionsGrid = $('#quick-expansion-options');
         const quickDawnContainer = $('#quick-dawn-options-container');
         const quickAcademyContainer = $('#quick-academy-options-container');
+        const quickArcaneContainer = $('#quick-arcane-options-container');
         if (quickOptionsGrid) quickOptionsGrid.innerHTML = quickSetupHtml.cardsHtml;
         if (quickDawnContainer) quickDawnContainer.innerHTML = quickSetupHtml.dawnOptionsHtml;
         if (quickAcademyContainer) quickAcademyContainer.innerHTML = quickSetupHtml.academyOptionsHtml;
+        if (quickArcaneContainer) quickArcaneContainer.innerHTML = quickSetupHtml.arcaneOptionsHtml;
       }
       
       // Populate expansion options
       initializeExpansionOptions();
       
       // Generic expansion selection handler - works for both Full and Quick Setup
-      function setupExpansionHandlers(optionsSelector, dawnOptionsSelector, dawnCheckboxSelector, academyOptionsSelector) {
+      function setupExpansionHandlers(optionsSelector, dawnOptionsSelector, dawnCheckboxSelector, academyOptionsSelector, arcaneOptionsSelector) {
         $$(optionsSelector + ' .option-card').forEach(card => {
           card.addEventListener('click', () => {
             const expansion = card.dataset.expansion;
@@ -12126,10 +13875,31 @@
               }
             }
             
+            // Handle Arcane Arts options panel
+            const arcaneOptions = $(arcaneOptionsSelector);
+            if (arcaneOptions) {
+              if (gameState.expansions.arcane) {
+                arcaneOptions.classList.remove('hidden');
+              } else {
+                arcaneOptions.classList.add('hidden');
+              }
+            }
+            
+            // Handle Arcane + Dawn warning (show when both selected)
+            const prefix = optionsSelector.includes('quick') ? 'quick-' : '';
+            const arcaneWarning = $(`#${prefix}arcane-dawn-warning`);
+            if (arcaneWarning) {
+              if (gameState.expansions.arcane && gameState.expansions.dawn) {
+                arcaneWarning.classList.remove('hidden');
+              } else {
+                arcaneWarning.classList.add('hidden');
+              }
+            }
+            
             // Update difficulty descriptions (Academy changes character counts)
             updateDifficultyDescriptions();
             
-            // Update prophecy removal display (Academy adds p31)
+            // Update prophecy removal display (Academy adds p31, Arcane adds p17/p18/p22)
             updateProphecyRemovalDisplay();
             
             // Update school descriptions (Academy adds magicians)
@@ -12154,10 +13924,10 @@
       }
       
       // Setup handlers for Full Setup
-      setupExpansionHandlers('#expansion-options', '#dawn-options', '#dawn-challenge-rule', '#academy-options');
+      setupExpansionHandlers('#expansion-options', '#dawn-options', '#dawn-challenge-rule', '#academy-options', '#arcane-options');
       
       // Setup handlers for Quick Setup
-      setupExpansionHandlers('#quick-expansion-options', '#quick-dawn-options', '#quick-dawn-challenge-rule', '#quick-academy-options');
+      setupExpansionHandlers('#quick-expansion-options', '#quick-dawn-options', '#quick-dawn-challenge-rule', '#quick-academy-options', '#quick-arcane-options');
       
       // Show setup section on load if expansion is pre-selected (base game)
       const preselectedExpansion = $('#expansion-options .option-card.selected');
@@ -12701,10 +14471,74 @@
         showEndTurnFinalTurn();
         console.log('🎮 Jumped to Turn 7 End Turn');
         console.log('📝 TEST: Verify streamlined flow (no next-turn setup steps)');
+      },
+      
+      // Usage: debug.testEnchantments() or debug.testEnchantments('p36') or debug.testEnchantments('p37')
+      testEnchantments: function(prophecyId) {
+        // Enable Arcane Arts
+        gameState.expansions.arcane = true;
+        
+        // Set up game state for Heir performance
+        gameState.currentTurn = 3;
+        gameState.currentPhase = 'performance';
+        gameState.heir.fame = 10;
+        gameState.heir.coins = 5;
+        gameState.heir.shards = 2;
+        gameState.heir.arcaneShards = 1;
+        gameState.heir.tricks = ['card-trick', 'quick-hands', 'cabinet-swap'];
+        
+        // Set Heir with enchanted tricks
+        gameState.heir.enchantedTricks = {
+          'card-trick': 'scrolls',
+          'quick-hands': 'scrolls',
+          'cabinet-swap': 'runes'
+        };
+        
+        gameState.arcaneShardsSupply = 3;
+        gameState.arcaneDice = { enchantment: null, reward: null };
+        gameState.performanceOrder = 'heir-first';
+        
+        // Set prophecy if provided
+        if (prophecyId) {
+          const allProphecies = [...PROPHECIES.arcaneAffectBoth, ...PROPHECIES.arcaneHeirIgnores];
+          const prophecy = allProphecies.find(p => p.id === prophecyId);
+          if (prophecy) {
+            gameState.activeProphecy = prophecy;
+            console.log(`🔮 Set prophecy: ${prophecy.name}`);
+          } else {
+            console.log(`⚠️ Prophecy ${prophecyId} not found`);
+          }
+        }
+        
+        // Set up temp data for performance
+        heirPerformanceTempData = {
+          winningCard: 2,
+          winningLinks: 3,
+          results: [{ card: 2, links: 3 }],
+          trickYields: { fame: 5, coins: 3, shards: 1 },
+          trickCountsByLevel: { level1: 1, level2: 1, level3: 1 },
+          cardBonus: { fame: 2, coins: 1, shards: 0 },
+          redLotusTricks: 0,
+          playerHasTricksOnCard: false,
+          enchantmentReward: { fame: 0, coins: 0, shards: 0, arcaneShards: 0, saCard: false }
+        };
+        
+        showScreen('game-screen');
+        updateGameDisplay();
+        showHeirPerformanceStep2c_ArcaneEnchantments();
+        
+        console.log('🎮 Started Enchantment trigger test');
+        console.log('📝 Heir has 2 Scrolls tricks, 1 Runes trick');
+        console.log('📝 Select enchantment die type and reward die to test triggers');
+        if (prophecyId === 'p36') {
+          console.log('📝 p36 active - ALL enchantments should trigger (skip enchantment die)');
+        } else if (prophecyId === 'p37') {
+          console.log('📝 p37 active - rewards should be doubled');
+        }
       }
     };
     
-    console.log('🎩 Debug functions available: debug.endGame(), debug.testP19(), debug.testP20(), debug.setProphecy(), debug.state()');
+    console.log('🎩 Debug functions available: debug.endGame(), debug.testP19(), debug.testP20(), debug.setProphecy(), debug.state(), debug.testEnchantments()');
     
     // Secret key combo to toggle debug panel: Ctrl+Shift+D
     document.addEventListener('keydown', (e) => {
