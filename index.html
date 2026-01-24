@@ -1356,7 +1356,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.15.13-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.15.15-beta</p>
       <button class="restart-btn hidden" id="restart-btn">↺ New Game</button>
     </header>
 
@@ -3404,6 +3404,12 @@
 
     const noteBox = (text) => infoBox(text, 'NOTE');
 
+    // Enchantment type icon helper - returns inline image HTML
+    const enchantIcon = (type, size = 20) => {
+      const files = { scrolls: 'enchant_scrolls.png', runes: 'enchant_runes.png', amulets: 'enchant_amulets.png' };
+      return `<img src="assets/images/arcane/${files[type]}" alt="${type}" style="width: ${size}px; height: ${size}px; vertical-align: middle;">`;
+    };
+
     // Arcane Worker wages reminder for End Turn (player only - Heir never has Arcane Workers)
     const getArcaneWorkerWagesHtml = () => {
       if (!gameState.expansions.arcane) return '';
@@ -3443,15 +3449,15 @@
         <div class="die-grid enchant-grid">
           <button class="die-btn ${btnClass}" data-value="scrolls">
             <img src="assets/images/arcane/enchant_scrolls.png" alt="Scrolls">
-            <span class="die-label">Scrolls<br>(1-2)</span>
+            <span class="die-label">Scrolls</span>
           </button>
           <button class="die-btn ${btnClass}" data-value="runes">
             <img src="assets/images/arcane/enchant_runes.png" alt="Runes">
-            <span class="die-label">Runes<br>(3-4)</span>
+            <span class="die-label">Runes</span>
           </button>
           <button class="die-btn ${btnClass}" data-value="amulets">
             <img src="assets/images/arcane/enchant_amulets.png" alt="Amulets">
-            <span class="die-label">Amulets<br>(5-6)</span>
+            <span class="die-label">Amulets</span>
           </button>
         </div>
       `;
@@ -4001,9 +4007,9 @@
       if (!leftContainer || !rightContainer) return;
       
       const enchantTypes = [
-        { id: 'scrolls', name: 'Scrolls', icon: '📜' },
-        { id: 'runes', name: 'Runes', icon: '🪨' },
-        { id: 'amulets', name: 'Amulets', icon: '📿' },
+        { id: 'scrolls', name: 'Scrolls' },
+        { id: 'runes', name: 'Runes' },
+        { id: 'amulets', name: 'Amulets' },
         { id: null, name: 'Empty', icon: '—' }
       ];
       
@@ -4012,7 +4018,7 @@
         <button class="btn enchant-offer-btn ${gameState.enchantmentOffer.left === type.id ? 'selected' : ''}" 
                 data-slot="left" data-type="${type.id}"
                 style="padding: 8px 12px; font-size: 0.85rem; ${gameState.enchantmentOffer.left === type.id ? 'background: var(--amber); color: var(--bg-dark);' : ''}">
-          ${type.icon} ${type.name}
+          ${type.id ? enchantIcon(type.id, 18) : type.icon} ${type.name}
         </button>
       `).join('');
       
@@ -4021,7 +4027,7 @@
         <button class="btn enchant-offer-btn ${gameState.enchantmentOffer.right === type.id ? 'selected' : ''}" 
                 data-slot="right" data-type="${type.id}"
                 style="padding: 8px 12px; font-size: 0.85rem; ${gameState.enchantmentOffer.right === type.id ? 'background: var(--amber); color: var(--bg-dark);' : ''}">
-          ${type.icon} ${type.name}
+          ${type.id ? enchantIcon(type.id, 18) : type.icon} ${type.name}
         </button>
       `).join('');
       
@@ -4337,9 +4343,9 @@
       if (!leftContainer || !rightContainer) return;
       
       const enchantTypes = [
-        { id: 'scrolls', name: 'Scrolls', icon: '📜' },
-        { id: 'runes', name: 'Runes', icon: '🪨' },
-        { id: 'amulets', name: 'Amulets', icon: '📿' },
+        { id: 'scrolls', name: 'Scrolls' },
+        { id: 'runes', name: 'Runes' },
+        { id: 'amulets', name: 'Amulets' },
         { id: null, name: 'Empty', icon: '—' }
       ];
       
@@ -4348,7 +4354,7 @@
         <button class="btn quick-enchant-btn ${gameState.enchantmentOffer.left === type.id ? 'selected' : ''}" 
                 data-slot="left" data-type="${type.id}"
                 style="padding: 8px 12px; font-size: 0.85rem; ${gameState.enchantmentOffer.left === type.id ? 'background: var(--amber); color: var(--bg-dark);' : ''}">
-          ${type.icon} ${type.name}
+          ${type.id ? enchantIcon(type.id, 18) : type.icon} ${type.name}
         </button>
       `).join('');
       
@@ -4357,7 +4363,7 @@
         <button class="btn quick-enchant-btn ${gameState.enchantmentOffer.right === type.id ? 'selected' : ''}" 
                 data-slot="right" data-type="${type.id}"
                 style="padding: 8px 12px; font-size: 0.85rem; ${gameState.enchantmentOffer.right === type.id ? 'background: var(--amber); color: var(--bg-dark);' : ''}">
-          ${type.icon} ${type.name}
+          ${type.id ? enchantIcon(type.id, 18) : type.icon} ${type.name}
         </button>
       `).join('');
       
@@ -4957,11 +4963,10 @@
       // Arcane enchantment note - show selected types
       let arcaneEnchantNote = '';
       if (gameState.expansions.arcane) {
-        const enchantNames = { scrolls: '📜 Scrolls', runes: '🪨 Runes', amulets: '📿 Amulets' };
         const leftType = gameState.enchantmentOffer.left;
         const rightType = gameState.enchantmentOffer.right;
-        const leftDisplay = leftType ? enchantNames[leftType] : '(empty)';
-        const rightDisplay = rightType ? enchantNames[rightType] : '(empty)';
+        const leftDisplay = leftType ? `${enchantIcon(leftType, 18)} ${leftType.charAt(0).toUpperCase() + leftType.slice(1)}` : '(empty)';
+        const rightDisplay = rightType ? `${enchantIcon(rightType, 18)} ${rightType.charAt(0).toUpperCase() + rightType.slice(1)}` : '(empty)';
         
         if (leftType !== undefined && rightType !== undefined) {
           arcaneEnchantNote = boardAction(`Place Enchantments on Arcanist board: Left = <strong>${leftDisplay}</strong>, Right = <strong>${rightDisplay}</strong>`);
@@ -6004,8 +6009,8 @@
       // Arcane Arts: Initialize expansion state
       if (gameState.expansions.arcane) {
         gameState.arcaneShardsSupply = 4; // Solo/2-player uses 4 Arcane Shards
-        gameState.arcaneWorkersInSupply = 3; // 3 in supply, 1 placed on offer at setup
-        gameState.arcaneWorkerOnOffer = true; // One placed on offer at setup
+        gameState.arcaneWorkersInSupply = 4; // All 4 in supply at start
+        gameState.arcaneWorkerOnOffer = false; // None on offer yet - placed during Turn 1 Roll Dice
         gameState.arcaneDice = { enchantment: null, reward: null };
         gameState.arcaneDiceLocked = false;
         gameState.heir.arcaneShards = 0;
@@ -6260,23 +6265,21 @@
           <h4 style="color: var(--amber); margin: 20px 0 10px 0;">Arcane Arts</h4>
           ${boardAction('Roll the <strong>2 Arcane dice</strong> (Enchantment die + Reward die) and place next to the Arcanist board')}`;
         
-        // Arcane Worker rotation (Turn 2+)
-        if (turnNumber > 1) {
-          // Return unclaimed worker to supply
-          if (gameState.arcaneWorkerOnOffer) {
-            gameState.arcaneWorkersInSupply++;
-            gameState.arcaneWorkerOnOffer = false;
-            content += boardAction('Return the unclaimed <strong>Arcane Worker</strong> from the Arcanist board offer to the supply');
-          }
-          
-          // Draw new Arcane Worker if any remain in supply
-          if (gameState.arcaneWorkersInSupply > 0) {
-            gameState.arcaneWorkersInSupply--;
-            gameState.arcaneWorkerOnOffer = true;
-            content += boardAction('Place an <strong>Arcane Worker</strong> on the Arcanist board offer slot');
-          } else {
-            content += noteBox('No Arcane Workers remain in supply — skip worker placement');
-          }
+        // Arcane Worker rotation
+        // Turn 2+: Return unclaimed worker to supply first
+        if (turnNumber > 1 && gameState.arcaneWorkerOnOffer) {
+          gameState.arcaneWorkersInSupply++;
+          gameState.arcaneWorkerOnOffer = false;
+          content += boardAction('Return the unclaimed <strong>Arcane Worker</strong> from the Arcanist board offer to the supply');
+        }
+        
+        // All turns: Draw new Arcane Worker if any remain in supply
+        if (gameState.arcaneWorkersInSupply > 0) {
+          gameState.arcaneWorkersInSupply--;
+          gameState.arcaneWorkerOnOffer = true;
+          content += boardAction('Randomly select an <strong>Arcane Worker</strong> from supply and place on the Arcanist board offer slot');
+        } else {
+          content += noteBox('No Arcane Workers remain in supply — skip worker placement');
         }
         
         // Reset dice lock at start of turn
@@ -6859,11 +6862,11 @@
               </div>
               <div class="gap"></div>
               <div class="icon-btn arcane-btn ${diceAlreadyLocked ? 'disabled' : ''}" id="btn-locked-dice" style="grid-column: 3; grid-row: 1;">
-                <div class="emoji-icon">🎲</div>
+                <img src="assets/images/arcane/enchant_die.png" alt="Dice">
                 <span>Locked Dice</span>
               </div>
               <div class="icon-btn arcane-btn ${workerAlreadyTaken ? 'disabled' : ''}" id="btn-summoned-worker" style="grid-column: 4; grid-row: 1;">
-                <img src="assets/images/characters/apprentice.png" alt="Worker">
+                <img src="assets/images/arcane/arcane_worker.png" alt="Worker">
                 <span>Summoned Worker</span>
               </div>
               <div class="icon-btn arcane-btn" id="btn-arcane-shards" style="grid-column: 3; grid-row: 2;">
@@ -7098,19 +7101,18 @@
       }
       
       const typeNames = { scrolls: 'Scrolls', runes: 'Runes', amulets: 'Amulets' };
-      const typeIcons = { scrolls: '📜', runes: '🪨', amulets: '📿' };
       
       let content = `<p style="color: var(--text-secondary); margin-bottom: 15px;">Which Enchantment slot did you buy from?</p>
         <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">`;
       
       if (hasLeft) {
         content += `<button class="btn enchant-slot-btn" data-slot="left" style="padding: 15px 25px;">
-          ${typeIcons[offer.left]} Left (${typeNames[offer.left]})
+          ${enchantIcon(offer.left, 22)} Left (${typeNames[offer.left]})
         </button>`;
       }
       if (hasRight) {
         content += `<button class="btn enchant-slot-btn" data-slot="right" style="padding: 15px 25px;">
-          ${typeIcons[offer.right]} Right (${typeNames[offer.right]})
+          ${enchantIcon(offer.right, 22)} Right (${typeNames[offer.right]})
         </button>`;
       }
       
@@ -11586,50 +11588,186 @@
       
       // Check if Heir has any enchanted tricks
       const enchantedTricks = gameState.heir.enchantedTricks || {};
-      const enchantedCount = Object.keys(enchantedTricks).length;
+      const enchantedTrickIds = Object.keys(enchantedTricks);
       
       // Skip if Heir has no enchanted tricks
-      if (enchantedCount === 0) {
+      if (enchantedTrickIds.length === 0) {
         showHeirPerformanceStep3_FinalTotals();
         return;
       }
       
-      // Check for active prophecies
-      const isP36Active = gameState.activeProphecy?.id === 'p36'; // All Enchantments Trigger
-      const isP37Active = gameState.activeProphecy?.id === 'p37'; // Double Reward
+      // Build the trick selection UI - show all 4 slots, grey out non-enchanted
+      const trickSlotsHtml = [1,2,3,4].map(slotNum => {
+        const index = slotNum - 1;
+        const trick = gameState.heir.tricks[index];
+        
+        if (trick) {
+          const isEnchanted = enchantedTrickIds.includes(trick.id);
+          const levelStars = '★'.repeat(trick.level);
+          
+          if (isEnchanted) {
+            // Selectable enchanted trick
+            return `
+              <div class="enchant-trick-slot" data-slot="${slotNum}" data-trick-id="${trick.id}" style="
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 5px 3px;
+                background: var(--bg-card);
+                border: 2px solid var(--amber);
+                border-radius: 6px;
+                width: 75px;
+                height: 95px;
+                text-align: center;
+                cursor: pointer;
+                transition: all 0.15s ease;
+              ">
+                <div style="font-size: 0.55rem; color: var(--text-muted); margin-bottom: 1px;">Slot ${slotNum}</div>
+                <div style="font-weight: 600; font-size: 0.55rem; margin-bottom: 2px; line-height: 1.15; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; flex: 1; display: flex; align-items: center;">${trick.name}</div>
+                <div style="font-size: 0.6rem; color: var(--text-secondary);">${levelStars} L${trick.level}</div>
+                <div style="font-size: 0.5rem; color: var(--amber); margin-top: 1px;">✨ ENCHANTED</div>
+              </div>`;
+          } else {
+            // Non-enchanted trick - greyed out
+            return `
+              <div style="
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 5px 3px;
+                background: var(--bg-card);
+                border: 2px solid var(--border);
+                border-radius: 6px;
+                width: 75px;
+                height: 95px;
+                text-align: center;
+                opacity: 0.4;
+              ">
+                <div style="font-size: 0.55rem; color: var(--text-muted); margin-bottom: 1px;">Slot ${slotNum}</div>
+                <div style="font-weight: 600; font-size: 0.55rem; margin-bottom: 2px; line-height: 1.15; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; flex: 1; display: flex; align-items: center;">${trick.name}</div>
+                <div style="font-size: 0.6rem; color: var(--text-secondary);">${levelStars} L${trick.level}</div>
+              </div>`;
+          }
+        } else {
+          // Empty slot
+          return `
+            <div style="
+              width: 75px;
+              height: 95px;
+              background: transparent;
+              border: 2px dashed var(--border);
+              border-radius: 6px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: var(--text-muted);
+              font-size: 0.8rem;
+              opacity: 0.4;
+            ">—</div>`;
+        }
+      }).join('');
       
-      // Count enchanted tricks by type (each trick can have multiple enchantment types)
+      const content = `
+        <p style="margin-bottom: 15px;"><strong>Which of the Heir's enchanted tricks are on the performed card?</strong></p>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;">Select all that apply. Only enchanted tricks are selectable.</p>
+        
+        <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 10px;">
+          ${trickSlotsHtml}
+        </div>
+        <div style="display: flex; justify-content: center; gap: 20px; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px;">
+          <span>← Higher Yield</span>
+          <span>Lower Yield →</span>
+        </div>
+      `;
+      
+      setActionContent(
+        `Turn ${gameState.currentTurn} — Performance: Enchanted Tricks`,
+        content,
+        [
+          { text: 'None on this card', action: () => {
+            heirPerformanceTempData.enchantmentReward = { fame: 0, coins: 0, shards: 0, arcaneShards: 0, saCard: false };
+            heirPerformanceTempData.selectedEnchantedTricks = [];
+            showHeirPerformanceStep3_FinalTotals();
+          }},
+          { text: 'Continue →', action: () => showHeirPerformanceStep2d_DiceSelection(), id: 'continue-btn', disabled: true }
+        ]
+      );
+      
+      // Track selected tricks
+      const selectedTricks = new Set();
+      
+      setTimeout(() => {
+        document.querySelectorAll('.enchant-trick-slot').forEach(slot => {
+          slot.addEventListener('click', () => {
+            const trickId = slot.dataset.trickId;
+            
+            if (selectedTricks.has(trickId)) {
+              selectedTricks.delete(trickId);
+              slot.style.background = 'var(--bg-card)';
+              slot.style.boxShadow = 'none';
+            } else {
+              selectedTricks.add(trickId);
+              slot.style.background = 'rgba(212, 168, 71, 0.15)';
+              slot.style.boxShadow = '0 0 10px rgba(212, 168, 71, 0.3)';
+            }
+            
+            // Store selections and enable/disable continue button
+            heirPerformanceTempData.selectedEnchantedTricks = Array.from(selectedTricks);
+            const continueBtn = document.getElementById('continue-btn');
+            if (continueBtn) {
+              continueBtn.disabled = selectedTricks.size === 0;
+            }
+          });
+        });
+      }, 0);
+    }
+    
+    // Step 2d: Dice selection after tricks are chosen
+    function showHeirPerformanceStep2d_DiceSelection() {
+      const selectedTrickIds = heirPerformanceTempData.selectedEnchantedTricks || [];
+      const enchantedTricks = gameState.heir.enchantedTricks || {};
+      
+      // Gather enchantment types and levels from selected tricks
+      const selectedTrickData = selectedTrickIds.map(trickId => {
+        const trick = gameState.heir.tricks.find(t => t.id === trickId);
+        const enchantTypes = enchantedTricks[trickId] || [];
+        const typeArray = Array.isArray(enchantTypes) ? enchantTypes : [enchantTypes];
+        return { trickId, level: trick?.level || 1, enchantments: typeArray };
+      });
+      
+      // Count enchantments by type on selected tricks
       const typeCounts = { scrolls: 0, runes: 0, amulets: 0 };
-      Object.values(enchantedTricks).forEach(types => {
-        // types is now an array like ['scrolls', 'runes']
-        const typeArray = Array.isArray(types) ? types : [types]; // Handle legacy single-type format
-        typeArray.forEach(type => {
+      selectedTrickData.forEach(data => {
+        data.enchantments.forEach(type => {
           if (typeCounts[type] !== undefined) typeCounts[type]++;
         });
       });
       
-      const winningCard = heirPerformanceTempData.winningCard;
-      const cardCount = getPerformanceCardCount();
-      const selectedSlots = heirPerformanceTempData.results.map(r => r.card);
-      const cardSlotsHtml = buildCardSlotsVisual(cardCount, selectedSlots, winningCard);
+      // Total enchantments on selected tricks
+      const totalEnchantments = typeCounts.scrolls + typeCounts.runes + typeCounts.amulets;
       
-      // Build content
-      let content = cardSlotsHtml;
+      // Store for later use
+      heirPerformanceTempData.selectedTrickData = selectedTrickData;
+      heirPerformanceTempData.enchantTypeCounts = typeCounts;
       
-      // Enchantment type icons/names
+      // Check for active prophecies
+      const isP36Active = gameState.activeProphecy?.id === 'p36'; // All Enchantments Trigger
+      
+      // Enchantment type names
       const typeNames = { scrolls: 'Parchment Scrolls', runes: 'Stone Runes', amulets: 'Amulet Necklaces' };
-      const typeIcons = { scrolls: '📜', runes: '🪨', amulets: '📿' };
       
-      // Show Heir's enchanted tricks summary
-      content += `
-        <div style="background: var(--bg-card); padding: 12px; border-radius: 6px; margin: 15px 0;">
-          <h4 style="margin: 0 0 10px 0; color: var(--amber);">✨ Heir's Enchanted Tricks</h4>
+      // Show summary of selected tricks' enchantments
+      let content = `
+        <div style="background: var(--bg-card); padding: 12px; border-radius: 6px; margin: 0 0 15px 0;">
+          <h4 style="margin: 0 0 10px 0; color: var(--amber);">✨ Enchantments on Performed Card</h4>
           <div style="display: flex; gap: 15px; flex-wrap: wrap;">
       `;
       
       Object.entries(typeCounts).forEach(([type, count]) => {
         if (count > 0) {
-          content += `<span style="color: var(--text-secondary);">${typeIcons[type]} ${typeNames[type]}: <strong>${count}</strong></span>`;
+          content += `<span style="color: var(--text-secondary);">${enchantIcon(type, 20)} ${typeNames[type]}: <strong>${count}</strong></span>`;
         }
       });
       
@@ -11638,16 +11776,15 @@
         </div>
       `;
       
-      // If p36 is active, skip dice selection - all enchantments trigger
+      // If p36 is active, all enchantments trigger
       if (isP36Active) {
         content += `
           <div style="background: rgba(212, 168, 71, 0.15); border-left: 3px solid var(--amber); padding: 12px; margin: 15px 0; border-radius: 0 4px 4px 0;">
             <strong style="color: var(--amber);">🔮 p36: All Enchantments Trigger</strong>
-            <p style="margin: 8px 0 0 0; color: var(--text-secondary);">Ignore the Enchantment Die — ALL ${enchantedCount} enchanted trick(s) trigger this turn!</p>
+            <p style="margin: 8px 0 0 0; color: var(--text-secondary);">Ignore the Enchantment Die — ALL ${totalEnchantments} enchantment(s) trigger!</p>
           </div>
         `;
         
-        // Still need to ask for Reward die result
         content += `
           <p style="margin: 15px 0;"><strong>What does the Reward Die show?</strong></p>
           <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 10px;">Select the face showing on the Arcane Reward die.</p>
@@ -11659,11 +11796,10 @@
           `Turn ${gameState.currentTurn} — Performance: Enchantment Triggers`,
           content,
           [
-            { text: 'Continue →', action: () => calculateAndApplyEnchantmentRewards(enchantedCount, true), id: 'continue-btn', disabled: true }
+            { text: 'Continue →', action: () => calculateEnchantmentRewardsFromSelection(true), id: 'continue-btn', disabled: true }
           ]
         );
         
-        // Add event listeners for reward die selection
         setTimeout(() => {
           attachDieButtonListeners('reward-die-btn', (value) => {
             gameState.arcaneDice.reward = parseInt(value);
@@ -11673,19 +11809,19 @@
         }, 0);
         
       } else {
-        // Normal case - need to select both dice
+        // Normal case - need enchantment die selection
         content += `
           <p style="margin: 15px 0;"><strong>What does the Enchantment Die show?</strong></p>
           <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 10px;">Select the Enchantment type showing on the die (or that the Heir set).</p>
           
           ${getEnchantmentDieHtml('enchant-die-btn')}
           
-          <div id="matching-tricks-display" style="display: none; background: rgba(74, 158, 107, 0.15); border-left: 3px solid var(--success); padding: 12px; margin: 15px 0; border-radius: 0 4px 4px 0;">
-            <span id="matching-tricks-count" style="color: var(--success); font-weight: 600;"></span>
+          <div id="matching-info" style="display: none; background: rgba(74, 158, 107, 0.15); border-left: 3px solid var(--success); padding: 12px; margin: 15px 0; border-radius: 0 4px 4px 0;">
+            <span id="matching-count" style="color: var(--success); font-weight: 600;"></span>
           </div>
           
-          <div id="no-match-display" style="display: none; background: rgba(180, 83, 83, 0.15); border-left: 3px solid var(--danger); padding: 12px; margin: 15px 0; border-radius: 0 4px 4px 0;">
-            <span style="color: var(--danger); font-weight: 600;">No matching Tricks — No Enchantment reward this performance.</span>
+          <div id="no-match-info" style="display: none; background: rgba(180, 83, 83, 0.15); border-left: 3px solid var(--danger); padding: 12px; margin: 15px 0; border-radius: 0 4px 4px 0;">
+            <span style="color: var(--danger); font-weight: 600;">No matching enchantments on selected tricks — No reward this performance.</span>
           </div>
           
           <div id="reward-die-section" style="display: none;">
@@ -11700,55 +11836,43 @@
           `Turn ${gameState.currentTurn} — Performance: Enchantment Triggers`,
           content,
           [
-            { text: 'No Triggers — Skip', action: () => showHeirPerformanceStep3_FinalTotals(), id: 'skip-btn' },
-            { text: 'Continue →', action: () => calculateAndApplyEnchantmentRewards(null, false), id: 'continue-btn', disabled: true }
+            { text: 'Continue →', action: () => calculateEnchantmentRewardsFromSelection(false), id: 'continue-btn', disabled: true }
           ]
         );
         
-        // Add event listeners for die selections
         setTimeout(() => {
-          let selectedEnchantment = null;
-          let selectedReward = null;
-          let matchingTricks = 0;
+          let matchingCount = 0;
           
-          // Enchantment die selection
           attachDieButtonListeners('enchant-die-btn', (value) => {
-            selectedEnchantment = value;
-            gameState.arcaneDice.enchantment = selectedEnchantment;
+            gameState.arcaneDice.enchantment = value;
+            matchingCount = typeCounts[value] || 0;
             
-            // Count matching tricks
-            matchingTricks = typeCounts[selectedEnchantment] || 0;
-            
-            const matchDisplay = document.getElementById('matching-tricks-display');
-            const noMatchDisplay = document.getElementById('no-match-display');
+            const matchInfo = document.getElementById('matching-info');
+            const noMatchInfo = document.getElementById('no-match-info');
             const rewardSection = document.getElementById('reward-die-section');
-            const skipBtn = document.getElementById('skip-btn');
+            const continueBtn = document.getElementById('continue-btn');
             
-            if (matchingTricks > 0) {
-              matchDisplay.style.display = 'block';
-              noMatchDisplay.style.display = 'none';
+            if (matchingCount > 0) {
+              matchInfo.style.display = 'block';
+              noMatchInfo.style.display = 'none';
               rewardSection.style.display = 'block';
-              document.getElementById('matching-tricks-count').textContent = 
-                `✓ ${matchingTricks} Heir Trick(s) match! Each will receive the Reward die benefit.`;
-              if (skipBtn) skipBtn.style.display = 'none';
+              document.getElementById('matching-count').textContent = 
+                `✓ ${matchingCount} enchantment(s) match! Each triggers the Reward die benefit.`;
             } else {
-              matchDisplay.style.display = 'none';
-              noMatchDisplay.style.display = 'block';
+              matchInfo.style.display = 'none';
+              noMatchInfo.style.display = 'block';
               rewardSection.style.display = 'none';
-              if (skipBtn) skipBtn.style.display = 'inline-block';
-              // Enable continue button when no match (skip)
-              const continueBtn = document.getElementById('continue-btn');
+              // Enable continue even with no match
               if (continueBtn) continueBtn.disabled = false;
             }
+            
+            heirPerformanceTempData.matchingEnchantmentCount = matchingCount;
           });
           
-          // Reward die selection
           attachDieButtonListeners('reward-die-btn', (value) => {
-            selectedReward = parseInt(value);
-            gameState.arcaneDice.reward = selectedReward;
-            
+            gameState.arcaneDice.reward = parseInt(value);
             const continueBtn = document.getElementById('continue-btn');
-            if (continueBtn && selectedEnchantment && matchingTricks > 0) {
+            if (continueBtn && matchingCount > 0) {
               continueBtn.disabled = false;
             }
           });
@@ -11756,26 +11880,36 @@
       }
     }
     
-    // Calculate and apply enchantment rewards, then proceed to final totals
-    function calculateAndApplyEnchantmentRewards(forcedTriggerCount, isP36) {
+    // Calculate rewards based on selected tricks
+    function calculateEnchantmentRewardsFromSelection(isP36) {
+      const selectedTrickData = heirPerformanceTempData.selectedTrickData || [];
+      const typeCounts = heirPerformanceTempData.enchantTypeCounts || { scrolls: 0, runes: 0, amulets: 0 };
       const isP37Active = gameState.activeProphecy?.id === 'p37'; // Double Reward
       const rewardDie = gameState.arcaneDice?.reward || 0;
       
-      // Determine trigger count
-      let triggerCount = 0;
-      if (isP36 && forcedTriggerCount !== null) {
-        triggerCount = forcedTriggerCount;
-      } else if (!isP36) {
-        const enchantedTricks = gameState.heir.enchantedTricks || {};
+      // Determine which enchantments trigger and collect their trick levels
+      let triggeringEnchantments = []; // Array of { type, level }
+      
+      if (isP36) {
+        // All enchantments trigger
+        selectedTrickData.forEach(data => {
+          data.enchantments.forEach(type => {
+            triggeringEnchantments.push({ type, level: data.level });
+          });
+        });
+      } else {
+        // Only matching enchantments trigger
         const selectedType = gameState.arcaneDice?.enchantment;
         if (selectedType) {
-          // Count tricks that have the selected enchantment type
-          triggerCount = Object.values(enchantedTricks).filter(types => {
-            const typeArray = Array.isArray(types) ? types : [types]; // Handle legacy single-type format
-            return typeArray.includes(selectedType);
-          }).length;
+          selectedTrickData.forEach(data => {
+            if (data.enchantments.includes(selectedType)) {
+              triggeringEnchantments.push({ type: selectedType, level: data.level });
+            }
+          });
         }
       }
+      
+      const triggerCount = triggeringEnchantments.length;
       
       // If no triggers, skip rewards
       if (triggerCount === 0) {
@@ -11784,56 +11918,39 @@
         return;
       }
       
-      // Calculate base reward (per trigger)
-      let baseReward = { fame: 0, coins: 0, shards: 0, arcaneShards: 0, saCard: false };
+      // Calculate rewards based on reward die
+      let totalReward = { fame: 0, coins: 0, shards: 0, arcaneShards: 0, saCard: false };
       
       switch (rewardDie) {
         case 1:
-          // Draw 2 SA cards, keep 1 - handled via flag
-          baseReward.saCard = true;
+          // Draw 2 SA cards, keep 1 - only happens once regardless of trigger count
+          totalReward.saCard = true;
           break;
         case 2:
-          baseReward.fame = 1;
-          baseReward.coins = 1;
+          totalReward.fame = triggerCount;
+          totalReward.coins = triggerCount;
           break;
         case 3:
-          baseReward.coins = 3;
+          totalReward.coins = 3 * triggerCount;
           break;
         case 4:
-          // Fame = Trick Level - ask for average level
-          // For simplicity, we'll ask this separately or use average
-          // Actually, for Heir we need to track which specific tricks triggered
-          // For now, use level 2 as average approximation
-          baseReward.fame = 2; // Will be adjusted in next step if needed
+          // Fame = Trick Level for each trigger - we now know the exact levels!
+          triggeringEnchantments.forEach(te => {
+            totalReward.fame += te.level;
+          });
           break;
         case 5:
         case 6:
-          // Arcane Shard (or +1 Fame +1 Coin if supply empty)
-          if (gameState.arcaneShardsSupply > 0) {
-            baseReward.arcaneShards = 1;
-          } else {
-            baseReward.fame = 1;
-            baseReward.coins = 1;
+          // Arcane Shard for each trigger (or +1 Fame +1 Coin if supply empty)
+          for (let i = 0; i < triggerCount; i++) {
+            if (gameState.arcaneShardsSupply > totalReward.arcaneShards) {
+              totalReward.arcaneShards++;
+            } else {
+              totalReward.fame++;
+              totalReward.coins++;
+            }
           }
           break;
-      }
-      
-      // Multiply by trigger count
-      let totalReward = {
-        fame: baseReward.fame * triggerCount,
-        coins: baseReward.coins * triggerCount,
-        shards: baseReward.shards * triggerCount,
-        arcaneShards: baseReward.arcaneShards * triggerCount,
-        saCard: baseReward.saCard && triggerCount > 0
-      };
-      
-      // For Arcane Shards, cap by supply
-      if (totalReward.arcaneShards > gameState.arcaneShardsSupply) {
-        const excess = totalReward.arcaneShards - gameState.arcaneShardsSupply;
-        totalReward.arcaneShards = gameState.arcaneShardsSupply;
-        // Convert excess to Fame + Coins
-        totalReward.fame += excess;
-        totalReward.coins += excess;
       }
       
       // Apply p37 (Double Reward)
@@ -11842,7 +11959,7 @@
         totalReward.coins *= 2;
         totalReward.shards *= 2;
         totalReward.arcaneShards *= 2;
-        // Cap Arcane Shards again
+        // Cap Arcane Shards by supply
         if (totalReward.arcaneShards > gameState.arcaneShardsSupply) {
           const excess = totalReward.arcaneShards - gameState.arcaneShardsSupply;
           totalReward.arcaneShards = gameState.arcaneShardsSupply;
@@ -11851,15 +11968,9 @@
         }
       }
       
-      // If reward die was 4 (Fame = Level), need to ask for actual levels
-      if (rewardDie === 4) {
-        showEnchantmentLevelInput(triggerCount, isP37Active);
-        return;
-      }
-      
-      // If SA card reward, show SA card instruction
+      // If SA card reward, show instruction
       if (totalReward.saCard) {
-        showEnchantmentSACardReward(triggerCount, isP37Active, totalReward);
+        showEnchantmentSACardRewardNew(triggerCount, isP37Active, totalReward);
         return;
       }
       
@@ -11868,118 +11979,95 @@
       showHeirPerformanceStep3_FinalTotals();
     }
     
-    // Handle reward die 4 (Fame = Trick Level) - need to ask for levels
-    function showEnchantmentLevelInput(triggerCount, isP37) {
+    // SA Card reward screen - uses same priority system as Dark Alley
+    function showEnchantmentSACardRewardNew(triggerCount, isP37, totalReward) {
       const multiplier = isP37 ? 2 : 1;
+      const keepCount = triggerCount * multiplier; // How many cards to keep total
       
-      setActionContent(
-        `Turn ${gameState.currentTurn} — Performance: Enchantment Reward`,
-        `<div style="background: var(--bg-card); padding: 15px; border-radius: 6px; margin: 15px 0;">
-           <h4 style="margin: 0 0 10px 0; color: var(--amber);">✨ Reward Die: Fame = Trick Level</h4>
-           <p style="color: var(--text-secondary);">The Heir gains Fame equal to the Level of each triggered Trick (1/2/3 Fame for L1/L2/L3).</p>
-           ${isP37 ? '<p style="color: var(--amber);">🔮 p37: Double Reward — Fame is doubled!</p>' : ''}
-         </div>
-         
-         <p style="margin: 15px 0;"><strong>How many triggered Tricks at each Level?</strong></p>
-         <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;">${triggerCount} trick(s) triggered total.</p>
-         
-         <div class="stepper-grid" style="margin-bottom: 20px;">
-           <div style="text-align: center;">
-             <label style="display: block; margin-bottom: 8px; font-weight: 600;">Level 1</label>
-             ${createStepper('enchant-level1', 0)}
-             <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 5px;">+${1 * multiplier} Fame each</p>
-           </div>
-           <div style="text-align: center;">
-             <label style="display: block; margin-bottom: 8px; font-weight: 600;">Level 2</label>
-             ${createStepper('enchant-level2', 0)}
-             <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 5px;">+${2 * multiplier} Fame each</p>
-           </div>
-           <div style="text-align: center;">
-             <label style="display: block; margin-bottom: 8px; font-weight: 600;">Level 3</label>
-             ${createStepper('enchant-level3', 0)}
-             <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 5px;">+${3 * multiplier} Fame each</p>
-           </div>
-         </div>`,
-        [
-          { text: 'Continue →', action: () => {
-            const l1 = parseInt($('#enchant-level1')?.dataset?.value) || 0;
-            const l2 = parseInt($('#enchant-level2')?.dataset?.value) || 0;
-            const l3 = parseInt($('#enchant-level3')?.dataset?.value) || 0;
-            const totalFame = ((l1 * 1) + (l2 * 2) + (l3 * 3)) * multiplier;
-            
-            heirPerformanceTempData.enchantmentReward = {
-              fame: totalFame,
-              coins: 0,
-              shards: 0,
-              arcaneShards: 0,
-              saCard: false
-            };
-            showHeirPerformanceStep3_FinalTotals();
-          }}
-        ]
-      );
+      // Calculate which piles to draw from (same logic as Dark Alley)
+      const cardsToDraw = calculateSACardsToDraw(keepCount);
       
-      // Attach stepper event listeners
-      setTimeout(() => {
-        document.querySelectorAll('.stepper-btn').forEach(btn => {
-          btn.addEventListener('click', (e) => {
-            const targetId = e.currentTarget.dataset.target;
-            const valueEl = document.getElementById(targetId);
-            if (!valueEl) return;
+      // Count how many of each color to draw
+      const drawCounts = {};
+      cardsToDraw.forEach(color => {
+        drawCounts[color] = (drawCounts[color] || 0) + 1;
+      });
+      
+      // Build visual pile display - order matches physical board
+      const piles = [
+        { key: 'downtown', icon: 'assets/images/locations/downtown.png', name: 'Downtown' },
+        { key: 'market', icon: 'assets/images/locations/market_row.png', name: 'Market Row' },
+        { key: 'workshop', icon: 'assets/images/locations/workshop.png', name: 'Workshop' },
+        { key: 'theater', icon: 'assets/images/locations/theatre.png', name: 'Theater' }
+      ];
+      
+      if (gameState.expansions.academy) {
+        piles.push({ key: 'academy', icon: 'assets/images/locations/academy.png', name: 'Academy' });
+      }
+      
+      const pileWidth = gameState.expansions.academy ? 58 : 70;
+      const pileHeight = gameState.expansions.academy ? 78 : 95;
+      const iconSize = gameState.expansions.academy ? 32 : 40;
+      
+      const pilesHtml = `
+        <div style="display: flex; justify-content: center; gap: ${gameState.expansions.academy ? '6px' : '10px'}; margin: 20px 0;">
+          ${piles.map(pile => {
+            const isDrawing = drawCounts[pile.key] > 0;
+            const count = drawCounts[pile.key] || 0;
             
-            let currentValue = parseInt(valueEl.dataset.value) || 0;
-            
-            if (e.currentTarget.classList.contains('stepper-plus')) {
-              currentValue++;
-            } else if (e.currentTarget.classList.contains('stepper-minus')) {
-              currentValue = Math.max(0, currentValue - 1);
-            }
-            
-            valueEl.dataset.value = currentValue;
-            valueEl.textContent = currentValue;
-            
-            const container = valueEl.closest('.stepper-container');
-            const minusBtn = container?.querySelector('.stepper-minus');
-            if (minusBtn) minusBtn.disabled = currentValue === 0;
-          });
-        });
-      }, 0);
-    }
-    
-    // Handle SA card reward (die face 1)
-    function showEnchantmentSACardReward(triggerCount, isP37, otherRewards) {
-      const draws = isP37 ? triggerCount * 2 : triggerCount;
+            return `<div style="
+              width: ${pileWidth}px;
+              height: ${pileHeight}px;
+              background: ${isDrawing ? 'rgba(212, 168, 71, 0.15)' : 'transparent'};
+              border: 2px ${isDrawing ? 'solid var(--amber)' : 'dashed var(--border)'};
+              border-radius: 6px;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              gap: 2px;
+              ${isDrawing ? 'box-shadow: 0 0 12px rgba(212, 168, 71, 0.3);' : 'opacity: 0.5;'}
+            ">
+              <img src="${pile.icon}" alt="${pile.name}" style="width: ${iconSize}px; height: ${iconSize}px; object-fit: contain;">
+              <span style="font-size: 0.65rem; color: ${isDrawing ? 'var(--amber)' : 'var(--text-muted)'}; text-align: center; line-height: 1.2;">${pile.name}</span>
+              ${isDrawing ? `<span style="font-size: 0.8rem; font-weight: 600; color: var(--amber);">×${count}</span>` : ''}
+            </div>`;
+          }).join('')}
+        </div>`;
+      
+      // Show current counts
+      const currentCounts = gameState.heir.specialAssignments;
+      let countsDisplay = `Downtown: ${currentCounts.downtown}, Market: ${currentCounts.market}, Workshop: ${currentCounts.workshop}, Theater: ${currentCounts.theater}`;
+      if (gameState.expansions.academy) {
+        countsDisplay += `, Academy: ${currentCounts.academy}`;
+      }
       
       setActionContent(
         `Turn ${gameState.currentTurn} — Performance: Enchantment Reward`,
         `<div style="background: var(--bg-card); padding: 15px; border-radius: 6px; margin: 15px 0;">
            <h4 style="margin: 0 0 10px 0; color: var(--amber);">✨ Reward Die: Draw SA Cards</h4>
-           <p style="color: var(--text-secondary);">${draws} trigger(s) = draw ${draws * 2} SA cards, keep ${draws}.</p>
-           ${isP37 ? '<p style="color: var(--amber);">🔮 p37: Double Reward — draw/keep doubled!</p>' : ''}
+           <p style="color: var(--text-secondary);">The Heir draws 1 SA card per trigger, using Dark Alley priorities.</p>
+           <p style="color: var(--text-secondary);">${triggerCount} trigger(s)${isP37 ? ' × 2 (p37 doubled)' : ''} = <strong>${keepCount} card(s)</strong></p>
+           ${isP37 ? '<p style="color: var(--amber);">🔮 p37: Double Reward active!</p>' : ''}
          </div>
          
-         ${boardAction(`For each of the ${draws} trigger(s): Draw the top <strong>2 SA cards</strong> from any deck. Use Dark Alley priorities to determine which the Heir keeps.`)}
+         ${pilesHtml}
          
-         <div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 12px; margin: 15px 0; border-radius: 0 4px 4px 0;">
-           <strong style="color: var(--info);">ℹ️ Dark Alley SA Card Priority:</strong>
-           <ol style="margin: 8px 0 0 20px; color: var(--text-secondary);">
-             <li>Special Assignment targeting Magician</li>
-             <li>Special Assignment with highest Fame reward</li>
-             <li>Special Assignment with highest total yield</li>
-           </ol>
-         </div>
+         ${boardAction(`Draw ${keepCount} SA card${keepCount > 1 ? 's' : ''} from the highlighted pile${Object.keys(drawCounts).length > 1 ? 's' : ''}`)}
          
-         ${boardAction('Return unchosen cards to the bottom of their decks')}`,
+         <div style="background: var(--bg-card); padding: 12px; border-radius: 6px; margin: 15px 0;">
+           <p style="color: var(--text-secondary); font-size: 0.85rem;"><strong>Current SA Cards:</strong> ${countsDisplay}</p>
+         </div>`,
         [
-          { text: 'Done — Continue', action: () => {
-            // SA card doesn't add direct resources - just instruction
-            heirPerformanceTempData.enchantmentReward = {
-              fame: otherRewards?.fame || 0,
-              coins: otherRewards?.coins || 0,
-              shards: otherRewards?.shards || 0,
-              arcaneShards: otherRewards?.arcaneShards || 0,
-              saCard: true
-            };
+          { text: 'Confirm Draw', action: () => {
+            // Update the SA card counts
+            cardsToDraw.forEach(color => {
+              gameState.heir.specialAssignments[color]++;
+            });
+            
+            // Store rewards and proceed
+            heirPerformanceTempData.enchantmentReward = totalReward;
+            updateGameDisplay();
             showHeirPerformanceStep3_FinalTotals();
           }}
         ]
@@ -12953,10 +13041,92 @@
     
     // Arcane Arts: Classroom Enchantment Trigger Check
     function showClassroomEnchantmentCheck() {
-      const isP36Active = gameState.activeProphecy?.id === 'p36';
+      // Check if Heir has any enchanted tricks
+      const enchantedTricks = gameState.heir.enchantedTricks || {};
+      const enchantedTrickIds = Object.keys(enchantedTricks);
+      
+      // Skip if Heir has no enchanted tricks at all
+      if (enchantedTrickIds.length === 0) {
+        continueAfterClassroomEnchantments();
+        return;
+      }
+      
       const prophecyReminder = getHeirProphecyReminderHtml('heir-classroom');
       
-      let content = `
+      // Build the trick selection UI - show all 4 slots, grey out non-enchanted
+      const trickSlotsHtml = [1,2,3,4].map(slotNum => {
+        const index = slotNum - 1;
+        const trick = gameState.heir.tricks[index];
+        
+        if (trick) {
+          const isEnchanted = enchantedTrickIds.includes(trick.id);
+          const levelStars = '★'.repeat(trick.level);
+          
+          if (isEnchanted) {
+            // Selectable enchanted trick
+            return `
+              <div class="classroom-trick-slot" data-slot="${slotNum}" data-trick-id="${trick.id}" style="
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 5px 3px;
+                background: var(--bg-card);
+                border: 2px solid var(--amber);
+                border-radius: 6px;
+                width: 75px;
+                height: 95px;
+                text-align: center;
+                cursor: pointer;
+                transition: all 0.15s ease;
+              ">
+                <div style="font-size: 0.55rem; color: var(--text-muted); margin-bottom: 1px;">Slot ${slotNum}</div>
+                <div style="font-weight: 600; font-size: 0.55rem; margin-bottom: 2px; line-height: 1.15; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; flex: 1; display: flex; align-items: center;">${trick.name}</div>
+                <div style="font-size: 0.6rem; color: var(--text-secondary);">${levelStars} L${trick.level}</div>
+                <div style="font-size: 0.5rem; color: var(--amber); margin-top: 1px;">✨ ENCHANTED</div>
+              </div>`;
+          } else {
+            // Non-enchanted trick - greyed out
+            return `
+              <div style="
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 5px 3px;
+                background: var(--bg-card);
+                border: 2px solid var(--border);
+                border-radius: 6px;
+                width: 75px;
+                height: 95px;
+                text-align: center;
+                opacity: 0.4;
+              ">
+                <div style="font-size: 0.55rem; color: var(--text-muted); margin-bottom: 1px;">Slot ${slotNum}</div>
+                <div style="font-weight: 600; font-size: 0.55rem; margin-bottom: 2px; line-height: 1.15; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; flex: 1; display: flex; align-items: center;">${trick.name}</div>
+                <div style="font-size: 0.6rem; color: var(--text-secondary);">${levelStars} L${trick.level}</div>
+              </div>`;
+          }
+        } else {
+          // Empty slot
+          return `
+            <div style="
+              width: 75px;
+              height: 95px;
+              background: transparent;
+              border: 2px dashed var(--border);
+              border-radius: 6px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: var(--text-muted);
+              font-size: 0.8rem;
+              opacity: 0.4;
+            ">—</div>`;
+        }
+      }).join('');
+      
+      const content = `
         <div style="background: rgba(138, 43, 226, 0.1); border: 1px solid #8a2be2; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
           <h4 style="margin: 0 0 10px 0; color: #8a2be2;">🔮 Arcane Arts: Classroom Enchantments</h4>
           <p style="color: var(--text-secondary); margin: 0;">Enchanted Tricks in Classrooms can trigger the Arcane Reward die.</p>
@@ -12964,163 +13134,253 @@
         
         ${prophecyReminder}
         
-        <p style="margin: 15px 0;"><strong>Does the Heir have any enchanted Tricks in Classrooms?</strong></p>
-        <p style="color: var(--text-muted); font-size: 0.9rem;">Check if any of the Heir's Tricks currently in Classroom slots have Enchantment markers.</p>
-      `;
-      
-      if (isP36Active) {
-        content += `
-          <div style="background: rgba(212, 168, 71, 0.15); border-left: 3px solid var(--amber); padding: 12px; margin: 15px 0; border-radius: 0 4px 4px 0;">
-            <strong style="color: var(--amber);">🔮 p36: All Enchantments Trigger</strong>
-            <p style="margin: 8px 0 0 0; color: var(--text-secondary);">If yes, ALL enchanted Tricks in Classrooms will trigger (ignore Enchantment Die).</p>
-          </div>
-        `;
-      }
-      
-      setActionContent(
-        `Turn ${gameState.currentTurn} — Classroom: Enchantment Check`,
-        content,
-        [
-          { text: 'Yes — Heir has enchanted Tricks', action: () => showClassroomEnchantmentTriggers() },
-          { text: 'No — Continue', action: () => continueAfterClassroomEnchantments() }
-        ]
-      );
-    }
-    
-    function showClassroomEnchantmentTriggers() {
-      const isP36Active = gameState.activeProphecy?.id === 'p36';
-      const isP37Active = gameState.activeProphecy?.id === 'p37';
-      
-      let content = `
-        <div style="background: rgba(138, 43, 226, 0.1); border: 1px solid #8a2be2; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
-          <h4 style="margin: 0 0 10px 0; color: #8a2be2;">🔮 Classroom Enchantment Triggers</h4>
+        <p style="margin-bottom: 15px;"><strong>Which of the Heir's enchanted tricks are currently in Classroom slots?</strong></p>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;">Select all that apply. Only enchanted tricks are selectable.</p>
+        
+        <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 10px;">
+          ${trickSlotsHtml}
+        </div>
+        <div style="display: flex; justify-content: center; gap: 20px; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px;">
+          <span>← Higher Yield</span>
+          <span>Lower Yield →</span>
         </div>
       `;
       
-      if (isP36Active) {
-        // p36: All enchantments trigger - just need reward die and count
-        content += `
-          <div style="background: rgba(212, 168, 71, 0.15); border-left: 3px solid var(--amber); padding: 12px; margin: 15px 0; border-radius: 0 4px 4px 0;">
-            <strong style="color: var(--amber);">🔮 p36: All Enchantments Trigger</strong>
-            <p style="margin: 8px 0 0 0; color: var(--text-secondary);">ALL enchanted Tricks in Classrooms trigger — ignore the Enchantment Die.</p>
-          </div>
-          
-          <p style="margin: 15px 0;"><strong>How many enchanted Tricks does the Heir have in Classrooms?</strong></p>
-          
-          <div style="background: var(--bg-card); padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <div style="text-align: center;">
-              <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 8px;">Enchanted Tricks in Classrooms</label>
-              ${createStepper('classroom-enchanted-count', 1)}
-            </div>
-          </div>
-          
-          <p style="margin: 15px 0;"><strong>What does the Reward Die show?</strong></p>
-          ${getRewardDieHtml('classroom-reward-btn')}
-        `;
-      } else {
-        // Normal: Need enchantment die, reward die, and matching count
-        content += `
-          <p style="margin: 15px 0;"><strong>Step 1: What does the Enchantment Die show?</strong></p>
-          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 10px;">Select the enchantment type showing on the die.</p>
-          
-          ${getEnchantmentDieHtml('classroom-ench-btn')}
-          
-          <div id="classroom-match-count-section" style="display: none;">
-            <p style="margin: 15px 0;"><strong>Step 2: How many of the Heir's Classroom Tricks have this type?</strong></p>
-            <p style="color: var(--text-muted); font-size: 0.9rem;">Count only Tricks with <span id="classroom-selected-type-name">the selected</span> enchantment in Classrooms.</p>
-            
-            <div style="background: var(--bg-card); padding: 15px; border-radius: 8px; margin: 15px 0;">
-              <div style="text-align: center;">
-                <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 8px;">Matching Tricks</label>
-                ${createStepper('classroom-match-count', 0)}
-              </div>
-            </div>
-          </div>
-          
-          <p style="margin: 15px 0;"><strong>Step 3: What does the Reward Die show?</strong></p>
-          ${getRewardDieHtml('classroom-reward-btn')}
-        `;
-      }
-      
-      // p37 reminder
-      if (isP37Active) {
-        content += `<div style="background: rgba(212, 168, 71, 0.15); border-left: 3px solid var(--amber); padding: 12px; margin: 15px 0; border-radius: 0 4px 4px 0;"><strong style="color: var(--amber);">🔮 p37: Double Reward</strong><p style="margin: 8px 0 0 0; color: var(--text-secondary);">All rewards will be doubled!</p></div>`;
-      }
-      
       setActionContent(
-        `Turn ${gameState.currentTurn} — Classroom: Enchantment Triggers`,
+        `Turn ${gameState.currentTurn} — Classroom: Enchanted Tricks`,
         content,
         [
-          { text: 'Calculate Rewards →', action: () => calculateClassroomEnchantmentRewards(), id: 'classroom-continue-btn', disabled: true }
+          { text: 'None in Classrooms', action: () => continueAfterClassroomEnchantments() },
+          { text: 'Continue →', action: () => showClassroomEnchantmentDiceSelection(), id: 'classroom-continue-btn', disabled: true }
         ]
       );
       
-      // Add event listeners
+      // Track selected tricks
+      const selectedTricks = new Set();
+      
+      // Store for use in next step
+      window.classroomSelectedTricks = selectedTricks;
+      
       setTimeout(() => {
-        const continueBtn = $('#classroom-continue-btn');
-        let selectedEnchantment = null;
-        let selectedReward = null;
-        
-        const typeNames = { scrolls: 'Scrolls', runes: 'Runes', amulets: 'Amulets' };
-        
-        const updateContinueButton = () => {
-          if (isP36Active) {
-            // For p36: just need reward die selected
-            continueBtn.disabled = !selectedReward;
-          } else {
-            // Normal: need enchantment type and reward die
-            continueBtn.disabled = !(selectedEnchantment && selectedReward);
-          }
-        };
-        
-        // Enchantment die buttons (only for non-p36)
-        if (!isP36Active) {
-          attachDieButtonListeners('classroom-ench-btn', (value) => {
-            selectedEnchantment = value;
+        document.querySelectorAll('.classroom-trick-slot').forEach(slot => {
+          slot.addEventListener('click', () => {
+            const trickId = slot.dataset.trickId;
             
-            // Show match count section
-            const matchSection = $('#classroom-match-count-section');
-            if (matchSection) matchSection.style.display = 'block';
+            if (selectedTricks.has(trickId)) {
+              selectedTricks.delete(trickId);
+              slot.style.background = 'var(--bg-card)';
+              slot.style.boxShadow = 'none';
+            } else {
+              selectedTricks.add(trickId);
+              slot.style.background = 'rgba(138, 43, 226, 0.15)';
+              slot.style.boxShadow = '0 0 10px rgba(138, 43, 226, 0.3)';
+            }
             
-            // Update type name
-            const typeNameEl = $('#classroom-selected-type-name');
-            if (typeNameEl) typeNameEl.textContent = typeNames[selectedEnchantment];
-            
-            updateContinueButton();
+            // Enable/disable continue button
+            const continueBtn = document.getElementById('classroom-continue-btn');
+            if (continueBtn) {
+              continueBtn.disabled = selectedTricks.size === 0;
+            }
           });
-        }
-        
-        // Reward die buttons
-        attachDieButtonListeners('classroom-reward-btn', (value) => {
-          selectedReward = parseInt(value);
-          updateContinueButton();
         });
-        
-        // Store selections for use in calculation
-        window.classroomEnchantmentData = {
-          isP36Active,
-          getSelectedEnchantment: () => selectedEnchantment,
-          getSelectedReward: () => selectedReward
-        };
-        
-        // Attach stepper listeners if needed
-        attachStepperListeners(() => {});
       }, 0);
     }
     
-    function calculateClassroomEnchantmentRewards() {
-      const data = window.classroomEnchantmentData || {};
-      const isP36Active = data.isP36Active;
-      const isP37Active = gameState.activeProphecy?.id === 'p37';
-      const rewardDie = data.getSelectedReward ? data.getSelectedReward() : 0;
+    // Step 2: Dice selection after tricks are chosen
+    function showClassroomEnchantmentDiceSelection() {
+      const selectedTrickIds = Array.from(window.classroomSelectedTricks || []);
+      const enchantedTricks = gameState.heir.enchantedTricks || {};
       
-      // Determine trigger count
-      let triggerCount = 0;
+      // Gather enchantment types and levels from selected tricks
+      const selectedTrickData = selectedTrickIds.map(trickId => {
+        const trick = gameState.heir.tricks.find(t => t.id === trickId);
+        const enchantTypes = enchantedTricks[trickId] || [];
+        const typeArray = Array.isArray(enchantTypes) ? enchantTypes : [enchantTypes];
+        return { trickId, level: trick?.level || 1, enchantments: typeArray };
+      });
+      
+      // Count enchantments by type on selected tricks
+      const typeCounts = { scrolls: 0, runes: 0, amulets: 0 };
+      selectedTrickData.forEach(data => {
+        data.enchantments.forEach(type => {
+          if (typeCounts[type] !== undefined) typeCounts[type]++;
+        });
+      });
+      
+      // Total enchantments on selected tricks
+      const totalEnchantments = typeCounts.scrolls + typeCounts.runes + typeCounts.amulets;
+      
+      // Store for later use
+      window.classroomTrickData = selectedTrickData;
+      window.classroomEnchantTypeCounts = typeCounts;
+      
+      // Check for active prophecies
+      const isP36Active = gameState.activeProphecy?.id === 'p36';
+      const isP37Active = gameState.activeProphecy?.id === 'p37';
+      
+      // Enchantment type names
+      const typeNames = { scrolls: 'Parchment Scrolls', runes: 'Stone Runes', amulets: 'Amulet Necklaces' };
+      
+      // Show summary of selected tricks' enchantments
+      let content = `
+        <div style="background: rgba(138, 43, 226, 0.1); border: 1px solid #8a2be2; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+          <h4 style="margin: 0 0 10px 0; color: #8a2be2;">🔮 Classroom Enchantments</h4>
+          <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 10px;">
+      `;
+      
+      Object.entries(typeCounts).forEach(([type, count]) => {
+        if (count > 0) {
+          content += `<span style="color: var(--text-secondary);">${enchantIcon(type, 20)} ${typeNames[type]}: <strong>${count}</strong></span>`;
+        }
+      });
+      
+      content += `
+          </div>
+        </div>
+      `;
+      
+      // If p36 is active, all enchantments trigger
       if (isP36Active) {
-        triggerCount = parseInt($('#classroom-enchanted-count')?.dataset?.value) || 1;
+        content += `
+          <div style="background: rgba(212, 168, 71, 0.15); border-left: 3px solid var(--amber); padding: 12px; margin: 15px 0; border-radius: 0 4px 4px 0;">
+            <strong style="color: var(--amber);">🔮 p36: All Enchantments Trigger</strong>
+            <p style="margin: 8px 0 0 0; color: var(--text-secondary);">Ignore the Enchantment Die — ALL ${totalEnchantments} enchantment(s) trigger!</p>
+          </div>
+        `;
+        
+        content += `
+          <p style="margin: 15px 0;"><strong>What does the Reward Die show?</strong></p>
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 10px;">Select the face showing on the Arcane Reward die.</p>
+          
+          ${getRewardDieHtml('classroom-reward-btn')}
+        `;
+        
+        if (isP37Active) {
+          content += `<div style="background: rgba(212, 168, 71, 0.15); border-left: 3px solid var(--amber); padding: 12px; margin: 15px 0; border-radius: 0 4px 4px 0;"><strong style="color: var(--amber);">🔮 p37: Double Reward</strong><p style="margin: 8px 0 0 0; color: var(--text-secondary);">All rewards will be doubled!</p></div>`;
+        }
+        
+        setActionContent(
+          `Turn ${gameState.currentTurn} — Classroom: Enchantment Triggers`,
+          content,
+          [
+            { text: 'Continue →', action: () => calculateClassroomEnchantmentRewardsNew(true), id: 'classroom-continue-btn', disabled: true }
+          ]
+        );
+        
+        setTimeout(() => {
+          attachDieButtonListeners('classroom-reward-btn', (value) => {
+            gameState.arcaneDice.reward = parseInt(value);
+            const continueBtn = document.getElementById('classroom-continue-btn');
+            if (continueBtn) continueBtn.disabled = false;
+          });
+        }, 0);
+        
       } else {
-        triggerCount = parseInt($('#classroom-match-count')?.dataset?.value) || 0;
+        // Normal case - need enchantment die selection
+        content += `
+          <p style="margin: 15px 0;"><strong>What does the Enchantment Die show?</strong></p>
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 10px;">Select the Enchantment type showing on the die.</p>
+          
+          ${getEnchantmentDieHtml('classroom-ench-btn')}
+          
+          <div id="classroom-match-info" style="display: none; background: rgba(74, 158, 107, 0.15); border-left: 3px solid var(--success); padding: 12px; margin: 15px 0; border-radius: 0 4px 4px 0;">
+            <span id="classroom-match-count" style="color: var(--success); font-weight: 600;"></span>
+          </div>
+          
+          <div id="classroom-no-match" style="display: none; background: rgba(180, 83, 83, 0.15); border-left: 3px solid var(--danger); padding: 12px; margin: 15px 0; border-radius: 0 4px 4px 0;">
+            <span style="color: var(--danger); font-weight: 600;">No matching enchantments — No reward this phase.</span>
+          </div>
+          
+          <div id="classroom-reward-section" style="display: none;">
+            <p style="margin: 15px 0;"><strong>What does the Reward Die show?</strong></p>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 10px;">Select the face showing on the Arcane Reward die.</p>
+            
+            ${getRewardDieHtml('classroom-reward-btn')}
+          </div>
+        `;
+        
+        if (isP37Active) {
+          content += `<div style="background: rgba(212, 168, 71, 0.15); border-left: 3px solid var(--amber); padding: 12px; margin: 15px 0; border-radius: 0 4px 4px 0;"><strong style="color: var(--amber);">🔮 p37: Double Reward</strong><p style="margin: 8px 0 0 0; color: var(--text-secondary);">All rewards will be doubled!</p></div>`;
+        }
+        
+        setActionContent(
+          `Turn ${gameState.currentTurn} — Classroom: Enchantment Triggers`,
+          content,
+          [
+            { text: 'Continue →', action: () => calculateClassroomEnchantmentRewardsNew(false), id: 'classroom-continue-btn', disabled: true }
+          ]
+        );
+        
+        setTimeout(() => {
+          let matchingCount = 0;
+          
+          attachDieButtonListeners('classroom-ench-btn', (value) => {
+            gameState.arcaneDice.enchantment = value;
+            matchingCount = typeCounts[value] || 0;
+            
+            const matchInfo = document.getElementById('classroom-match-info');
+            const noMatch = document.getElementById('classroom-no-match');
+            const rewardSection = document.getElementById('classroom-reward-section');
+            const continueBtn = document.getElementById('classroom-continue-btn');
+            
+            if (matchingCount > 0) {
+              matchInfo.style.display = 'block';
+              noMatch.style.display = 'none';
+              rewardSection.style.display = 'block';
+              document.getElementById('classroom-match-count').textContent = 
+                `✓ ${matchingCount} enchantment(s) match! Each triggers the Reward die benefit.`;
+            } else {
+              matchInfo.style.display = 'none';
+              noMatch.style.display = 'block';
+              rewardSection.style.display = 'none';
+              // Enable continue even with no match
+              if (continueBtn) continueBtn.disabled = false;
+            }
+            
+            window.classroomMatchingCount = matchingCount;
+          });
+          
+          attachDieButtonListeners('classroom-reward-btn', (value) => {
+            gameState.arcaneDice.reward = parseInt(value);
+            const continueBtn = document.getElementById('classroom-continue-btn');
+            if (continueBtn && matchingCount > 0) {
+              continueBtn.disabled = false;
+            }
+          });
+        }, 0);
       }
+    }
+    
+    // Calculate rewards based on selected tricks
+    function calculateClassroomEnchantmentRewardsNew(isP36) {
+      const selectedTrickData = window.classroomTrickData || [];
+      const typeCounts = window.classroomEnchantTypeCounts || { scrolls: 0, runes: 0, amulets: 0 };
+      const isP37Active = gameState.activeProphecy?.id === 'p37';
+      const rewardDie = gameState.arcaneDice?.reward || 0;
+      
+      // Determine which enchantments trigger and collect their trick levels
+      let triggeringEnchantments = []; // Array of { type, level }
+      
+      if (isP36) {
+        // All enchantments trigger
+        selectedTrickData.forEach(data => {
+          data.enchantments.forEach(type => {
+            triggeringEnchantments.push({ type, level: data.level });
+          });
+        });
+      } else {
+        // Only matching enchantments trigger
+        const selectedType = gameState.arcaneDice?.enchantment;
+        if (selectedType) {
+          selectedTrickData.forEach(data => {
+            if (data.enchantments.includes(selectedType)) {
+              triggeringEnchantments.push({ type: selectedType, level: data.level });
+            }
+          });
+        }
+      }
+      
+      const triggerCount = triggeringEnchantments.length;
       
       // If no triggers, continue
       if (triggerCount === 0) {
@@ -13128,50 +13388,39 @@
         return;
       }
       
-      // Calculate base reward (per trigger)
-      let baseReward = { fame: 0, coins: 0, shards: 0, arcaneShards: 0, saCard: false };
+      // Calculate rewards based on reward die
+      let totalReward = { fame: 0, coins: 0, shards: 0, arcaneShards: 0, saCard: false };
       
       switch (rewardDie) {
         case 1:
-          baseReward.saCard = true;
+          // SA card - only happens once regardless of trigger count
+          totalReward.saCard = true;
           break;
         case 2:
-          baseReward.fame = 1;
-          baseReward.coins = 1;
+          totalReward.fame = triggerCount;
+          totalReward.coins = triggerCount;
           break;
         case 3:
-          baseReward.coins = 3;
+          totalReward.coins = 3 * triggerCount;
           break;
         case 4:
-          // Fame = Trick Level - will ask separately
-          baseReward.fame = 2; // Placeholder
+          // Fame = Trick Level for each trigger - we now know the exact levels!
+          triggeringEnchantments.forEach(te => {
+            totalReward.fame += te.level;
+          });
           break;
         case 5:
         case 6:
-          if (gameState.arcaneShardsSupply > 0) {
-            baseReward.arcaneShards = 1;
-          } else {
-            baseReward.fame = 1;
-            baseReward.coins = 1;
+          // Arcane Shard for each trigger (or +1 Fame +1 Coin if supply empty)
+          for (let i = 0; i < triggerCount; i++) {
+            if (gameState.arcaneShardsSupply > totalReward.arcaneShards) {
+              totalReward.arcaneShards++;
+            } else {
+              totalReward.fame++;
+              totalReward.coins++;
+            }
           }
           break;
-      }
-      
-      // Multiply by trigger count
-      let totalReward = {
-        fame: baseReward.fame * triggerCount,
-        coins: baseReward.coins * triggerCount,
-        shards: baseReward.shards * triggerCount,
-        arcaneShards: baseReward.arcaneShards * triggerCount,
-        saCard: baseReward.saCard && triggerCount > 0
-      };
-      
-      // Cap Arcane Shards by supply
-      if (totalReward.arcaneShards > gameState.arcaneShardsSupply) {
-        const excess = totalReward.arcaneShards - gameState.arcaneShardsSupply;
-        totalReward.arcaneShards = gameState.arcaneShardsSupply;
-        totalReward.fame += excess;
-        totalReward.coins += excess;
       }
       
       // Apply p37 (Double Reward)
@@ -13180,6 +13429,7 @@
         totalReward.coins *= 2;
         totalReward.shards *= 2;
         totalReward.arcaneShards *= 2;
+        // Cap Arcane Shards by supply
         if (totalReward.arcaneShards > gameState.arcaneShardsSupply) {
           const excess = totalReward.arcaneShards - gameState.arcaneShardsSupply;
           totalReward.arcaneShards = gameState.arcaneShardsSupply;
@@ -13188,18 +13438,9 @@
         }
       }
       
-      // Store for display
-      window.classroomEnchantmentReward = totalReward;
-      window.classroomEnchantmentTriggerCount = triggerCount;
-      
-      // Handle special cases
-      if (rewardDie === 4) {
-        showClassroomEnchantmentLevelInput(triggerCount, isP37Active);
-        return;
-      }
-      
+      // If SA card reward, show SA card screen with Dark Alley priorities
       if (totalReward.saCard) {
-        showClassroomEnchantmentSAReward(triggerCount, isP37Active, totalReward);
+        showClassroomEnchantmentSARewardNew(triggerCount, isP37Active, totalReward);
         return;
       }
       
@@ -13207,84 +13448,95 @@
       showClassroomEnchantmentFinalRewards(totalReward, triggerCount);
     }
     
-    function showClassroomEnchantmentLevelInput(triggerCount, isP37) {
+    // SA Card reward screen for Classroom - uses Dark Alley priorities
+    function showClassroomEnchantmentSARewardNew(triggerCount, isP37, totalReward) {
       const multiplier = isP37 ? 2 : 1;
+      const keepCount = triggerCount * multiplier;
       
-      setActionContent(
-        `Turn ${gameState.currentTurn} — Classroom: Enchantment Reward`,
-        `<div style="background: var(--bg-card); padding: 15px; border-radius: 6px; margin: 15px 0;">
-           <h4 style="margin: 0 0 10px 0; color: #8a2be2;">🔮 Reward Die: Fame = Trick Level</h4>
-           <p style="color: var(--text-secondary);">The Heir gains Fame equal to the Level of each triggered Trick (1/2/3 Fame for L1/L2/L3).</p>
-           ${isP37 ? '<p style="color: var(--amber);">🔮 p37: Double Reward — Fame is doubled!</p>' : ''}
-         </div>
-         
-         <p style="margin: 15px 0;"><strong>How many triggered Tricks at each Level?</strong></p>
-         <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;">${triggerCount} trick(s) triggered total.</p>
-         
-         <div class="stepper-grid" style="margin-bottom: 20px;">
-           <div style="text-align: center;">
-             <label style="display: block; margin-bottom: 8px; font-weight: 600;">Level 1</label>
-             <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px;">${1 * multiplier} Fame each</div>
-             ${createStepper('classroom-level1', 0)}
-           </div>
-           <div style="text-align: center;">
-             <label style="display: block; margin-bottom: 8px; font-weight: 600;">Level 2</label>
-             <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px;">${2 * multiplier} Fame each</div>
-             ${createStepper('classroom-level2', 0)}
-           </div>
-           <div style="text-align: center;">
-             <label style="display: block; margin-bottom: 8px; font-weight: 600;">Level 3</label>
-             <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px;">${3 * multiplier} Fame each</div>
-             ${createStepper('classroom-level3', 0)}
-           </div>
-         </div>
-         
-         <div id="classroom-level-total" style="background: var(--bg-card); padding: 12px; border-radius: 6px; text-align: center;">
-           <strong>Total Fame:</strong> <span id="classroom-level-fame">0</span>
-         </div>`,
-        [
-          { text: 'Apply Rewards', action: () => {
-            const l1 = parseInt($('#classroom-level1')?.dataset?.value) || 0;
-            const l2 = parseInt($('#classroom-level2')?.dataset?.value) || 0;
-            const l3 = parseInt($('#classroom-level3')?.dataset?.value) || 0;
-            const totalFame = (l1 * 1 + l2 * 2 + l3 * 3) * multiplier;
+      // Calculate which piles to draw from (same logic as Dark Alley)
+      const cardsToDraw = calculateSACardsToDraw(keepCount);
+      
+      // Count how many of each color to draw
+      const drawCounts = {};
+      cardsToDraw.forEach(color => {
+        drawCounts[color] = (drawCounts[color] || 0) + 1;
+      });
+      
+      // Build visual pile display
+      const piles = [
+        { key: 'downtown', icon: 'assets/images/locations/downtown.png', name: 'Downtown' },
+        { key: 'market', icon: 'assets/images/locations/market_row.png', name: 'Market Row' },
+        { key: 'workshop', icon: 'assets/images/locations/workshop.png', name: 'Workshop' },
+        { key: 'theater', icon: 'assets/images/locations/theatre.png', name: 'Theater' }
+      ];
+      
+      if (gameState.expansions.academy) {
+        piles.push({ key: 'academy', icon: 'assets/images/locations/academy.png', name: 'Academy' });
+      }
+      
+      const pileWidth = gameState.expansions.academy ? 58 : 70;
+      const pileHeight = gameState.expansions.academy ? 78 : 95;
+      const iconSize = gameState.expansions.academy ? 32 : 40;
+      
+      const pilesHtml = `
+        <div style="display: flex; justify-content: center; gap: ${gameState.expansions.academy ? '6px' : '10px'}; margin: 20px 0;">
+          ${piles.map(pile => {
+            const isDrawing = drawCounts[pile.key] > 0;
+            const count = drawCounts[pile.key] || 0;
             
-            const reward = { fame: totalFame, coins: 0, shards: 0, arcaneShards: 0, saCard: false };
-            showClassroomEnchantmentFinalRewards(reward, triggerCount);
-          }}
-        ]
-      );
+            return `<div style="
+              width: ${pileWidth}px;
+              height: ${pileHeight}px;
+              background: ${isDrawing ? 'rgba(138, 43, 226, 0.15)' : 'transparent'};
+              border: 2px ${isDrawing ? 'solid #8a2be2' : 'dashed var(--border)'};
+              border-radius: 6px;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              gap: 2px;
+              ${isDrawing ? 'box-shadow: 0 0 12px rgba(138, 43, 226, 0.3);' : 'opacity: 0.5;'}
+            ">
+              <img src="${pile.icon}" alt="${pile.name}" style="width: ${iconSize}px; height: ${iconSize}px; object-fit: contain;">
+              <span style="font-size: 0.65rem; color: ${isDrawing ? '#8a2be2' : 'var(--text-muted)'}; text-align: center; line-height: 1.2;">${pile.name}</span>
+              ${isDrawing ? `<span style="font-size: 0.8rem; font-weight: 600; color: #8a2be2;">×${count}</span>` : ''}
+            </div>`;
+          }).join('')}
+        </div>`;
       
-      const updateTotal = () => {
-        const l1 = parseInt($('#classroom-level1')?.dataset?.value) || 0;
-        const l2 = parseInt($('#classroom-level2')?.dataset?.value) || 0;
-        const l3 = parseInt($('#classroom-level3')?.dataset?.value) || 0;
-        const totalFame = (l1 * 1 + l2 * 2 + l3 * 3) * multiplier;
-        const fameEl = $('#classroom-level-fame');
-        if (fameEl) fameEl.textContent = totalFame;
-      };
-      
-      attachStepperListeners(updateTotal);
-    }
-    
-    function showClassroomEnchantmentSAReward(triggerCount, isP37, totalReward) {
-      const draws = isP37 ? triggerCount * 2 : triggerCount;
+      // Show current counts
+      const currentCounts = gameState.heir.specialAssignments;
+      let countsDisplay = `Downtown: ${currentCounts.downtown}, Market: ${currentCounts.market}, Workshop: ${currentCounts.workshop}, Theater: ${currentCounts.theater}`;
+      if (gameState.expansions.academy) {
+        countsDisplay += `, Academy: ${currentCounts.academy}`;
+      }
       
       setActionContent(
         `Turn ${gameState.currentTurn} — Classroom: SA Card Reward`,
-        `<div style="background: var(--bg-card); padding: 15px; border-radius: 6px; margin: 15px 0;">
+        `<div style="background: rgba(138, 43, 226, 0.1); border: 1px solid #8a2be2; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
            <h4 style="margin: 0 0 10px 0; color: #8a2be2;">🔮 Reward Die: Draw SA Cards</h4>
-           <p style="color: var(--text-secondary);">For each trigger, draw 2 SA cards and keep 1.</p>
-           ${isP37 ? '<p style="color: var(--amber);">🔮 p37: Double Reward — Draw twice as many times!</p>' : ''}
+           <p style="color: var(--text-secondary);">The Heir draws 1 SA card per trigger, using Dark Alley priorities.</p>
+           <p style="color: var(--text-secondary);">${triggerCount} trigger(s)${isP37 ? ' × 2 (p37 doubled)' : ''} = <strong>${keepCount} card(s)</strong></p>
+           ${isP37 ? '<p style="color: var(--amber);">🔮 p37: Double Reward active!</p>' : ''}
          </div>
          
-         ${boardAction(`Draw <strong>${draws * 2}</strong> SA cards (top 2 from ${draws} different piles based on Dark Alley priorities)`)}
-         ${boardAction(`Keep <strong>${draws}</strong> card(s) for the Heir, return the rest to pile bottoms`)}
+         ${pilesHtml}
          
-         ${infoBox(`<strong>Dark Alley Priority:</strong> Theater (if empty) → Downtown → Market → Workshop, take from pile Heir has fewest of.`)}`,
+         ${boardAction(`Draw ${keepCount} SA card${keepCount > 1 ? 's' : ''} from the highlighted pile${Object.keys(drawCounts).length > 1 ? 's' : ''}`)}
+         
+         <div style="background: var(--bg-card); padding: 12px; border-radius: 6px; margin: 15px 0;">
+           <p style="color: var(--text-secondary); font-size: 0.85rem;"><strong>Current SA Cards:</strong> ${countsDisplay}</p>
+         </div>`,
         [
-          { text: 'Done — Continue', action: () => {
-            // No fame/coins/shards from SA card reward directly
+          { text: 'Confirm Draw', action: () => {
+            // Update the SA card counts
+            cardsToDraw.forEach(color => {
+              gameState.heir.specialAssignments[color]++;
+            });
+            
+            updateGameDisplay();
+            
+            // Show final screen (with no additional rewards since SA was handled)
             const reward = { fame: 0, coins: 0, shards: 0, arcaneShards: 0, saCard: true };
             showClassroomEnchantmentFinalRewards(reward, triggerCount);
           }}
@@ -13355,6 +13607,10 @@
       delete window.classroomEnchantmentData;
       delete window.classroomEnchantmentReward;
       delete window.classroomEnchantmentTriggerCount;
+      delete window.classroomSelectedTricks;
+      delete window.classroomTrickData;
+      delete window.classroomEnchantTypeCounts;
+      delete window.classroomMatchingCount;
       
       const isBernard = gameState.heirMagician?.id === 'bernard';
       
@@ -13949,27 +14205,26 @@
       
       // Build UI for selecting new enchantment types
       const enchantTypes = [
-        { id: 'scrolls', name: 'Scrolls', icon: '📜' },
-        { id: 'runes', name: 'Runes', icon: '🪨' },
-        { id: 'amulets', name: 'Amulets', icon: '📿' },
+        { id: 'scrolls', name: 'Scrolls' },
+        { id: 'runes', name: 'Runes' },
+        { id: 'amulets', name: 'Amulets' },
         { id: null, name: 'Empty (bag empty)', icon: '—' }
       ];
       
       const typeNames = { scrolls: 'Scrolls', runes: 'Runes', amulets: 'Amulets' };
-      const typeIcons = { scrolls: '📜', runes: '🪨', amulets: '📿' };
       
       let content = `<p style="color: #8a2be2; font-weight: 600; margin-bottom: 15px;">🔮 Arcane Arts: Refill Enchantment Offer</p>`;
       
       // Show slide action if it happened
       if (slidAction) {
-        content += boardAction(`Slide <strong>${typeIcons[slidAction]} ${typeNames[slidAction]}</strong> from Right slot to Left slot`);
+        content += boardAction(`Slide <strong>${enchantIcon(slidAction, 18)} ${typeNames[slidAction]}</strong> from Right slot to Left slot`);
       }
       
       content += `<p style="color: var(--text-secondary); margin-bottom: 15px;">Draw Enchantment tiles from the bag to fill empty slots:</p>`;
       
       // Show current state for filled slot
       if (!needsLeftRefill) {
-        content += `<p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 10px;">Left slot: ${typeIcons[offer.left]} ${typeNames[offer.left]} (already filled)</p>`;
+        content += `<p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 10px;">Left slot: ${enchantIcon(offer.left, 18)} ${typeNames[offer.left]} (already filled)</p>`;
       }
       
       // Left slot selection (if needed)
@@ -13981,7 +14236,7 @@
               ${enchantTypes.map(type => `
                 <button class="btn refill-btn" data-slot="left" data-type="${type.id}"
                         style="padding: 8px 12px; font-size: 0.85rem;">
-                  ${type.icon} ${type.name}
+                  ${type.id ? enchantIcon(type.id, 18) : type.icon} ${type.name}
                 </button>
               `).join('')}
             </div>
@@ -13998,7 +14253,7 @@
               ${enchantTypes.map(type => `
                 <button class="btn refill-btn" data-slot="right" data-type="${type.id}"
                         style="padding: 8px 12px; font-size: 0.85rem;">
-                  ${type.icon} ${type.name}
+                  ${type.id ? enchantIcon(type.id, 18) : type.icon} ${type.name}
                 </button>
               `).join('')}
             </div>
@@ -14032,7 +14287,7 @@
           if (selections.left === null) {
             actions += boardAction(`Left slot remains <strong>empty</strong> (bag empty)`);
           } else {
-            actions += boardAction(`Place <strong>${typeIcons[selections.left]} ${typeNames[selections.left]}</strong> on Left slot`);
+            actions += boardAction(`Place <strong>${enchantIcon(selections.left, 18)} ${typeNames[selections.left]}</strong> on Left slot`);
           }
         }
         
@@ -14040,7 +14295,7 @@
           if (selections.right === null) {
             actions += boardAction(`Right slot remains <strong>empty</strong> (bag empty)`);
           } else {
-            actions += boardAction(`Place <strong>${typeIcons[selections.right]} ${typeNames[selections.right]}</strong> on Right slot`);
+            actions += boardAction(`Place <strong>${enchantIcon(selections.right, 18)} ${typeNames[selections.right]}</strong> on Right slot`);
           }
         }
         
@@ -14124,10 +14379,9 @@
         const wagonLocationNames = { downtown: 'Downtown', academy: 'Academy', market: 'Market Row', darkalley: 'Dark Alley' };
         const offer = gameState.enchantmentOffer || { left: null, right: null };
         const typeNames = { scrolls: 'Scrolls', runes: 'Runes', amulets: 'Amulets' };
-        const typeIcons = { scrolls: '📜', runes: '🪨', amulets: '📿' };
         
-        const leftDisplay = offer.left ? `${typeIcons[offer.left]} ${typeNames[offer.left]}` : '(empty)';
-        const rightDisplay = offer.right ? `${typeIcons[offer.right]} ${typeNames[offer.right]}` : '(empty)';
+        const leftDisplay = offer.left ? `${enchantIcon(offer.left, 18)} ${typeNames[offer.left]}` : '(empty)';
+        const rightDisplay = offer.right ? `${enchantIcon(offer.right, 18)} ${typeNames[offer.right]}` : '(empty)';
         
         content += `<div style="background: rgba(138, 43, 226, 0.1); border: 1px solid #8a2be2; padding: 10px; border-radius: 6px; margin: 12px 0;">
           <p style="color: #8a2be2; font-weight: 600; margin-bottom: 8px;">🔮 Arcane Arts Summary</p>
@@ -14389,10 +14643,9 @@
         const wagonLocationNames = { downtown: 'Downtown', academy: 'Academy', market: 'Market Row', darkalley: 'Dark Alley' };
         const offer = gameState.enchantmentOffer || { left: null, right: null };
         const typeNames = { scrolls: 'Scrolls', runes: 'Runes', amulets: 'Amulets' };
-        const typeIcons = { scrolls: '📜', runes: '🪨', amulets: '📿' };
         
-        const leftDisplay = offer.left ? `${typeIcons[offer.left]} ${typeNames[offer.left]}` : '(empty)';
-        const rightDisplay = offer.right ? `${typeIcons[offer.right]} ${typeNames[offer.right]}` : '(empty)';
+        const leftDisplay = offer.left ? `${enchantIcon(offer.left, 18)} ${typeNames[offer.left]}` : '(empty)';
+        const rightDisplay = offer.right ? `${enchantIcon(offer.right, 18)} ${typeNames[offer.right]}` : '(empty)';
         
         content += `<div style="background: rgba(138, 43, 226, 0.1); border: 1px solid #8a2be2; padding: 10px; border-radius: 6px; margin: 12px 0;">
           <p style="color: #8a2be2; font-weight: 600; margin-bottom: 8px;">🔮 Arcane Arts Summary</p>
