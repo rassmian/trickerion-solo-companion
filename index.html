@@ -1356,7 +1356,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.15.16-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.15.17-beta</p>
       <button class="restart-btn hidden" id="restart-btn">↺ New Game</button>
     </header>
 
@@ -1639,19 +1639,20 @@
                 <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place <strong>2 Arcane dice</strong> (Enchantment die + Reward die) next to the Arcanist board</span></div>
                 
                 <!-- Wagon starting location selection -->
-                <div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ WAGON SETUP:</span> <span style="color: var(--text-secondary);">Select the Wagon's starting location:</span></div>
-                
                 <div style="margin: 15px 0;">
                   <label style="color: var(--text-primary); font-weight: 500; display: block; margin-bottom: 8px;">Wagon Starting Location:</label>
+                  <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 8px;">Randomly determine using your permanent Assignment cards:</p>
                   <div id="quick-wagon-location-options" style="display: flex; flex-wrap: wrap; gap: 8px;">
                     <!-- Populated by updateWagonLocationOptions() -->
                   </div>
+                  <div id="quick-wagon-board-action" style="margin-top: 10px;"></div>
                 </div>
                 
                 <!-- Enchantment Offer Selection -->
                 <div style="margin: 20px 0;">
                   <label style="color: var(--text-primary); font-weight: 500; display: block; margin-bottom: 8px;">Enchantment Tiles on Offer:</label>
-                  <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 12px;">Draw 2 tiles from the bag and select their types:</p>
+                  <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Draw <strong>2 Enchantment tiles</strong> from the bag</span></div>
+                  <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 12px;">Select the types you drew:</p>
                   
                   <div style="display: flex; align-items: flex-start; gap: 0;">
                     <div style="flex: 1;">
@@ -1671,6 +1672,7 @@
                       </div>
                     </div>
                   </div>
+                  <div id="quick-enchant-board-action" style="margin-top: 10px;"></div>
                 </div>
               </div>
             </div>
@@ -1774,19 +1776,20 @@
             <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place the <strong>2 Arcane dice</strong> (Enchantment die + Reward die) next to the Arcanist board</span></div>
             
             <!-- Wagon starting location selection -->
-            <div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 15px 0 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ WAGON SETUP:</span> <span style="color: var(--text-secondary);">Randomly determine the Wagon's starting location using your permanent Assignment cards (shuffle Downtown, Market Row, Dark Alley, and Academy if enabled).</span></div>
-            
             <div style="margin: 15px 0;">
-              <label style="color: var(--text-primary); font-weight: 500; display: block; margin-bottom: 8px;">Select Wagon Starting Location:</label>
+              <label style="color: var(--text-primary); font-weight: 500; display: block; margin-bottom: 8px;">Wagon Starting Location:</label>
+              <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 8px;">Randomly determine using your permanent Assignment cards (shuffle Downtown, Market Row, Dark Alley, and Academy if enabled):</p>
               <div id="full-wagon-location-options" style="display: flex; flex-wrap: wrap; gap: 8px;">
                 <!-- Populated by updateFullSetupWagonOptions() -->
               </div>
+              <div id="full-wagon-board-action" style="margin-top: 10px;"></div>
             </div>
             
             <!-- Enchantment Offer Selection -->
             <div style="margin: 20px 0;">
-              <label style="color: var(--text-primary); font-weight: 500; display: block; margin-bottom: 8px;">Select Enchantment Tiles on Offer:</label>
-              <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 12px;">Draw 2 Enchantment tiles from the bag and select their types below:</p>
+              <label style="color: var(--text-primary); font-weight: 500; display: block; margin-bottom: 8px;">Enchantment Tiles on Offer:</label>
+              <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Draw <strong>2 Enchantment tiles</strong> from the bag</span></div>
+              <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 12px;">Select the types you drew:</p>
               
               <div style="display: flex; align-items: flex-start; gap: 0;">
                 <!-- Left Slot -->
@@ -1808,6 +1811,7 @@
                   </div>
                 </div>
               </div>
+              <div id="full-enchant-board-action" style="margin-top: 10px;"></div>
             </div>
             
             <div class="setup-nav">
@@ -4019,6 +4023,8 @@
         { id: null }
       ];
       
+      const typeNames = { scrolls: 'Scrolls', runes: 'Runes', amulets: 'Amulets' };
+      
       // Render left slot options (2x2 grid, icons only)
       leftContainer.innerHTML = enchantTypes.map(type => `
         <button class="btn enchant-offer-btn ${gameState.enchantmentOffer.left === type.id ? 'selected' : ''}" 
@@ -4047,6 +4053,21 @@
           checkArcaneSetupComplete();
         });
       });
+      
+      // Update board action for placing tiles
+      const boardActionContainer = $('#full-enchant-board-action');
+      if (boardActionContainer) {
+        const left = gameState.enchantmentOffer.left;
+        const right = gameState.enchantmentOffer.right;
+        
+        if (left !== undefined || right !== undefined) {
+          const leftDisplay = left ? `${enchantIcon(left, 18)} ${typeNames[left]}` : 'Empty';
+          const rightDisplay = right ? `${enchantIcon(right, 18)} ${typeNames[right]}` : 'Empty';
+          boardActionContainer.innerHTML = boardAction(`Place Enchantment tiles on Arcanist board: <strong>Left slot</strong> = ${leftDisplay}, <strong>Right slot</strong> = ${rightDisplay}`);
+        } else {
+          boardActionContainer.innerHTML = '';
+        }
+      }
     }
     
     function checkArcaneSetupComplete() {
@@ -4302,6 +4323,22 @@
         locations.splice(1, 0, { id: 'academy', name: 'Academy' });
       }
       
+      // Helper to update board action display
+      const updateBoardAction = () => {
+        const quickBoardAction = $('#quick-wagon-board-action');
+        const fullBoardAction = $('#full-wagon-board-action');
+        const locationName = locations.find(l => l.id === gameState.wagonLocation)?.name;
+        
+        if (locationName) {
+          const actionHtml = boardAction(`Place the <strong>Wagon marker</strong> on <strong>${locationName}</strong>`);
+          if (quickBoardAction) quickBoardAction.innerHTML = actionHtml;
+          if (fullBoardAction) fullBoardAction.innerHTML = actionHtml;
+        } else {
+          if (quickBoardAction) quickBoardAction.innerHTML = '';
+          if (fullBoardAction) fullBoardAction.innerHTML = '';
+        }
+      };
+      
       // Helper to populate a container with wagon buttons
       const populateContainer = (cont) => {
         if (!cont) return;
@@ -4341,6 +4378,7 @@
       
       populateContainer(container);
       populateContainer(fullContainer);
+      updateBoardAction();
     }
     
     function updateQuickEnchantmentOptions() {
@@ -4354,6 +4392,8 @@
         { id: 'amulets' },
         { id: null }
       ];
+      
+      const typeNames = { scrolls: 'Scrolls', runes: 'Runes', amulets: 'Amulets' };
       
       // Render left slot options (2x2 grid, icons only)
       leftContainer.innerHTML = enchantTypes.map(type => `
@@ -4383,6 +4423,21 @@
           updateQuickSetupSummary();
         });
       });
+      
+      // Update board action for placing tiles
+      const boardActionContainer = $('#quick-enchant-board-action');
+      if (boardActionContainer) {
+        const left = gameState.enchantmentOffer.left;
+        const right = gameState.enchantmentOffer.right;
+        
+        if (left !== undefined || right !== undefined) {
+          const leftDisplay = left ? `${enchantIcon(left, 18)} ${typeNames[left]}` : 'Empty';
+          const rightDisplay = right ? `${enchantIcon(right, 18)} ${typeNames[right]}` : 'Empty';
+          boardActionContainer.innerHTML = boardAction(`Place Enchantment tiles on Arcanist board: <strong>Left slot</strong> = ${leftDisplay}, <strong>Right slot</strong> = ${rightDisplay}`);
+        } else {
+          boardActionContainer.innerHTML = '';
+        }
+      }
     }
     
     // Update school card descriptions based on Academy expansion
@@ -6981,6 +7036,7 @@
                 'Did you summon the Arcane Worker from the offer?',
                 () => {
                   gameState.arcaneWorkerOnOffer = false;
+                  updateGameDisplay();
                   showPlayerActionConfirmation('Summoned Worker', 'Arcane Worker added to your board.');
                 }
               );
@@ -7619,9 +7675,10 @@
             const enchantName = enchantNames[action.enchantType] || action.enchantType || 'Unknown';
             boardActionsHtml += boardAction(`Take <strong>${enchantIcon(action.enchantType, 18)} ${enchantName}</strong> Enchantment from the <strong>${action.slot}</strong> slot`);
             boardActionsHtml += `
-              <div style="display: flex; gap: 8px; justify-content: center; margin: 10px 0 15px 0;">
+              <div style="display: flex; gap: 8px; justify-content: center; margin: 10px 0 10px 0;">
                 ${generateTrickSlotsDisplay(action.trickId)}
               </div>`;
+            boardActionsHtml += boardAction(`Place the Enchantment tile on <strong>${action.trickName}</strong>`);
             break;
           case 'apprentice':
             boardActionsHtml += boardAction(`Remove the <strong>Arcane Worker</strong> from the offer and return to box`);
@@ -14243,7 +14300,11 @@
         content += boardAction(`Slide <strong>${enchantIcon(slidAction, 18)} ${typeNames[slidAction]}</strong> from Right slot to Left slot`);
       }
       
-      content += `<p style="color: var(--text-secondary); margin-bottom: 15px;">Draw Enchantment tiles from the bag to fill empty slots:</p>`;
+      // Determine how many tiles to draw
+      const tilesToDraw = (needsLeftRefill ? 1 : 0) + (needsRightRefill ? 1 : 0);
+      content += boardAction(`Draw <strong>${tilesToDraw} Enchantment tile${tilesToDraw > 1 ? 's' : ''}</strong> from the bag`);
+      
+      content += `<p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;">Select the type${tilesToDraw > 1 ? 's' : ''} you drew:</p>`;
       
       // Show current state for filled slot
       if (!needsLeftRefill) {
