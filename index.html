@@ -1356,7 +1356,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.15.15-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.15.16-beta</p>
       <button class="restart-btn hidden" id="restart-btn">↺ New Game</button>
     </header>
 
@@ -1653,17 +1653,20 @@
                   <label style="color: var(--text-primary); font-weight: 500; display: block; margin-bottom: 8px;">Enchantment Tiles on Offer:</label>
                   <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 12px;">Draw 2 tiles from the bag and select their types:</p>
                   
-                  <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-                    <div style="flex: 1; min-width: 140px;">
-                      <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 6px;">Left Slot (3 Coins):</label>
-                      <div id="quick-enchant-left-options" style="display: flex; flex-wrap: wrap; gap: 6px;">
+                  <div style="display: flex; align-items: flex-start; gap: 0;">
+                    <div style="flex: 1;">
+                      <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 6px;">Left (3 Coins):</label>
+                      <div id="quick-enchant-left-options" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; max-width: 120px;">
                         <!-- Populated by updateQuickEnchantmentOptions() -->
                       </div>
                     </div>
                     
-                    <div style="flex: 1; min-width: 140px;">
-                      <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 6px;">Right Slot (4 Coins):</label>
-                      <div id="quick-enchant-right-options" style="display: flex; flex-wrap: wrap; gap: 6px;">
+                    <!-- Dotted Divider -->
+                    <div style="border-left: 2px dotted var(--text-muted); height: 100px; margin: 20px 12px 0 12px; opacity: 0.5;"></div>
+                    
+                    <div style="flex: 1;">
+                      <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 6px;">Right (4 Coins):</label>
+                      <div id="quick-enchant-right-options" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; max-width: 120px;">
                         <!-- Populated by updateQuickEnchantmentOptions() -->
                       </div>
                     </div>
@@ -1783,21 +1786,24 @@
             <!-- Enchantment Offer Selection -->
             <div style="margin: 20px 0;">
               <label style="color: var(--text-primary); font-weight: 500; display: block; margin-bottom: 8px;">Select Enchantment Tiles on Offer:</label>
-              <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 12px;">Draw 2 Enchantment tiles from the bag and select their types below (left slot is cheaper):</p>
+              <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 12px;">Draw 2 Enchantment tiles from the bag and select their types below:</p>
               
-              <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+              <div style="display: flex; align-items: flex-start; gap: 0;">
                 <!-- Left Slot -->
-                <div style="flex: 1; min-width: 140px;">
-                  <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 6px;">Left Slot (3 Coins):</label>
-                  <div id="enchant-left-options" style="display: flex; flex-wrap: wrap; gap: 6px;">
+                <div style="flex: 1;">
+                  <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 6px;">Left (3 Coins):</label>
+                  <div id="enchant-left-options" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; max-width: 120px;">
                     <!-- Populated by updateEnchantmentOfferOptions() -->
                   </div>
                 </div>
                 
+                <!-- Dotted Divider -->
+                <div style="border-left: 2px dotted var(--text-muted); height: 100px; margin: 20px 12px 0 12px; opacity: 0.5;"></div>
+                
                 <!-- Right Slot -->
-                <div style="flex: 1; min-width: 140px;">
-                  <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 6px;">Right Slot (4 Coins):</label>
-                  <div id="enchant-right-options" style="display: flex; flex-wrap: wrap; gap: 6px;">
+                <div style="flex: 1;">
+                  <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 6px;">Right (4 Coins):</label>
+                  <div id="enchant-right-options" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; max-width: 120px;">
                     <!-- Populated by updateEnchantmentOfferOptions() -->
                   </div>
                 </div>
@@ -4007,27 +4013,27 @@
       if (!leftContainer || !rightContainer) return;
       
       const enchantTypes = [
-        { id: 'scrolls', name: 'Scrolls' },
-        { id: 'runes', name: 'Runes' },
-        { id: 'amulets', name: 'Amulets' },
-        { id: null, name: 'Empty', icon: '—' }
+        { id: 'scrolls' },
+        { id: 'runes' },
+        { id: 'amulets' },
+        { id: null }
       ];
       
-      // Render left slot options
+      // Render left slot options (2x2 grid, icons only)
       leftContainer.innerHTML = enchantTypes.map(type => `
         <button class="btn enchant-offer-btn ${gameState.enchantmentOffer.left === type.id ? 'selected' : ''}" 
                 data-slot="left" data-type="${type.id}"
-                style="padding: 8px 12px; font-size: 0.85rem; ${gameState.enchantmentOffer.left === type.id ? 'background: var(--amber); color: var(--bg-dark);' : ''}">
-          ${type.id ? enchantIcon(type.id, 18) : type.icon} ${type.name}
+                style="width: 52px; height: 52px; padding: 8px; display: flex; align-items: center; justify-content: center; ${gameState.enchantmentOffer.left === type.id ? 'background: var(--amber); color: var(--bg-dark);' : ''}">
+          ${type.id ? enchantIcon(type.id, 36) : '<span style="font-size: 24px; font-weight: bold;">✕</span>'}
         </button>
       `).join('');
       
-      // Render right slot options
+      // Render right slot options (2x2 grid, icons only)
       rightContainer.innerHTML = enchantTypes.map(type => `
         <button class="btn enchant-offer-btn ${gameState.enchantmentOffer.right === type.id ? 'selected' : ''}" 
                 data-slot="right" data-type="${type.id}"
-                style="padding: 8px 12px; font-size: 0.85rem; ${gameState.enchantmentOffer.right === type.id ? 'background: var(--amber); color: var(--bg-dark);' : ''}">
-          ${type.id ? enchantIcon(type.id, 18) : type.icon} ${type.name}
+                style="width: 52px; height: 52px; padding: 8px; display: flex; align-items: center; justify-content: center; ${gameState.enchantmentOffer.right === type.id ? 'background: var(--amber); color: var(--bg-dark);' : ''}">
+          ${type.id ? enchantIcon(type.id, 36) : '<span style="font-size: 24px; font-weight: bold;">✕</span>'}
         </button>
       `).join('');
       
@@ -4343,27 +4349,27 @@
       if (!leftContainer || !rightContainer) return;
       
       const enchantTypes = [
-        { id: 'scrolls', name: 'Scrolls' },
-        { id: 'runes', name: 'Runes' },
-        { id: 'amulets', name: 'Amulets' },
-        { id: null, name: 'Empty', icon: '—' }
+        { id: 'scrolls' },
+        { id: 'runes' },
+        { id: 'amulets' },
+        { id: null }
       ];
       
-      // Render left slot options
+      // Render left slot options (2x2 grid, icons only)
       leftContainer.innerHTML = enchantTypes.map(type => `
         <button class="btn quick-enchant-btn ${gameState.enchantmentOffer.left === type.id ? 'selected' : ''}" 
                 data-slot="left" data-type="${type.id}"
-                style="padding: 8px 12px; font-size: 0.85rem; ${gameState.enchantmentOffer.left === type.id ? 'background: var(--amber); color: var(--bg-dark);' : ''}">
-          ${type.id ? enchantIcon(type.id, 18) : type.icon} ${type.name}
+                style="width: 52px; height: 52px; padding: 8px; display: flex; align-items: center; justify-content: center; ${gameState.enchantmentOffer.left === type.id ? 'background: var(--amber); color: var(--bg-dark);' : ''}">
+          ${type.id ? enchantIcon(type.id, 36) : '<span style="font-size: 24px; font-weight: bold;">✕</span>'}
         </button>
       `).join('');
       
-      // Render right slot options
+      // Render right slot options (2x2 grid, icons only)
       rightContainer.innerHTML = enchantTypes.map(type => `
         <button class="btn quick-enchant-btn ${gameState.enchantmentOffer.right === type.id ? 'selected' : ''}" 
                 data-slot="right" data-type="${type.id}"
-                style="padding: 8px 12px; font-size: 0.85rem; ${gameState.enchantmentOffer.right === type.id ? 'background: var(--amber); color: var(--bg-dark);' : ''}">
-          ${type.id ? enchantIcon(type.id, 18) : type.icon} ${type.name}
+                style="width: 52px; height: 52px; padding: 8px; display: flex; align-items: center; justify-content: center; ${gameState.enchantmentOffer.right === type.id ? 'background: var(--amber); color: var(--bg-dark);' : ''}">
+          ${type.id ? enchantIcon(type.id, 36) : '<span style="font-size: 24px; font-weight: bold;">✕</span>'}
         </button>
       `).join('');
       
@@ -5545,13 +5551,35 @@
         return;
       }
       
+      const hasArcane = gameState.expansions?.arcane;
+      const enchantedTricks = gameState.heir.enchantedTricks || {};
+      
       let html = '';
       tricks.forEach(trick => {
         const markers = '◆'.repeat(trick.currentMarkers);
+        
+        // Get enchantments for this trick (only if Arcane Arts enabled)
+        let enchantIcons = '';
+        if (hasArcane && enchantedTricks[trick.id]) {
+          const types = Array.isArray(enchantedTricks[trick.id]) 
+            ? enchantedTricks[trick.id] 
+            : [enchantedTricks[trick.id]];
+          enchantIcons = types.map(type => enchantIcon(type, 12)).join('');
+        }
+        
+        // Truncate long names (max 18 chars) if there are enchantments to show
+        let displayName = trick.name;
+        if (enchantIcons && trick.name.length > 18) {
+          displayName = trick.name.substring(0, 16) + '…';
+        }
+        
         html += `
           <div class="trick-item" data-school="${trick.school}">
-            <span class="trick-name">${trick.name} (L${trick.level})</span>
-            <span class="trick-markers" style="color: var(--amber);">${markers}</span>
+            <span class="trick-name">${displayName} (L${trick.level})</span>
+            <span style="display: flex; align-items: center; gap: 6px;">
+              ${enchantIcons ? `<span style="display: flex; gap: 2px;">${enchantIcons}</span>` : ''}
+              <span class="trick-markers" style="color: var(--amber);">${markers}</span>
+            </span>
           </div>
         `;
       });
@@ -6284,10 +6312,6 @@
         
         // Reset dice lock at start of turn
         gameState.arcaneDiceLocked = false;
-        
-        // Show current wagon location
-        const wagonLocationNames = { downtown: 'Downtown', market: 'Market Row', darkalley: 'Dark Alley', academy: 'Academy' };
-        content += infoBox(`<strong>Wagon Location:</strong> ${wagonLocationNames[gameState.wagonLocation]}`, 'ARCANE');
       }
 
       // On Turn 2+, show prophecy selection before advancing
@@ -6954,10 +6978,10 @@
             summonedWorkerBtn.addEventListener('click', () => {
               showPlayerActionPrompt(
                 'Summon Arcane Worker',
-                'Did you summon the Arcane Worker from the offer? (Worker is removed from the game)',
+                'Did you summon the Arcane Worker from the offer?',
                 () => {
                   gameState.arcaneWorkerOnOffer = false;
-                  showPlayerActionConfirmation('Summoned Worker', 'You summoned the Arcane Worker (removed from game).');
+                  showPlayerActionConfirmation('Summoned Worker', 'Arcane Worker added to your board.');
                 }
               );
             });
@@ -7523,6 +7547,56 @@
       }
     }
     
+    // Helper to generate 4-slot trick display with one highlighted
+    function generateTrickSlotsDisplay(highlightTrickId = null) {
+      return [1,2,3,4].map(slotNum => {
+        const index = slotNum - 1;
+        const trick = gameState.heir.tricks[index];
+        
+        if (trick) {
+          const isHighlighted = trick.id === highlightTrickId;
+          const levelStars = '★'.repeat(trick.level);
+          
+          return `
+            <div style="
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              padding: 5px 3px;
+              background: ${isHighlighted ? 'rgba(212, 168, 71, 0.2)' : 'var(--bg-card)'};
+              border: 2px solid ${isHighlighted ? 'var(--amber)' : 'var(--border)'};
+              border-radius: 6px;
+              width: 75px;
+              height: 95px;
+              text-align: center;
+              ${isHighlighted ? 'box-shadow: 0 0 10px var(--amber);' : 'opacity: 0.5;'}
+            ">
+              <div style="font-size: 0.55rem; color: var(--text-muted); margin-bottom: 1px;">Slot ${slotNum}</div>
+              <div style="font-weight: 600; font-size: 0.55rem; margin-bottom: 2px; line-height: 1.15; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; flex: 1; display: flex; align-items: center;">${trick.name}</div>
+              <div style="font-size: 0.6rem; color: var(--text-secondary);">${levelStars} L${trick.level}</div>
+              ${isHighlighted ? '<div style="font-size: 0.5rem; color: var(--amber); margin-top: 1px;">⬆ PLACE HERE</div>' : ''}
+            </div>`;
+        } else {
+          // Empty slot
+          return `
+            <div style="
+              width: 75px;
+              height: 95px;
+              background: transparent;
+              border: 2px dashed var(--border);
+              border-radius: 6px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: var(--text-muted);
+              font-size: 0.8rem;
+              opacity: 0.3;
+            ">—</div>`;
+        }
+      }).join('');
+    }
+    
     function showHeirArcanistActions() {
       // Heir is at the Wagon location - automatically calculate and execute priority actions
       const difficulty = gameState.difficulty;
@@ -7535,7 +7609,7 @@
       
       // Build the results display
       const enchantNames = { scrolls: 'Parchment Scrolls', runes: 'Stone Runes', amulets: 'Amulet Necklaces' };
-      let boardActions = [];
+      let boardActionsHtml = '';
       let totalFameGained = 0;
       let totalCoinsGained = 0;
       
@@ -7543,57 +7617,42 @@
         switch (action.type) {
           case 'enchant':
             const enchantName = enchantNames[action.enchantType] || action.enchantType || 'Unknown';
-            boardActions.push(boardAction(`Take <strong>${enchantName}</strong> Enchantment from the <strong>${action.slot}</strong> slot and place on Heir's <strong>${action.trickName}</strong>`));
+            boardActionsHtml += boardAction(`Take <strong>${enchantIcon(action.enchantType, 18)} ${enchantName}</strong> Enchantment from the <strong>${action.slot}</strong> slot`);
+            boardActionsHtml += `
+              <div style="display: flex; gap: 8px; justify-content: center; margin: 10px 0 15px 0;">
+                ${generateTrickSlotsDisplay(action.trickId)}
+              </div>`;
             break;
           case 'apprentice':
-            boardActions.push(boardAction(`Remove the Arcane Worker from the game. Add an Apprentice disk <img src="assets/images/characters/apprentice.png" alt="Apprentice" style="width: 24px; height: 24px; vertical-align: middle;"> next to the Heir's board (joins at end of turn)`));
+            boardActionsHtml += boardAction(`Remove the <strong>Arcane Worker</strong> from the offer and return to box`);
+            boardActionsHtml += boardAction(`Add an <strong>Apprentice</strong> <img src="assets/images/characters/apprentice.png" alt="Apprentice" style="width: 24px; height: 24px; vertical-align: middle;"> to the Heir's board (joins at end of turn)`);
             break;
           case 'setdie':
-            boardActions.push(boardAction(`Set the Enchantment die to <strong>${enchantNames[action.dieType]}</strong> and move both Arcane dice next to the Theater (dice are now locked)`));
+            boardActionsHtml += boardAction(`Set the Enchantment die to <strong>${enchantIcon(action.dieType, 18)} ${enchantNames[action.dieType]}</strong> and move both Arcane dice next to the Theater (dice are now locked)`);
             break;
           case 'shard':
             if (action.fromSupply) {
-              boardActions.push(boardAction(`Give the Heir 1 Arcane Shard from the supply`));
+              boardActionsHtml += boardAction(`Give the Heir <strong>1 Arcane Shard</strong> from the supply`);
             } else {
-              boardActions.push(boardAction(`Supply empty — Give the Heir +1 Fame and +1 Coin instead`));
+              // Supply empty - show as note, then board actions for Fame and Coins
+              // Note: gameState already updated by calculateArcanistPriorities, so current values are post-update
+              const newFame = gameState.heir.fame - totalFameGained; // Current minus what we've already counted
+              const newCoins = gameState.heir.coins - totalCoinsGained;
+              boardActionsHtml += noteBox(`Arcane Shard supply is empty — Heir receives +1 Fame and +1 Coin instead`);
+              boardActionsHtml += boardAction(`Update Heir's Fame (${newFame - 1} → ${newFame})`);
+              boardActionsHtml += boardAction(`Update Heir's Coins (${newCoins - 1} → ${newCoins})`);
               totalFameGained += 1;
               totalCoinsGained += 1;
             }
             break;
           case 'fame':
-            boardActions.push(boardAction(`Give the Heir 3 Fame`));
+            // Note: gameState already updated by calculateArcanistPriorities
+            const fameAfter = gameState.heir.fame - totalFameGained;
+            boardActionsHtml += boardAction(`Update Heir's Fame (${fameAfter - 3} → ${fameAfter})`);
             totalFameGained += 3;
             break;
         }
       });
-      
-      // Add summary of state changes
-      let summaryItems = [];
-      
-      // Fame changes
-      if (totalFameGained > 0) {
-        const prevFame = gameState.heir.fame - totalFameGained;
-        summaryItems.push(`Fame: ${prevFame} → ${gameState.heir.fame}`);
-      }
-      
-      // Coin changes
-      if (totalCoinsGained > 0) {
-        const prevCoins = gameState.heir.coins - totalCoinsGained;
-        summaryItems.push(`Coins: ${prevCoins} → ${gameState.heir.coins}`);
-      }
-      
-      // Arcane Shard changes
-      const shardsGained = actionsPerformed.filter(a => a.type === 'shard' && a.fromSupply).length;
-      if (shardsGained > 0) {
-        const prevShards = gameState.heir.arcaneShards - shardsGained;
-        summaryItems.push(`Arcane Shards: ${prevShards} → ${gameState.heir.arcaneShards}`);
-      }
-      
-      const summaryHtml = summaryItems.length > 0 
-        ? `<div style="background: var(--bg-card); padding: 12px; border-radius: 6px; margin: 15px 0;">
-            <strong>Heir's Updated Stats:</strong> ${summaryItems.join(' • ')}
-           </div>`
-        : '';
       
       setActionContent(
         `Turn ${gameState.currentTurn} — Arcanist Actions`,
@@ -7601,9 +7660,7 @@
         
         <p><strong>Actions performed (${difficulty} difficulty):</strong></p>
         
-        ${boardActions.join('')}
-        
-        ${summaryHtml}`,
+        ${boardActionsHtml}`,
         [
           { text: 'Done — Continue', action: () => {
             updateGameDisplay();
@@ -7757,6 +7814,7 @@
           type: 'enchant',
           enchantType: typeToTake,
           slot: slotToTake,
+          trickId: trickId,
           trickName: trickName
         });
         
@@ -7997,27 +8055,28 @@
       const results = window.arcanistResults;
       const enchantNames = { scrolls: 'Parchment Scrolls', runes: 'Stone Runes', amulets: 'Amulet Necklaces' };
       
-      let boardActions = [];
+      let boardActionsHtml = '';
       
       // Enchant action
       if (results.enchantType) {
-        boardActions.push(`Note: Heir's leftmost non-enchanted Trick is now enchanted with <strong>${enchantNames[results.enchantType]}</strong>`);
+        boardActionsHtml += noteBox(`Heir's leftmost non-enchanted Trick is now enchanted with <strong>${enchantIcon(results.enchantType, 18)} ${enchantNames[results.enchantType]}</strong>`);
       }
       
       // Apprentice hired
       if (results.apprenticeHired) {
-        boardActions.push(`Add an Apprentice disk <img src="assets/images/characters/apprentice.png" alt="Apprentice" style="width: 24px; height: 24px; vertical-align: middle;"> next to the Heir's board (joins at end of turn)`);
+        boardActionsHtml += boardAction(`Remove the <strong>Arcane Worker</strong> from the offer and return to box`);
+        boardActionsHtml += boardAction(`Add an <strong>Apprentice</strong> <img src="assets/images/characters/apprentice.png" alt="Apprentice" style="width: 24px; height: 24px; vertical-align: middle;"> to the Heir's board (joins at end of turn)`);
       }
       
       // Set die
       if (results.dieType) {
-        boardActions.push(`Set the Enchantment die to show <strong>${enchantNames[results.dieType]}</strong> (dice now locked for turn)`);
+        boardActionsHtml += boardAction(`Set the Enchantment die to show <strong>${enchantIcon(results.dieType, 18)} ${enchantNames[results.dieType]}</strong> (dice now locked for turn)`);
       }
       
       // Shards gained
       if (results.shardsGained > 0) {
         const prevShards = gameState.heir.shards - results.shardsGained;
-        boardActions.push(`Update Heir's Shards (${prevShards} → ${gameState.heir.shards})`);
+        boardActionsHtml += boardAction(`Update Heir's Shards (${prevShards} → ${gameState.heir.shards})`);
       }
       
       // Fame/Coins from failed shard attempts or Gain 3 Fame action
@@ -8029,16 +8088,13 @@
         const prevCoins = gameState.heir.coins - totalCoins;
         
         if (totalFame > 0 && totalCoins > 0) {
-          boardActions.push(`Update Heir's Fame (${prevFame} → ${gameState.heir.fame}) and Coins (${prevCoins} → ${gameState.heir.coins})`);
+          boardActionsHtml += boardAction(`Update Heir's Fame (${prevFame} → ${gameState.heir.fame}) and Coins (${prevCoins} → ${gameState.heir.coins})`);
         } else if (totalFame > 0) {
-          boardActions.push(`Update Heir's Fame (${prevFame} → ${gameState.heir.fame})`);
+          boardActionsHtml += boardAction(`Update Heir's Fame (${prevFame} → ${gameState.heir.fame})`);
         } else {
-          boardActions.push(`Update Heir's Coins (${prevCoins} → ${gameState.heir.coins})`);
+          boardActionsHtml += boardAction(`Update Heir's Coins (${prevCoins} → ${gameState.heir.coins})`);
         }
       }
-      
-      // Build board actions HTML
-      const boardActionsHtml = boardActions.map(action => boardAction(action)).join('');
       
       setActionContent(
         `Turn ${gameState.currentTurn} — Arcanist Actions Complete`,
@@ -11758,28 +11814,12 @@
       // Enchantment type names
       const typeNames = { scrolls: 'Parchment Scrolls', runes: 'Stone Runes', amulets: 'Amulet Necklaces' };
       
-      // Show summary of selected tricks' enchantments
-      let content = `
-        <div style="background: var(--bg-card); padding: 12px; border-radius: 6px; margin: 0 0 15px 0;">
-          <h4 style="margin: 0 0 10px 0; color: var(--amber);">✨ Enchantments on Performed Card</h4>
-          <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-      `;
-      
-      Object.entries(typeCounts).forEach(([type, count]) => {
-        if (count > 0) {
-          content += `<span style="color: var(--text-secondary);">${enchantIcon(type, 20)} ${typeNames[type]}: <strong>${count}</strong></span>`;
-        }
-      });
-      
-      content += `
-          </div>
-        </div>
-      `;
+      let content = '';
       
       // If p36 is active, all enchantments trigger
       if (isP36Active) {
         content += `
-          <div style="background: rgba(212, 168, 71, 0.15); border-left: 3px solid var(--amber); padding: 12px; margin: 15px 0; border-radius: 0 4px 4px 0;">
+          <div style="background: rgba(212, 168, 71, 0.15); border-left: 3px solid var(--amber); padding: 12px; margin: 0 0 15px 0; border-radius: 0 4px 4px 0;">
             <strong style="color: var(--amber);">🔮 p36: All Enchantments Trigger</strong>
             <p style="margin: 8px 0 0 0; color: var(--text-secondary);">Ignore the Enchantment Die — ALL ${totalEnchantments} enchantment(s) trigger!</p>
           </div>
@@ -11811,7 +11851,7 @@
       } else {
         // Normal case - need enchantment die selection
         content += `
-          <p style="margin: 15px 0;"><strong>What does the Enchantment Die show?</strong></p>
+          <p style="margin: 0 0 15px 0;"><strong>What does the Enchantment Die show?</strong></p>
           <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 10px;">Select the Enchantment type showing on the die (or that the Heir set).</p>
           
           ${getEnchantmentDieHtml('enchant-die-btn')}
@@ -12287,10 +12327,10 @@
       let arcaneShardsBreakdown = '';
       if (hasArcane && enchantmentArcaneShards > 0) {
         arcaneShardsBreakdown = `
-          <div style="background: var(--bg-card); padding: 12px; border-radius: 6px; margin-bottom: 10px; border: 1px solid var(--amber);">
-            <h4 style="margin: 0 0 10px 0; color: var(--amber);">✨ Arcane Shards</h4>
+          <div style="background: var(--bg-card); padding: 12px; border-radius: 6px; margin-bottom: 10px;">
+            <h4 style="margin: 0 0 10px 0; color: var(--text-primary);">✨ Arcane Shards</h4>
             <table style="width: 100%; font-size: 0.9rem;">
-              <tr style="color: var(--amber);"><td>Enchantment Reward</td><td style="text-align: right; font-weight: 600;">+${enchantmentArcaneShards}</td></tr>
+              <tr><td>Enchantment Reward</td><td style="text-align: right; font-weight: 600;">+${enchantmentArcaneShards}</td></tr>
             </table>
           </div>
         `;
@@ -13221,28 +13261,12 @@
       // Enchantment type names
       const typeNames = { scrolls: 'Parchment Scrolls', runes: 'Stone Runes', amulets: 'Amulet Necklaces' };
       
-      // Show summary of selected tricks' enchantments
-      let content = `
-        <div style="background: rgba(138, 43, 226, 0.1); border: 1px solid #8a2be2; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
-          <h4 style="margin: 0 0 10px 0; color: #8a2be2;">🔮 Classroom Enchantments</h4>
-          <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 10px;">
-      `;
-      
-      Object.entries(typeCounts).forEach(([type, count]) => {
-        if (count > 0) {
-          content += `<span style="color: var(--text-secondary);">${enchantIcon(type, 20)} ${typeNames[type]}: <strong>${count}</strong></span>`;
-        }
-      });
-      
-      content += `
-          </div>
-        </div>
-      `;
+      let content = '';
       
       // If p36 is active, all enchantments trigger
       if (isP36Active) {
         content += `
-          <div style="background: rgba(212, 168, 71, 0.15); border-left: 3px solid var(--amber); padding: 12px; margin: 15px 0; border-radius: 0 4px 4px 0;">
+          <div style="background: rgba(212, 168, 71, 0.15); border-left: 3px solid var(--amber); padding: 12px; margin: 0 0 15px 0; border-radius: 0 4px 4px 0;">
             <strong style="color: var(--amber);">🔮 p36: All Enchantments Trigger</strong>
             <p style="margin: 8px 0 0 0; color: var(--text-secondary);">Ignore the Enchantment Die — ALL ${totalEnchantments} enchantment(s) trigger!</p>
           </div>
@@ -13278,7 +13302,7 @@
       } else {
         // Normal case - need enchantment die selection
         content += `
-          <p style="margin: 15px 0;"><strong>What does the Enchantment Die show?</strong></p>
+          <p style="margin: 0 0 15px 0;"><strong>What does the Enchantment Die show?</strong></p>
           <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 10px;">Select the Enchantment type showing on the die.</p>
           
           ${getEnchantmentDieHtml('classroom-ench-btn')}
@@ -14197,18 +14221,17 @@
       const needsRightRefill = offer.right === null;
       
       if (!needsLeftRefill && !needsRightRefill) {
-        // Both slots filled, just update wagon and continue
-        updateWagonLocation();
+        // Both slots filled, skip to final content (wagon will be updated there)
         onComplete();
         return;
       }
       
       // Build UI for selecting new enchantment types
       const enchantTypes = [
-        { id: 'scrolls', name: 'Scrolls' },
-        { id: 'runes', name: 'Runes' },
-        { id: 'amulets', name: 'Amulets' },
-        { id: null, name: 'Empty (bag empty)', icon: '—' }
+        { id: 'scrolls' },
+        { id: 'runes' },
+        { id: 'amulets' },
+        { id: null }
       ];
       
       const typeNames = { scrolls: 'Scrolls', runes: 'Runes', amulets: 'Amulets' };
@@ -14227,16 +14250,19 @@
         content += `<p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 10px;">Left slot: ${enchantIcon(offer.left, 18)} ${typeNames[offer.left]} (already filled)</p>`;
       }
       
+      // Build slot selectors side by side
+      content += `<div style="display: flex; align-items: flex-start; gap: 0;">`;
+      
       // Left slot selection (if needed)
       if (needsLeftRefill) {
         content += `
-          <div style="margin-bottom: 15px;">
-            <label style="color: var(--text-primary); font-size: 0.9rem; display: block; margin-bottom: 8px;">Left Slot (3 Coins):</label>
-            <div id="refill-left-options" style="display: flex; flex-wrap: wrap; gap: 6px;">
+          <div style="flex: 1;">
+            <label style="color: var(--text-primary); font-size: 0.9rem; display: block; margin-bottom: 8px;">Left (3 Coins):</label>
+            <div id="refill-left-options" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; max-width: 120px;">
               ${enchantTypes.map(type => `
                 <button class="btn refill-btn" data-slot="left" data-type="${type.id}"
-                        style="padding: 8px 12px; font-size: 0.85rem;">
-                  ${type.id ? enchantIcon(type.id, 18) : type.icon} ${type.name}
+                        style="width: 52px; height: 52px; padding: 8px; display: flex; align-items: center; justify-content: center;">
+                  ${type.id ? enchantIcon(type.id, 36) : '<span style="font-size: 24px; font-weight: bold;">✕</span>'}
                 </button>
               `).join('')}
             </div>
@@ -14244,22 +14270,29 @@
         `;
       }
       
+      // Dotted divider (only if both slots need refilling)
+      if (needsLeftRefill && needsRightRefill) {
+        content += `<div style="border-left: 2px dotted var(--text-muted); height: 100px; margin: 20px 12px 0 12px; opacity: 0.5;"></div>`;
+      }
+      
       // Right slot selection (if needed)
       if (needsRightRefill) {
         content += `
-          <div style="margin-bottom: 15px;">
-            <label style="color: var(--text-primary); font-size: 0.9rem; display: block; margin-bottom: 8px;">Right Slot (4 Coins):</label>
-            <div id="refill-right-options" style="display: flex; flex-wrap: wrap; gap: 6px;">
+          <div style="flex: 1;">
+            <label style="color: var(--text-primary); font-size: 0.9rem; display: block; margin-bottom: 8px;">Right (4 Coins):</label>
+            <div id="refill-right-options" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; max-width: 120px;">
               ${enchantTypes.map(type => `
                 <button class="btn refill-btn" data-slot="right" data-type="${type.id}"
-                        style="padding: 8px 12px; font-size: 0.85rem;">
-                  ${type.id ? enchantIcon(type.id, 18) : type.icon} ${type.name}
+                        style="width: 52px; height: 52px; padding: 8px; display: flex; align-items: center; justify-content: center;">
+                  ${type.id ? enchantIcon(type.id, 36) : '<span style="font-size: 24px; font-weight: bold;">✕</span>'}
                 </button>
               `).join('')}
             </div>
           </div>
         `;
       }
+      
+      content += `</div>`;
       
       // Board actions placeholder - will be updated dynamically
       content += `<div id="arcane-refill-board-actions" style="margin-top: 15px;"></div>`;
@@ -14268,7 +14301,6 @@
         `Turn ${gameState.currentTurn} — End Turn (Arcane Refill)`,
         content,
         [{ text: 'Continue', action: () => {
-          updateWagonLocation();
           onComplete();
         }, id: 'refill-continue-btn', disabled: true }]
       );
@@ -14298,11 +14330,6 @@
             actions += boardAction(`Place <strong>${enchantIcon(selections.right, 18)} ${typeNames[selections.right]}</strong> on Right slot`);
           }
         }
-        
-        // Wagon movement (always shown)
-        const wagonLocationNames = { downtown: 'Downtown', academy: 'Academy', market: 'Market Row', darkalley: 'Dark Alley' };
-        const newWagonLocation = getNextWagonLocation();
-        actions += boardAction(`Move Wagon marker to <strong>${wagonLocationNames[newWagonLocation]}</strong>`);
         
         actionsDiv.innerHTML = actions;
       };
@@ -14374,9 +14401,10 @@
         </div>`;
       }
       
-      // Arcane Arts: Show summary of what was done in refill step
+      // Arcane Arts: Show enchantment status and wagon move board action
       if (gameState.expansions.arcane) {
         const wagonLocationNames = { downtown: 'Downtown', academy: 'Academy', market: 'Market Row', darkalley: 'Dark Alley' };
+        const nextWagonLocation = getNextWagonLocation();
         const offer = gameState.enchantmentOffer || { left: null, right: null };
         const typeNames = { scrolls: 'Scrolls', runes: 'Runes', amulets: 'Amulets' };
         
@@ -14384,9 +14412,9 @@
         const rightDisplay = offer.right ? `${enchantIcon(offer.right, 18)} ${typeNames[offer.right]}` : '(empty)';
         
         content += `<div style="background: rgba(138, 43, 226, 0.1); border: 1px solid #8a2be2; padding: 10px; border-radius: 6px; margin: 12px 0;">
-          <p style="color: #8a2be2; font-weight: 600; margin-bottom: 8px;">🔮 Arcane Arts Summary</p>
+          <p style="color: #8a2be2; font-weight: 600; margin-bottom: 8px;">🔮 Arcane Arts</p>
           <p style="margin: 4px 0; color: var(--text-secondary);">Enchantment Offer: Left = ${leftDisplay}, Right = ${rightDisplay}</p>
-          <p style="margin: 4px 0; color: var(--text-secondary);">Wagon Location: ${wagonLocationNames[gameState.wagonLocation]}</p>
+          ${boardAction(`Move Wagon marker to <strong>${wagonLocationNames[nextWagonLocation]}</strong>`)}
         </div>`;
       }
       
@@ -14414,10 +14442,22 @@
       const isLastTurn = gameState.currentTurn >= 7;
       const buttonText = isLastTurn ? 'End Game Scoring' : `Start Turn ${gameState.currentTurn + 1}`;
       
+      // Update wagon location when continuing (before starting next turn)
+      const handleContinue = () => {
+        if (gameState.expansions.arcane) {
+          updateWagonLocation();
+        }
+        if (isLastTurn) {
+          endGame();
+        } else {
+          startNextTurn();
+        }
+      };
+      
       setActionContent(
         `Turn ${gameState.currentTurn} — End Turn (Part 2)`,
         content,
-        [{ text: buttonText, action: () => isLastTurn ? endGame() : startNextTurn() }]
+        [{ text: buttonText, action: handleContinue }]
       );
     }
     
@@ -14638,9 +14678,10 @@
         </div>`;
       }
       
-      // Arcane Arts: Show summary of what was done in refill step
+      // Arcane Arts: Show enchantment status and wagon move board action
       if (gameState.expansions.arcane) {
         const wagonLocationNames = { downtown: 'Downtown', academy: 'Academy', market: 'Market Row', darkalley: 'Dark Alley' };
+        const nextWagonLocation = getNextWagonLocation();
         const offer = gameState.enchantmentOffer || { left: null, right: null };
         const typeNames = { scrolls: 'Scrolls', runes: 'Runes', amulets: 'Amulets' };
         
@@ -14648,9 +14689,9 @@
         const rightDisplay = offer.right ? `${enchantIcon(offer.right, 18)} ${typeNames[offer.right]}` : '(empty)';
         
         content += `<div style="background: rgba(138, 43, 226, 0.1); border: 1px solid #8a2be2; padding: 10px; border-radius: 6px; margin: 12px 0;">
-          <p style="color: #8a2be2; font-weight: 600; margin-bottom: 8px;">🔮 Arcane Arts Summary</p>
+          <p style="color: #8a2be2; font-weight: 600; margin-bottom: 8px;">🔮 Arcane Arts</p>
           <p style="margin: 4px 0; color: var(--text-secondary);">Enchantment Offer: Left = ${leftDisplay}, Right = ${rightDisplay}</p>
-          <p style="margin: 4px 0; color: var(--text-secondary);">Wagon Location: ${wagonLocationNames[gameState.wagonLocation]}</p>
+          ${boardAction(`Move Wagon marker to <strong>${wagonLocationNames[nextWagonLocation]}</strong>`)}
         </div>`;
       }
       
@@ -14678,10 +14719,22 @@
       const isLastTurn = gameState.currentTurn >= 7;
       const buttonText = isLastTurn ? 'End Game Scoring' : `Start Turn ${gameState.currentTurn + 1}`;
       
+      // Update wagon location when continuing (before starting next turn)
+      const handleContinue = () => {
+        if (gameState.expansions.arcane) {
+          updateWagonLocation();
+        }
+        if (isLastTurn) {
+          endGame();
+        } else {
+          startNextTurn();
+        }
+      };
+      
       setActionContent(
         `Turn ${gameState.currentTurn} — End Turn`,
         content,
-        [{ text: buttonText, action: () => isLastTurn ? endGame() : startNextTurn() }]
+        [{ text: buttonText, action: handleContinue }]
       );
     }
     
@@ -14978,10 +15031,9 @@
         gameState.classroomPhaseDone = false;
       }
       
-      // Arcane Arts: Move wagon to next location
+      // Arcane Arts: Reset dice lock for new turn (wagon already moved in End Turn phase)
       if (gameState.expansions.arcane) {
-        gameState.wagonLocation = getNextWagonLocation();
-        gameState.arcaneDiceLocked = false; // Reset dice lock for new turn
+        gameState.arcaneDiceLocked = false;
       }
       
       // Reset downtown dice for new turn (they get re-rolled)
