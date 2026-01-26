@@ -1356,7 +1356,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.15.17-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.15.18-beta</p>
       <button class="restart-btn hidden" id="restart-btn">↺ New Game</button>
     </header>
 
@@ -4037,6 +4037,17 @@
           updateFullSetupWagonOptions();
           checkArcaneSetupComplete();
         });
+      }
+      
+      // Update board action display
+      const boardActionContainer = $('#full-wagon-board-action');
+      if (boardActionContainer) {
+        const locationName = locations.find(l => l.id === gameState.wagonLocation)?.name;
+        if (locationName) {
+          boardActionContainer.innerHTML = boardAction(`Place the <strong>Wagon marker</strong> on <strong>${locationName}</strong>`);
+        } else {
+          boardActionContainer.innerHTML = '';
+        }
       }
     }
     
