@@ -1849,6 +1849,23 @@
             
             <div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ NOTE:</span> Your Trick starts <strong>Prepared</strong> if you have the required Components</div>
             
+            <!-- Dawn of Technology player setup (hidden unless DoT enabled) -->
+            <div id="dawn-player-setup" class="hidden" style="margin: 20px 0; padding: 15px; background: var(--bg-card); border-radius: 6px; border: 1px solid var(--border);">
+              <h4 style="color: var(--amber); margin-bottom: 12px;">⚙️ Dawn of Technology Setup</h4>
+              
+              <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Take the <strong>Contraption Board</strong> matching your Magician's Favorite Trick category</span></div>
+              
+              <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place the Contraption Board to the <strong>left</strong> of your Player Board, aligning Contraption slots with Shard slots</span></div>
+              
+              <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Take your <strong>4 Contraption tokens</strong> (matching your Favorite category) and set them aside — Contraption slots start empty</span></div>
+              
+              <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Take your Magician's <strong>Signature Trick</strong> and set it aside next to your Player Board</span></div>
+              
+              <div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ NOTE:</span> <span style="color: var(--text-secondary);">If your Magician has a Level 1 Signature Trick (Mechaniker, Lumenia, Priestess, Professor Bernard), you may pay 1 Shard to use it as your starting Trick instead of a standard Trick</span></div>
+              
+              <div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ NOTE:</span> <span style="color: var(--text-secondary);">Place your starting Shards on the <strong>lowest Shard symbols</strong> on your Player Board (next to the Contraption slots)</span></div>
+            </div>
+            
             <div id="player-assignment-cards-instruction" style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Take your permanent Assignment cards: 2× Theater, 1× Workshop, 1× Market Row, 1× Downtown, 1× Dark Alley</span></div>
             
             <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Take all Trick and Symbol markers in your color</span></div>
@@ -1863,7 +1880,7 @@
             <div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 8px 0 20px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--info); font-weight: 600;">ℹ️ NOTE:</span> Take the placement blockers from the box and keep them nearby for use during the game</div>
             
             <div class="setup-nav">
-              <button class="btn" onclick="showSetupPage(2)">← Back</button>
+              <button class="btn" onclick="navigateBackFromPlayerSetup()">← Back</button>
               <button class="btn" onclick="showSetupPage(4)">Continue →</button>
             </div>
           </div>
@@ -3927,6 +3944,18 @@
       }
     }
     
+    // Navigate back from Player Setup (page 3) to the correct previous page
+    function navigateBackFromPlayerSetup() {
+      if (gameState.expansions.arcane) {
+        showSetupPage('arcane');
+        initializeFullSetupArcane();
+      } else if (gameState.expansions.academy) {
+        showSetupPage('academy');
+      } else {
+        showSetupPage(2);
+      }
+    }
+    
     function initializeFullSetupArcane() {
       // Update Arcanist board instruction based on Academy
       const hasAcademy = gameState.expansions.academy;
@@ -4575,22 +4604,61 @@
       }
       
       if (pageNum === 3) {
-        // Update player Fame/Coins/Disks/Assignment cards based on Academy expansion
+        // Update player Fame/Coins/Disks/Assignment cards based on expansions
         const fameInstruction = $('#player-fame-instruction');
         const coinsInstruction = $('#player-coins-instruction');
         const disksInstruction = $('#player-disks-instruction');
         const assignmentInstruction = $('#player-assignment-cards-instruction');
+        const dawnPlayerSetup = $('#dawn-player-setup');
         
-        if (gameState.expansions.academy) {
-          if (fameInstruction) fameInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place your Fame marker on <strong>3 Fame</strong> (Academy)</span>`;
-          if (coinsInstruction) coinsInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Take <strong>12 Coins</strong> and <strong>1 Shard</strong> (Academy)</span>`;
-          if (disksInstruction) disksInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place your Magician disk, <strong>Protégé disk</strong>, Specialist disk, and 1 Apprentice disk on their respective slots on your Player Board (Academy)</span>`;
-          if (assignmentInstruction) assignmentInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Take your permanent Assignment cards: 2× Theater, 1× Workshop, 1× Market Row, 1× Downtown, 1× Dark Alley, <strong>1× Academy</strong> (Academy)</span>`;
-        } else {
-          if (fameInstruction) fameInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place your Fame marker on <strong>5 Fame</strong></span>`;
-          if (coinsInstruction) coinsInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Take <strong>10 Coins</strong> and <strong>1 Shard</strong></span>`;
-          if (disksInstruction) disksInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place your Magician disk, Specialist disk, and 1 Apprentice disk on their respective slots on your Player Board</span>`;
-          if (assignmentInstruction) assignmentInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Take your permanent Assignment cards: 2× Theater, 1× Workshop, 1× Market Row, 1× Downtown, 1× Dark Alley</span>`;
+        // Calculate starting shards: Base 1, +1 for Dawn of Technology
+        const hasAcademy = gameState.expansions.academy;
+        const hasDawn = gameState.expansions.dawn;
+        const startingShards = hasDawn ? 2 : 1;
+        const startingCoins = hasAcademy ? 12 : 10;
+        const startingFame = hasAcademy ? 3 : 5;
+        
+        // Build expansion labels
+        const expansionLabels = [];
+        if (hasAcademy) expansionLabels.push('Academy');
+        if (hasDawn) expansionLabels.push('Dawn of Technology');
+        const expansionSuffix = expansionLabels.length > 0 ? ` (${expansionLabels.join(' + ')})` : '';
+        
+        // Update Fame instruction
+        if (fameInstruction) {
+          fameInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place your Fame marker on <strong>${startingFame} Fame</strong>${hasAcademy ? ' (Academy)' : ''}</span>`;
+        }
+        
+        // Update Coins/Shards instruction
+        if (coinsInstruction) {
+          coinsInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Take <strong>${startingCoins} Coins</strong> and <strong>${startingShards} Shard${startingShards > 1 ? 's' : ''}</strong>${expansionSuffix}</span>`;
+        }
+        
+        // Update Disks instruction (Academy adds Protégé)
+        if (disksInstruction) {
+          if (hasAcademy) {
+            disksInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place your Magician disk, <strong>Protégé disk</strong>, Specialist disk, and 1 Apprentice disk on their respective slots on your Player Board (Academy)</span>`;
+          } else {
+            disksInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Place your Magician disk, Specialist disk, and 1 Apprentice disk on their respective slots on your Player Board</span>`;
+          }
+        }
+        
+        // Update Assignment cards instruction (Academy adds Academy card)
+        if (assignmentInstruction) {
+          if (hasAcademy) {
+            assignmentInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Take your permanent Assignment cards: 2× Theater, 1× Workshop, 1× Market Row, 1× Downtown, 1× Dark Alley, <strong>1× Academy</strong> (Academy)</span>`;
+          } else {
+            assignmentInstruction.innerHTML = `<span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Take your permanent Assignment cards: 2× Theater, 1× Workshop, 1× Market Row, 1× Downtown, 1× Dark Alley</span>`;
+          }
+        }
+        
+        // Show/hide Dawn of Technology player setup section
+        if (dawnPlayerSetup) {
+          if (hasDawn) {
+            dawnPlayerSetup.classList.remove('hidden');
+          } else {
+            dawnPlayerSetup.classList.add('hidden');
+          }
         }
         
         // Hide the Academy note - now redundant since main instructions are dynamic
@@ -5007,12 +5075,18 @@
       // Academy-specific content
       const playerStartingFame = gameState.expansions.academy ? 3 : 5;
       const playerStartingCoins = gameState.expansions.academy ? 12 : 10;
+      const playerStartingShards = gameState.expansions.dawn ? 2 : 1;
       const heirStartingFame = gameState.expansions.academy ? 3 : 5;
       const academyPlayerSetupNote = gameState.expansions.academy
         ? infoBox(`You start with <strong>${playerStartingFame} Fame</strong>, <strong>${playerStartingCoins} Coins</strong>, and a <strong>Protégé</strong> (instead of 5 Fame and 10 Coins) (Academy)`, 'ACADEMY')
         : '';
       const academyHeirSetupNote = gameState.expansions.academy
         ? boardAction(`Use the <strong>6-character side</strong> of the Heir board (Academy)`)
+        : '';
+      
+      // DoT-specific player content
+      const dawnPlayerSetupNote = gameState.expansions.dawn
+        ? infoBox(`<strong>Dawn of Technology:</strong> Take your Contraption Board (matching your Favorite category), 4 Contraption tokens, and Signature Trick. You start with <strong>${playerStartingShards} Shards</strong>. Place Shards on lowest Shard symbols.`, 'DAWN OF TECH')
         : '';
       
       // Arcane-specific content
@@ -5036,6 +5110,7 @@
       
       content.innerHTML = `
         ${academyPlayerSetupNote}
+        ${dawnPlayerSetupNote}
         ${boardAction(`Place the Heir's Poster: <strong>${gameState.heirMagician.name}</strong>`)}
         ${academyHeirSetupNote}
         
