@@ -1363,7 +1363,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.16.1-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.16.2-beta</p>
       <div class="header-buttons hidden" id="header-buttons">
         <button class="header-btn" id="restart-btn">↺ New Game</button>
         <button class="header-btn" id="save-quit-btn">💾 Save & Quit</button>
@@ -9486,7 +9486,7 @@
                     ↻ ROTATE PROPHECIES
                   </div>
                   <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 10px auto; border-radius: 0 4px 4px 0; max-width: 400px; text-align: left;">
-                    <span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Rotate all Prophecies one position (Active → Discard, Pending 1 → Active, etc.)</span>
+                    <span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Move each Pending Prophecy one slot in a clockwise direction</span>
                   </div>
                   ${priestessNote}`;
               } else {
@@ -9497,18 +9497,13 @@
                   <p style="color: var(--text-secondary);">The Prophecies stay in their current positions.</p>`;
               }
               
-              // Add continue button
+              // Add continue button (no prophecy selection needed - rotation just moves physical tiles)
               resultDiv.innerHTML += `
-                <button id="continue-dark-alley-btn" class="btn" style="margin-top: 20px;">${rotate ? 'Select New Prophecy' : 'Continue to Step 2'}</button>
+                <button id="continue-dark-alley-btn" class="btn" style="margin-top: 20px;">Continue to Step 2</button>
               `;
               
               $('#continue-dark-alley-btn').addEventListener('click', () => {
-                if (rotate) {
-                  // Rotation happened - select new prophecy first
-                  showProphecySelection(() => showDarkAlleyCardDraw(actionPoints, cardCount));
-                } else {
-                  showDarkAlleyCardDraw(actionPoints, cardCount);
-                }
+                showDarkAlleyCardDraw(actionPoints, cardCount);
               });
             }
           }, 100);
