@@ -1028,31 +1028,38 @@
       position: relative;
     }
 
-    .restart-btn {
+    .header-buttons {
       position: absolute;
       top: 50%;
       right: 0;
       transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .header-buttons.hidden {
+      display: none;
+    }
+
+    .header-btn {
       font-family: 'Crimson Text', Georgia, serif;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       background: transparent;
       border: 1px solid var(--border);
       color: var(--text-muted);
-      padding: 6px 12px;
+      padding: 5px 10px;
       border-radius: 4px;
       cursor: pointer;
       transition: all 0.2s ease;
+      white-space: nowrap;
     }
 
     @media (hover: hover) {
-      .restart-btn:hover {
+      .header-btn:hover {
         border-color: var(--amber-dark);
         color: var(--amber);
       }
-    }
-
-    .restart-btn.hidden {
-      display: none;
     }
 
     /* Modal styles */
@@ -1356,8 +1363,11 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.15.18-beta</p>
-      <button class="restart-btn hidden" id="restart-btn">↺ New Game</button>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.16.0-beta</p>
+      <div class="header-buttons hidden" id="header-buttons">
+        <button class="header-btn" id="restart-btn">↺ New Game</button>
+        <button class="header-btn" id="save-quit-btn">💾 Save & Quit</button>
+      </div>
     </header>
 
 
@@ -1382,6 +1392,14 @@
                 <div class="description">Just the essential choices on one page — magicians, difficulty, and starting trick</div>
                 <div class="description" style="color: var(--text-muted); font-size: 0.8rem; margin-top: 8px;">For experienced players</div>
               </div>
+            </div>
+            
+            <!-- Continue Saved Game (shown only if save exists) -->
+            <div id="continue-save-container" class="hidden" style="margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border);">
+              <button id="continue-save-btn" class="btn" style="background: transparent; border: 1px solid var(--amber-dark); color: var(--amber);">
+                ↩ Continue Saved Game
+              </button>
+              <div id="continue-save-info" style="color: var(--text-muted); font-size: 0.85rem; margin-top: 8px;"></div>
             </div>
           </div>
         </div>
@@ -3657,6 +3675,189 @@
     };
 
     // ============================================
+    // SAVE SYSTEM (Session Recovery)
+    // ============================================
+    
+    const SAVE_KEY = 'trickerion-save';
+    
+    function saveGame() {
+      try {
+        const saveData = {
+          gameState: gameState,
+          savedAt: new Date().toISOString()
+        };
+        localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
+      } catch (e) {
+        console.warn('Failed to save game:', e);
+      }
+    }
+    
+    function loadSave() {
+      try {
+        const data = localStorage.getItem(SAVE_KEY);
+        if (!data) return null;
+        const parsed = JSON.parse(data);
+        // Validate basic structure
+        if (!parsed.gameState || !parsed.savedAt) return null;
+        if (!parsed.gameState.currentTurn || parsed.gameState.currentTurn < 1) return null;
+        return parsed;
+      } catch (e) {
+        console.warn('Failed to load save:', e);
+        clearSave();
+        return null;
+      }
+    }
+    
+    function clearSave() {
+      try {
+        localStorage.removeItem(SAVE_KEY);
+      } catch (e) {
+        console.warn('Failed to clear save:', e);
+      }
+    }
+    
+    function hasSavedGame() {
+      return loadSave() !== null;
+    }
+    
+    function getSaveDisplayInfo() {
+      const save = loadSave();
+      if (!save) return null;
+      
+      const gs = save.gameState;
+      const phases = ['Roll Dice', 'Initiative', 'Advertise', 'Assignment', 'Place Characters', 'Performance', 'End Turn'];
+      const phaseName = phases[gs.currentPhaseIndex] || 'Unknown';
+      
+      // Build expansion string
+      const expansionList = [];
+      if (gs.expansions?.academy) expansionList.push('Academy');
+      if (gs.expansions?.dawn) expansionList.push('Dawn of Technology');
+      if (gs.expansions?.arcane) expansionList.push('Arcane Arts');
+      const expansionStr = expansionList.length > 0 ? expansionList.join(' + ') : 'Base Game';
+      
+      // Placement info for Place Characters phase
+      let placementInfo = '';
+      if (phaseName === 'Place Characters') {
+        const placed = gs.heirPlacementsThisTurn || 0;
+        const total = gs.heir?.characters?.length || 0;
+        placementInfo = ` (Heir: ${placed} of ${total} placed)`;
+      }
+      
+      // Time ago
+      const savedDate = new Date(save.savedAt);
+      const timeAgo = getTimeAgo(savedDate);
+      
+      // Difficulty with capital first letter
+      const difficulty = gs.difficulty ? gs.difficulty.charAt(0).toUpperCase() + gs.difficulty.slice(1) : 'Unknown';
+      
+      return {
+        turn: gs.currentTurn,
+        phase: phaseName,
+        placementInfo: placementInfo,
+        difficulty: difficulty,
+        expansions: expansionStr,
+        timeAgo: timeAgo
+      };
+    }
+    
+    function getTimeAgo(date) {
+      const now = new Date();
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMs / 3600000);
+      const diffDays = Math.floor(diffMs / 86400000);
+      
+      if (diffMins < 1) return 'Just now';
+      if (diffMins < 60) return `${diffMins} minute${diffMins === 1 ? '' : 's'} ago`;
+      if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
+      if (diffDays === 1) return 'Yesterday';
+      if (diffDays < 7) return `${diffDays} days ago`;
+      
+      // Format as date
+      return date.toLocaleDateString();
+    }
+    
+    function checkForSavedGame() {
+      const saveInfo = getSaveDisplayInfo();
+      const container = $('#continue-save-container');
+      const infoDiv = $('#continue-save-info');
+      
+      if (saveInfo && container && infoDiv) {
+        container.classList.remove('hidden');
+        infoDiv.innerHTML = `Turn ${saveInfo.turn} · ${saveInfo.phase}${saveInfo.placementInfo}<br>${saveInfo.difficulty} · ${saveInfo.expansions}<br>Saved ${saveInfo.timeAgo}`;
+      }
+    }
+    
+    function continueSavedGame() {
+      const save = loadSave();
+      if (!save) {
+        alert('Save data not found. Starting new game.');
+        return;
+      }
+      
+      // Restore gameState
+      Object.assign(gameState, save.gameState);
+      
+      // Show header buttons
+      $('#header-buttons').classList.remove('hidden');
+      
+      // Show game screen
+      showScreen('game-screen');
+      updateGameDisplay();
+      updatePhaseDisplay();
+      
+      // Navigate to appropriate screen based on phase
+      const phaseId = PHASES[gameState.currentPhaseIndex]?.id;
+      
+      if (phaseId === 'place-characters') {
+        // Go to player turn screen for Place Characters
+        showPlayerTurnScreen();
+      } else {
+        // Start at beginning of current phase
+        handlePhase(phaseId);
+      }
+    }
+    
+    function showNewGameWarning(callback) {
+      const saveInfo = getSaveDisplayInfo();
+      if (!saveInfo) {
+        // No save, proceed directly
+        callback();
+        return;
+      }
+      
+      // Show warning modal
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-overlay';
+      overlay.id = 'new-game-warning-modal';
+      overlay.innerHTML = `
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+          <h3 style="color: var(--amber); margin-bottom: 15px;">⚠️ Saved Game Found</h3>
+          <p style="color: var(--text-primary); margin-bottom: 10px;">You have a saved game in progress:</p>
+          <p style="color: var(--text-secondary); margin-bottom: 20px;">
+            Turn ${saveInfo.turn} · ${saveInfo.phase}${saveInfo.placementInfo}<br>
+            ${saveInfo.difficulty} · ${saveInfo.expansions}
+          </p>
+          <p style="color: var(--text-muted); margin-bottom: 25px; font-size: 0.9rem;">Starting a new game will overwrite this save.</p>
+          <div style="display: flex; gap: 10px; justify-content: center;">
+            <button class="btn" id="warning-cancel-btn" style="background: transparent; border: 1px solid var(--border);">Cancel</button>
+            <button class="btn" id="warning-confirm-btn">Start New Game</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+      
+      $('#warning-cancel-btn').addEventListener('click', () => {
+        overlay.remove();
+      });
+      
+      $('#warning-confirm-btn').addEventListener('click', () => {
+        overlay.remove();
+        callback();
+      });
+    }
+
+    // ============================================
     // UI HELPERS
     // ============================================
 
@@ -4740,15 +4941,19 @@
     // ============================================
     
     function startFullSetup() {
-      setupMode = 'full';
-      showSetupPage(1);
+      showNewGameWarning(() => {
+        setupMode = 'full';
+        showSetupPage(1);
+      });
     }
     
     function startQuickSetup() {
-      setupMode = 'quick';
-      showSetupPage('quick');
-      // Update school descriptions based on Academy expansion
-      updateSchoolDescriptions();
+      showNewGameWarning(() => {
+        setupMode = 'quick';
+        showSetupPage('quick');
+        // Update school descriptions based on Academy expansion
+        updateSchoolDescriptions();
+      });
     }
     
     // Quick Setup selection handlers
@@ -6199,13 +6404,16 @@
         // Note: wagonLocation is set during setup screen before game starts
       }
       
-      // Show restart button
-      $('#restart-btn').classList.remove('hidden');
+      // Show header buttons (New Game / Save & Quit)
+      $('#header-buttons').classList.remove('hidden');
       
       // Show game screen
       showScreen('game-screen');
       updateGameDisplay();
       updatePhaseDisplay();
+      
+      // Autosave at game start
+      saveGame();
       
       // Start with Roll Dice phase
       handleRollDicePhase();
@@ -6236,6 +6444,9 @@
 
     function advancePhase() {
       gameState.currentPhaseIndex++;
+      
+      // Autosave after each phase completes
+      saveGame();
       
       if (gameState.currentPhaseIndex >= PHASES.length) {
         // End of turn
@@ -6941,6 +7152,9 @@
     }
     
     function showPlayerTurnScreen() {
+      // Autosave after each Heir placement when returning to player
+      saveGame();
+      
       const playerTurnBox = (text) => `<div style="background: rgba(100, 200, 100, 0.15); border: 2px solid #6c6; padding: 20px; margin: 15px 0; border-radius: 8px; text-align: center;"><span style="color: #6c6; font-weight: 600; font-size: 1.2rem;">👤 YOUR TURN</span><p style="margin-top: 10px; color: var(--text-primary);">${text}</p></div>`;
       
       // Player's magician power reminder
@@ -15167,6 +15381,9 @@
       gameState.currentTurn++;
       gameState.currentPhaseIndex = 0;
       
+      // Autosave at start of new turn
+      saveGame();
+      
       // Reset prophecy for new turn (will be selected after Roll Dice)
       gameState.activeProphecy = null;
       
@@ -15602,7 +15819,36 @@
          
          <p style="text-align: center; margin-top: 20px; color: var(--text-secondary);">Compare your final Fame to the Heir's <strong>${heirFinalFame} ★</strong></p>`,
         [
-          { text: 'Finish', action: () => location.reload() }
+          { text: 'Finish', action: () => finishGame() }
+        ]
+      );
+    }
+    
+    function finishGame() {
+      // Clear saved game since it's complete
+      clearSave();
+      location.reload();
+    }
+    
+    function saveAndQuit() {
+      saveGame();
+      
+      const saveInfo = getSaveDisplayInfo();
+      const infoText = saveInfo 
+        ? `Turn ${saveInfo.turn} · ${saveInfo.phase}${saveInfo.placementInfo}`
+        : 'Current progress';
+      
+      setActionContent(
+        'Game Saved',
+        `<div style="text-align: center; padding: 20px 0;">
+           <div style="font-size: 3rem; margin-bottom: 15px;">💾</div>
+           <p style="color: var(--text-primary); font-size: 1.1rem; margin-bottom: 10px;">Your game has been saved.</p>
+           <p style="color: var(--text-secondary); margin-bottom: 20px;">${infoText}</p>
+           <p style="color: var(--text-muted); font-size: 0.9rem;">You can safely close this window.<br>When you return, you'll be able to continue from here.</p>
+         </div>`,
+        [
+          { text: 'Return to Menu', action: () => location.reload() },
+          { text: 'Continue Playing', action: () => handlePhase(PHASES[gameState.currentPhaseIndex].id) }
         ]
       );
     }
@@ -15787,8 +16033,9 @@
       const quickStartBtn = $('#quick-start-game-btn');
       if (quickStartBtn) quickStartBtn.addEventListener('click', initializeGame);
 
-      // Restart button
+      // Header buttons
       $('#restart-btn').addEventListener('click', restartGame);
+      $('#save-quit-btn').addEventListener('click', saveAndQuit);
       
       // Manage player tricks button
       $('#manage-player-tricks-btn').addEventListener('click', showManagePlayerTricks);
@@ -15797,6 +16044,15 @@
       populatePlayerMagicianOptions();
       populateStartingTrickOptions();
       updateRandomizeButtons();
+      
+      // Check for saved game and show continue option
+      checkForSavedGame();
+      
+      // Continue saved game button
+      const continueSaveBtn = $('#continue-save-btn');
+      if (continueSaveBtn) {
+        continueSaveBtn.addEventListener('click', continueSavedGame);
+      }
     });
 
     function restartGame() {
@@ -15915,8 +16171,8 @@
         updateRandomizeButtons();
         updateSetupButton();
 
-        // Hide restart button, show setup screen at page 0 (mode selection)
-        $('#restart-btn').classList.add('hidden');
+        // Hide header buttons, show setup screen at page 0 (mode selection)
+        $('#header-buttons').classList.add('hidden');
         showScreen('setup-screen');
         showSetupPage(0);
       } catch (e) {
