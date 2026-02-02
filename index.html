@@ -1363,7 +1363,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.16.2-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.16.3-beta</p>
       <div class="header-buttons hidden" id="header-buttons">
         <button class="header-btn" id="restart-btn">↺ New Game</button>
         <button class="header-btn" id="save-quit-btn">💾 Save & Quit</button>
@@ -14738,10 +14738,10 @@
       // Return Magician Posters
       content += boardAction("Return all Magician Posters to their respective player boards");
       
-      // Move Prophecies
+      // Move Prophecies (rulebook language)
       const prophecyInstruction = gameState.activeProphecy 
-        ? "Discard the Active Prophecy; move Pending Prophecies left; draw a new Prophecy for the rightmost slot"
-        : "Move Pending Prophecies left; draw a new Prophecy for the rightmost slot";
+        ? "Discard the Active Prophecy. Move the leftmost Pending Prophecy into the Active slot. Move remaining Pending Prophecies one slot clockwise, then draw a new one for the rightmost slot"
+        : "Move the leftmost Pending Prophecy into the Active slot. Move remaining Pending Prophecies one slot clockwise, then draw a new one for the rightmost slot";
       content += boardAction(prophecyInstruction);
       
       // Discard Special Assignment cards
@@ -15015,10 +15015,10 @@
       // Return Magician Posters
       content += boardAction("Return all Magician Posters to their respective player boards");
       
-      // Move Prophecies
+      // Move Prophecies (rulebook language)
       const prophecyInstruction2 = gameState.activeProphecy 
-        ? "Discard the Active Prophecy; move Pending Prophecies left; draw a new Prophecy for the rightmost slot"
-        : "Move Pending Prophecies left; draw a new Prophecy for the rightmost slot";
+        ? "Discard the Active Prophecy. Move the leftmost Pending Prophecy into the Active slot. Move remaining Pending Prophecies one slot clockwise, then draw a new one for the rightmost slot"
+        : "Move the leftmost Pending Prophecy into the Active slot. Move remaining Pending Prophecies one slot clockwise, then draw a new one for the rightmost slot";
       content += boardAction(prophecyInstruction2);
       
       // Discard Special Assignment cards
