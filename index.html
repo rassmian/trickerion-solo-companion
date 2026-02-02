@@ -1363,7 +1363,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.16.0-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.16.1-beta</p>
       <div class="header-buttons hidden" id="header-buttons">
         <button class="header-btn" id="restart-btn">↺ New Game</button>
         <button class="header-btn" id="save-quit-btn">💾 Save & Quit</button>
@@ -15848,9 +15848,22 @@
          </div>`,
         [
           { text: 'Return to Menu', action: () => location.reload() },
-          { text: 'Continue Playing', action: () => handlePhase(PHASES[gameState.currentPhaseIndex].id) }
+          { text: 'Continue Playing', action: () => resumeCurrentPhase() }
         ]
       );
+    }
+    
+    function resumeCurrentPhase() {
+      const phaseId = PHASES[gameState.currentPhaseIndex]?.id;
+      
+      if (phaseId === 'place-characters') {
+        // Don't call handlePlaceCharactersPhase() as it resets placement counters
+        // Go directly to player turn screen
+        showPlayerTurnScreen();
+      } else {
+        // For other phases, restart from beginning of phase
+        handlePhase(phaseId);
+      }
     }
 
     // ============================================
