@@ -1373,7 +1373,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.16.15-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.16.17-beta</p>
       <div class="header-buttons hidden" id="header-buttons">
         <button class="header-btn" id="restart-btn">↺ New Game</button>
         <button class="header-btn" id="save-quit-btn">💾 Save & Quit</button>
@@ -8113,7 +8113,7 @@
               const newFame = gameState.heir.fame - totalFameGained; // Current minus what we've already counted
               const newCoins = gameState.heir.coins - totalCoinsGained;
               boardActionsHtml += noteBox(`Arcane Shard supply is empty — Heir receives +1 Fame and +1 Coin instead`);
-              boardActionsHtml += boardAction(`Update Heir's Fame (${newFame - 1} → ${newFame})`);
+              boardActionsHtml += boardAction(`Update Heir's Fame (${newFame - 1}★ → ${newFame}★)`);
               boardActionsHtml += boardAction(`Update Heir's Coins (${newCoins - 1} → ${newCoins})`);
               totalFameGained += 1;
               totalCoinsGained += 1;
@@ -8122,7 +8122,7 @@
           case 'fame':
             // Note: gameState already updated by calculateArcanistPriorities
             const fameAfter = gameState.heir.fame - totalFameGained;
-            boardActionsHtml += boardAction(`Update Heir's Fame (${fameAfter - 3} → ${fameAfter})`);
+            boardActionsHtml += boardAction(`Update Heir's Fame (${fameAfter - 3}★ → ${fameAfter}★)`);
             totalFameGained += 3;
             break;
         }
@@ -8562,9 +8562,9 @@
         const prevCoins = gameState.heir.coins - totalCoins;
         
         if (totalFame > 0 && totalCoins > 0) {
-          boardActionsHtml += boardAction(`Update Heir's Fame (${prevFame} → ${gameState.heir.fame}) and Coins (${prevCoins} → ${gameState.heir.coins})`);
+          boardActionsHtml += boardAction(`Update Heir's Fame (${prevFame}★ → ${gameState.heir.fame}★) and Coins (${prevCoins} → ${gameState.heir.coins})`);
         } else if (totalFame > 0) {
-          boardActionsHtml += boardAction(`Update Heir's Fame (${prevFame} → ${gameState.heir.fame})`);
+          boardActionsHtml += boardAction(`Update Heir's Fame (${prevFame}★ → ${gameState.heir.fame}★)`);
         } else {
           boardActionsHtml += boardAction(`Update Heir's Coins (${prevCoins} → ${gameState.heir.coins})`);
         }
@@ -10237,7 +10237,7 @@
          </div>
          
          <div id="theater-link-board-action">
-           ${boardAction(`Update Heir's Fame (${currentFame} → ${currentFame + 1}) and Shards (${currentShards} → ${currentShards})`)}
+           ${boardAction(`Update Heir's Fame (${currentFame}★ → ${currentFame + 1}★) and Shards (${currentShards} → ${currentShards})`)}
          </div>
          
          ${isPlayerLink ? `<div id="theater-player-shard-action" class="hidden">
@@ -10332,7 +10332,7 @@
           
           const boardActionEl = $('#theater-link-board-action');
           if (boardActionEl) {
-            boardActionEl.innerHTML = `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Update Heir's Fame (${currentFame} → ${currentFame + fameGain}) and Shards (${currentShards} → ${currentShards + shardGain})</span></div>`;
+            boardActionEl.innerHTML = `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Update Heir's Fame (${currentFame}★ → ${currentFame + fameGain}★) and Shards (${currentShards} → ${currentShards + shardGain})</span></div>`;
           }
           
           // Show/hide player shard action
@@ -11532,13 +11532,11 @@
         `Turn ${gameState.currentTurn} — Performance (Heir)`,
         `${cardSlotsHtml}
          
-         <div style="background: var(--bg-card); padding: 12px; border-radius: 6px; margin-bottom: 10px;">
-           <p style="margin-bottom: 15px;"><strong>How many Links are on card ${cardSlot}?</strong></p>
-           <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 6px;">Count where two matching category symbols meet in a Link circle.</p>
+         <div style="background: var(--bg-card); padding: 12px; border-radius: 6px;">
+           <p style="margin-bottom: 8px;"><strong>How many Links are on card ${cardSlot}?</strong></p>
            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
              ${[0,1,2,3,4,5,6].map(n => `<button class="btn link-count-btn-single" data-links="${n}" style="min-width: 40px;">${n}</button>`).join('')}
            </div>
-           <p id="selected-links-single" style="margin-top: 10px; color: var(--text-secondary); font-size: 0.9rem;">Links: <strong>none selected</strong></p>
          </div>`,
         [
           { text: 'Continue', action: () => processSingleCardPerformance(cardSlot), id: 'continue-btn', disabled: true }
@@ -11555,7 +11553,6 @@
             });
             btn.classList.add('btn-selected');
             btn.dataset.selected = 'true';
-            $('#selected-links-single').innerHTML = `Links: <strong>${btn.dataset.links}</strong>`;
             
             // Enable continue button
             const continueBtn = $('#continue-btn');
@@ -11680,20 +11677,17 @@
         `Turn ${gameState.currentTurn} — Performance (Card ${currentSlot})`,
         `${cardSlotsHtml}
          
-         <div style="background: var(--bg-card); padding: 12px; border-radius: 6px; margin-bottom: 10px;">
-           <p style="margin-bottom: 15px;"><strong>How many Links are on this card?</strong></p>
-           <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 6px;">Count where two matching category symbols meet in a Link circle.</p>
+         <div style="background: var(--bg-card); padding: 12px; border-radius: 6px; margin-bottom: 8px;">
+           <p style="margin-bottom: 8px;"><strong>How many Links are on this card?</strong></p>
            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
              ${[0,1,2,3,4,5,6].map(n => `<button class="btn link-count-btn" data-links="${n}" style="min-width: 40px;">${n}</button>`).join('')}
            </div>
-           <p id="selected-links-display" style="margin-top: 10px; color: var(--text-secondary); font-size: 0.9rem;">Links: <strong>none selected</strong></p>
          </div>
          
-         <div style="background: var(--bg-card); padding: 15px; border-radius: 6px;">
-           <p style="margin-bottom: 15px;"><strong>What's the Performance card bonus?</strong></p>
-           <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 6px;">Look at the bottom of the card and select the matching bonus:</p>
+         <div style="background: var(--bg-card); padding: 12px; border-radius: 6px;">
+           <p style="margin-bottom: 8px;"><strong>What's the Performance card bonus?</strong></p>
            
-           <div class="bonus-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px;">
+           <div class="bonus-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
              <button class="btn bonus-btn" data-fame="1" data-shards="0" data-coins="0" style="white-space: nowrap; padding: 10px 8px; width: 100%;">1★</button>
              <button class="btn bonus-btn" data-fame="2" data-shards="0" data-coins="0" style="white-space: nowrap; padding: 10px 8px; width: 100%;">2★</button>
              <button class="btn bonus-btn" data-fame="3" data-shards="0" data-coins="0" style="white-space: nowrap; padding: 10px 8px; width: 100%;">3★</button>
@@ -11707,7 +11701,6 @@
              <button class="btn bonus-btn" data-fame="1" data-shards="1" data-coins="0" style="white-space: nowrap; padding: 10px 8px; width: 100%;">1★ 1💎</button>
              <button class="btn bonus-btn" data-fame="0" data-shards="1" data-coins="1" style="white-space: nowrap; padding: 10px 8px; width: 100%;">1🪙 1💎</button>
            </div>
-           <p id="selected-bonus-display" style="margin-top: 10px; color: var(--text-secondary); font-size: 0.9rem;">Bonus: <strong>none selected</strong></p>
          </div>`,
         [
           { text: currentIndex < selectedSlots.length - 1 ? `Next Card →` : 'Calculate Winner', action: () => saveCardBonusAndContinue(selectedSlots, currentIndex, results), id: 'continue-btn', disabled: true }
@@ -11735,7 +11728,6 @@
             });
             btn.classList.add('btn-selected');
             btn.dataset.selected = 'true';
-            $('#selected-links-display').innerHTML = `Links: <strong>${btn.dataset.links}</strong>`;
             updateContinueButton();
           });
         });
@@ -11749,7 +11741,6 @@
             });
             btn.classList.add('btn-selected');
             btn.dataset.selected = 'true';
-            $('#selected-bonus-display').innerHTML = `Bonus: <strong>${btn.textContent}</strong>`;
             updateContinueButton();
           });
         });
@@ -13076,7 +13067,7 @@
               `Turn ${gameState.currentTurn} — Trick Steal Applied`,
               `${magicianAbilityBox(`<strong>The Red Lotus:</strong> Heir loses 1 Fame for the stolen trick.`)}
                
-               ${boardAction(`Update Heir's Fame (${currentFame} → ${gameState.heir.fame})`)}
+               ${boardAction(`Update Heir's Fame (${currentFame}★ → ${gameState.heir.fame}★)`)}
                
                <p style="margin-top: 15px; color: var(--text-secondary);">Remember: You receive the Heir's trick yield instead of your own trick's yield.</p>`,
               [{ text: 'Continue to Performance', action: () => showPlayerPerformanceScreen() }]
@@ -13134,7 +13125,7 @@
         
         const boardActionEl = $('#player-perf-board-action');
         if (boardActionEl) {
-          boardActionEl.innerHTML = `Update Heir's Fame (${currentFame} → ${currentFame + gains.fame}), Coins (${currentCoins} → ${currentCoins + gains.coins}), and Shards (${currentShards} → ${currentShards + gains.shards})`;
+          boardActionEl.innerHTML = `Update Heir's Fame (${currentFame}★ → ${currentFame + gains.fame}★), Coins (${currentCoins} → ${currentCoins + gains.coins}), and Shards (${currentShards} → ${currentShards + gains.shards})`;
         }
       };
       
@@ -13178,7 +13169,7 @@
          
          ${prophecyReminder}
          
-         <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);" id="player-perf-board-action">Update Heir's Fame (${currentFame} → ${currentFame}), Coins (${currentCoins} → ${currentCoins}), and Shards (${currentShards} → ${currentShards})</span></div>
+         <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);" id="player-perf-board-action">Update Heir's Fame (${currentFame}★ → ${currentFame}★), Coins (${currentCoins} → ${currentCoins}), and Shards (${currentShards} → ${currentShards})</span></div>
          
          ${boardAction("Return your trick markers to your supply")}
          
@@ -13328,7 +13319,7 @@
       const currentCoins = gameState.heir.coins;
       const currentShards = gameState.heir.shards;
       
-      // Use standard prophecy reminder (for p19, p20, p32, p36, p37)
+      // Use standard prophecy reminder (for p19, p20, p32, p34)
       const prophecyReminder = getHeirProphecyReminderHtml('heir-classroom');
       
       setActionContent(
@@ -14114,7 +14105,7 @@
       // Show what was gained
       let hasRewards = false;
       if (reward.fame > 0) {
-        content += boardAction(`Update Heir's Fame (${previousFame} → ${gameState.heir.fame})`);
+        content += boardAction(`Update Heir's Fame (${previousFame}★ → ${gameState.heir.fame}★)`);
         hasRewards = true;
       }
       if (reward.coins > 0) {
@@ -14525,7 +14516,7 @@
         
         const boardActionEl = $('#removed-card-board-action');
         if (boardActionEl) {
-          boardActionEl.innerHTML = `Update Heir's Fame (${currentFame} → ${currentFame + gains.fame}), Coins (${currentCoins} → ${currentCoins + gains.coins}), and Shards (${currentShards} → ${currentShards + gains.shards})`;
+          boardActionEl.innerHTML = `Update Heir's Fame (${currentFame}★ → ${currentFame + gains.fame}★), Coins (${currentCoins} → ${currentCoins + gains.coins}), and Shards (${currentShards} → ${currentShards + gains.shards})`;
         }
       };
       
@@ -14565,7 +14556,7 @@
          
          ${prophecyReminder}
          
-         <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);" id="removed-card-board-action">Update Heir's Fame (${currentFame} → ${currentFame}), Coins (${currentCoins} → ${currentCoins}), and Shards (${currentShards} → ${currentShards})</span></div>
+         <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);" id="removed-card-board-action">Update Heir's Fame (${currentFame}★ → ${currentFame}★), Coins (${currentCoins} → ${currentCoins}), and Shards (${currentShards} → ${currentShards})</span></div>
          ${boardAction("Return the Heir's Trick markers from the removed card to their Trick cards")}`,
         [
           { text: 'Continue', action: () => {
@@ -15352,7 +15343,7 @@
         
         const boardActionEl = $('#removed-card-board-action-final');
         if (boardActionEl) {
-          boardActionEl.innerHTML = `Update Heir's Fame (${currentFame} → ${currentFame + gains.fame}), Coins (${currentCoins} → ${currentCoins + gains.coins}), and Shards (${currentShards} → ${currentShards + gains.shards})`;
+          boardActionEl.innerHTML = `Update Heir's Fame (${currentFame}★ → ${currentFame + gains.fame}★), Coins (${currentCoins} → ${currentCoins + gains.coins}), and Shards (${currentShards} → ${currentShards + gains.shards})`;
         }
       };
       
@@ -15391,7 +15382,7 @@
          
          ${prophecyReminder}
          
-         <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);" id="removed-card-board-action-final">Update Heir's Fame (${currentFame} → ${currentFame}), Coins (${currentCoins} → ${currentCoins}), and Shards (${currentShards} → ${currentShards})</span></div>`,
+         <div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);" id="removed-card-board-action-final">Update Heir's Fame (${currentFame}★ → ${currentFame}★), Coins (${currentCoins} → ${currentCoins}), and Shards (${currentShards} → ${currentShards})</span></div>`,
         [
           { text: 'Continue', action: () => {
             const gains = calculateRemovedCardGains();
