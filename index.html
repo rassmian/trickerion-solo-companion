@@ -1042,6 +1042,16 @@
       display: none;
     }
 
+    @media (max-width: 600px) {
+      .header-buttons {
+        position: static;
+        transform: none;
+        flex-direction: row;
+        justify-content: center;
+        margin-top: 12px;
+      }
+    }
+
     .header-btn {
       font-family: 'Crimson Text', Georgia, serif;
       font-size: 0.85rem;
@@ -1363,7 +1373,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.16.4-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.16.15-beta</p>
       <div class="header-buttons hidden" id="header-buttons">
         <button class="header-btn" id="restart-btn">↺ New Game</button>
         <button class="header-btn" id="save-quit-btn">💾 Save & Quit</button>
@@ -3673,6 +3683,67 @@
       planDeck: [],
       currentPlanCard: null
     };
+    
+    // Reset gameState to initial values (for starting a new game without page refresh)
+    function resetGameState() {
+      gameState.expansions = {
+        academy: false,
+        dawn: false,
+        arcane: false,
+        dawnChallengeRule: false
+      };
+      gameState.difficulty = null;
+      gameState.playerSchool = null;
+      gameState.playerMagician = null;
+      gameState.heirMagician = null;
+      gameState.startingSpecialists = [];
+      gameState.currentTurn = 1;
+      gameState.currentPhaseIndex = 0;
+      gameState.activeProphecy = null;
+      gameState.removedProphecies = [];
+      gameState.performanceOrder = null;
+      gameState.wagonLocation = null;
+      gameState.arcaneDice = { enchantment: null, reward: null };
+      gameState.arcaneDiceLocked = false;
+      gameState.arcaneWorkerOnOffer = false;
+      gameState.arcaneWorkersInSupply = 0;
+      gameState.arcaneShardsSupply = 0;
+      gameState.enchantmentOffer = { left: undefined, right: undefined };
+      gameState.heir = {
+        fame: 5,
+        coins: 0,
+        shards: 0,
+        arcaneShards: 0,
+        stance: null,
+        characters: [],
+        tricks: [],
+        enchantedTricks: {},
+        shoppingList: [],
+        specialAssignments: { theater: 0, downtown: 0, market: 0, workshop: 0, academy: 0 },
+        pendingCharacters: [],
+        secrets: 0,
+        protegeAP: 1,
+        banners: 0
+      };
+      gameState.player = {
+        tricks: []
+      };
+      gameState.downtownDice = {
+        trick1: 'x',
+        trick2: 'x',
+        apprentice: 'x',
+        specialist: 'x',
+        bank1: 'x',
+        bank2: 'x'
+      };
+      gameState.planDeck = [];
+      gameState.currentPlanCard = null;
+      
+      // Reset any phase-specific tracking variables
+      gameState.heirPlacementsThisTurn = 0;
+      gameState.heirPlacementsEndedEarly = false;
+      gameState.classroomPhaseDone = false;
+    }
 
     // ============================================
     // SAVE SYSTEM (Session Recovery)
@@ -4942,6 +5013,7 @@
     
     function startFullSetup() {
       showNewGameWarning(() => {
+        resetGameState();
         setupMode = 'full';
         showSetupPage(1);
       });
@@ -4949,6 +5021,7 @@
     
     function startQuickSetup() {
       showNewGameWarning(() => {
+        resetGameState();
         setupMode = 'quick';
         showSetupPage('quick');
         // Update school descriptions based on Academy expansion
@@ -6493,8 +6566,8 @@
       'p34': ['classroom'],                       // Double Classroom Yield
       // Arcane Arts expansion prophecies
       'p35': ['end-turn'],                        // Ignore Arcane Wages
-      'p36': ['performance', 'classroom'],        // All Enchantments Trigger
-      'p37': ['performance', 'classroom']         // Double Reward
+      'p36': ['enchantments'],                    // All Enchantments Trigger (only on enchantment resolution screens)
+      'p37': ['enchantments']                     // Double Reward (only on enchantment resolution screens)
     };
 
     function getProphecyReminderHtml(phaseId) {
@@ -6542,10 +6615,15 @@
         'heir-downtown': ['p01', 'p02', 'p25'],           // Apprentice AP, Double Coins, 1 Base AP
         'heir-market': ['p01', 'p25'],                    // Apprentice AP, 1 Base AP
         'heir-darkalley': ['p01', 'p25'],                 // Apprentice AP, 1 Base AP
-        'heir-theater-nonmagician': ['p01', 'p07', 'p08', 'p09', 'p10', 'p19', 'p20', 'p25'],  // Apprentice AP, Fame for trick schools, Shard bonuses, 1 Base AP
-        'heir-performance': ['p14', 'p16', 'p19', 'p20', 'p33', 'p36', 'p37'],  // Double performer bonus, Coins as Fame, Shard bonuses, Protégé Backstage, Enchantment prophecies
-        'heir-academy': ['p28', 'p29', 'p32'],            // Renovate Fame Bonus, Practice Coins, Teach Immediate Yield
-        'heir-classroom': ['p19', 'p20', 'p32', 'p34', 'p36', 'p37']    // Shard bonuses, Teach Immediate Yield, Double Classroom Yield, Enchantment prophecies
+        'heir-theater-nonmagician': ['p01', 'p07', 'p08', 'p09', 'p10', 'p19', 'p20', 'p25'],  // AP selection: Apprentice AP, Fame for trick schools, Shard bonuses, 1 Base AP
+        'heir-theater-markers': ['p07', 'p08', 'p09', 'p10', 'p19', 'p20'],  // Marker placement: Fame for trick schools, Shard bonuses (no AP prophecies)
+        'heir-performance': ['p14', 'p16', 'p19', 'p20', 'p33'],  // Double performer bonus, Coins as Fame, Shard bonuses, Protégé Backstage (p36/p37 only on enchantment screens)
+        'heir-academy': ['p01', 'p25', 'p28', 'p29', 'p32'],  // AP selection: Apprentice AP, 1 Base AP, plus academy prophecies
+        'heir-academy-renovate': ['p28'],                 // Renovate: Fame Bonus only
+        'heir-academy-practice': ['p29'],                 // Practice: Coins only
+        'heir-academy-teach': ['p32'],                    // Teach: Immediate Yield only
+        'heir-classroom': ['p19', 'p20', 'p32', 'p34'],    // Shard bonuses, Teach Immediate Yield, Double Classroom Yield (p36/p37 only on enchantment screens)
+        'heir-enchantments': ['p36', 'p37']               // Enchantment resolution: All Enchantments Trigger, Double Reward
       };
       
       const relevantProphecies = contextMap[context] || [];
@@ -7872,6 +7950,45 @@
       }, 0);
     }
 
+    // Helper function to get the correct button text after Heir placement
+    // Returns "Place Second Character" if p22 is active and this is first placement, otherwise default text
+    function getHeirPlacementDoneButtonText(defaultText = "Done — Player's Turn") {
+      const isP22Active = gameState.activeProphecy?.id === 'p22';
+      const heirCharacterCount = gameState.heir.characters.length;
+      const heirPlaced = gameState.heirPlacementsThisTurn || 0;
+      const heirRemaining = heirCharacterCount - heirPlaced;
+      
+      // After this placement completes, heirPlaced will be incremented by 1
+      // So check if this is the first placement (heirPlaced === 0) and heir has more characters
+      if (isP22Active && !gameState.heirP22FirstPlacementDone && heirRemaining > 1) {
+        return 'Done — Place Second Character →';
+      }
+      return defaultText;
+    }
+    
+    // Helper function to get p22 prophecy reminder HTML for location completion screens
+    function getP22CompletionReminderHtml() {
+      const isP22Active = gameState.activeProphecy?.id === 'p22';
+      const heirCharacterCount = gameState.heir.characters.length;
+      const heirPlaced = gameState.heirPlacementsThisTurn || 0;
+      const heirRemaining = heirCharacterCount - heirPlaced;
+      
+      // Show reminder if p22 is active and this is the first placement
+      if (isP22Active && !gameState.heirP22FirstPlacementDone && heirRemaining > 1) {
+        return `<div style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(236, 72, 153, 0.15)); border: 2px solid var(--prophecy); padding: 10px 14px; margin: 12px 0; border-radius: 6px;">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+            <img src="assets/images/prophecies/${gameState.activeProphecy.icon}" alt="" style="width: 36px; height: 36px; border-radius: 4px;">
+            <div>
+              <div style="color: var(--prophecy); font-weight: 600; font-size: 0.85rem;">🔮 ${gameState.activeProphecy.name}</div>
+              <span class="prophecy-badge badge-affect-both">⚡ AFFECTS BOTH</span>
+            </div>
+          </div>
+          <div style="color: var(--text-secondary); font-size: 0.9rem;">${getProphecyDescription(gameState.activeProphecy)}</div>
+        </div>`;
+      }
+      return '';
+    }
+
     function startPlaceCharactersSequence() {
       // Heir just finished placing a character
       gameState.heirPlacementsThisTurn = (gameState.heirPlacementsThisTurn || 0) + 1;
@@ -9039,6 +9156,8 @@
         }
       }).join('');
       
+      const p22Reminder = getP22CompletionReminderHtml();
+      
       setActionContent(
         `Turn ${gameState.currentTurn} — Downtown (Place Trick)`,
         `<p><strong>${newTrick.name}</strong> learned!</p>
@@ -9054,9 +9173,10 @@
          <div style="display: flex; justify-content: center; gap: 20px; color: var(--text-muted); font-size: 0.85rem;">
            <span>← Higher Yield</span>
            <span>Lower Yield →</span>
-         </div>`,
+         </div>
+         ${p22Reminder}`,
         [
-          { text: 'Done — Continue Placement', action: () => {
+          { text: getHeirPlacementDoneButtonText('Done — Continue Placement'), action: () => {
             checkAndNotifyStanceChange(() => {
               // Check if there are remaining dice after trick was taken
               const { actionPoints } = gameState.pendingDowntown;
@@ -9085,11 +9205,14 @@
       // Update display to show new coin count
       updateGameDisplay();
       
+      const p22Reminder = getP22CompletionReminderHtml();
+      
       setActionContent(
         `Turn ${gameState.currentTurn} — Downtown Actions`,
-        `<div style="margin-bottom: 20px;">${instructionsHtml}</div>`,
+        `<div style="margin-bottom: 20px;">${instructionsHtml}</div>
+         ${p22Reminder}`,
         [
-          { text: 'Done — Continue Placement', action: () => startPlaceCharactersSequence() }
+          { text: getHeirPlacementDoneButtonText('Done — Continue Placement'), action: () => startPlaceCharactersSequence() }
         ]
       );
     }
@@ -9149,12 +9272,14 @@
       const shoppingList = gameState.heir.shoppingList;
       
       if (shoppingList.length === 0) {
+        const p22Reminder = getP22CompletionReminderHtml();
         setActionContent(
           `Turn ${gameState.currentTurn} — Market Row (${actionPoints} AP)`,
           `<p>The Heir's Shopping List is empty.</p>
-           <p style="color: var(--text-secondary);">No components to acquire at Market Row.</p>`,
+           <p style="color: var(--text-secondary);">No components to acquire at Market Row.</p>
+           ${p22Reminder}`,
           [
-            { text: 'Done — Continue Placement', action: () => startPlaceCharactersSequence() }
+            { text: getHeirPlacementDoneButtonText('Done — Continue Placement'), action: () => startPlaceCharactersSequence() }
           ]
         );
         return;
@@ -9227,11 +9352,14 @@
       // Update sidebar to reflect the change
       updateGameDisplay();
 
+      const p22Reminder = getP22CompletionReminderHtml();
+      
       setActionContent(
         `Turn ${gameState.currentTurn} — Market Row Actions`,
-        `<div style="margin-bottom: 20px;">${instructionsHtml}</div>`,
+        `<div style="margin-bottom: 20px;">${instructionsHtml}</div>
+         ${p22Reminder}`,
         [
-          { text: 'Done — Player\'s Turn', action: () => startPlaceCharactersSequence() }
+          { text: getHeirPlacementDoneButtonText("Done — Player's Turn"), action: () => startPlaceCharactersSequence() }
         ]
       );
     }
@@ -9580,6 +9708,8 @@
         countsDisplay += `, Academy: ${currentCounts.academy}`;
       }
       
+      const p22Reminder = getP22CompletionReminderHtml();
+      
       setActionContent(
         `Turn ${gameState.currentTurn} — Dark Alley (${actionPoints} AP)`,
         `<p><strong>Step 2: Draw Special Assignment Cards</strong></p>
@@ -9591,9 +9721,10 @@
          
          <div style="background: var(--bg-card); padding: 12px; border-radius: 6px; margin: 15px 0;">
            <p style="color: var(--text-secondary); font-size: 0.85rem;"><strong>Current SA Cards:</strong> ${countsDisplay}</p>
-         </div>`,
+         </div>
+         ${p22Reminder}`,
         [
-          { text: 'Confirm Draw', action: () => confirmSACardDraw(cardsToDraw) }
+          { text: getHeirPlacementDoneButtonText('Confirm Draw'), action: () => confirmSACardDraw(cardsToDraw) }
         ]
       );
     }
@@ -9683,6 +9814,7 @@
       
       const stance = gameState.heir.stance;
       const dayPreference = stance === 'ready' ? 'earliest available day' : 'latest available day';
+      const p22Reminder = getP22CompletionReminderHtml();
       
       setActionContent(
         `Turn ${gameState.currentTurn} — Theater (Magician)`,
@@ -9692,9 +9824,10 @@
          
          ${boardAction(`Place the Heir's Magician disk in the Performance spot on the <strong>${dayPreference}</strong>`)}
          
-         <p style="margin-top: 15px; color: var(--text-muted); font-size: 0.9rem;"><em>Why: Heir is ${stance.charAt(0).toUpperCase() + stance.slice(1)}, so prefers the ${dayPreference} for performances.</em></p>`,
+         <p style="margin-top: 15px; color: var(--text-muted); font-size: 0.9rem;"><em>Why: Heir is ${stance.charAt(0).toUpperCase() + stance.slice(1)}, so prefers the ${dayPreference} for performances.</em></p>
+         ${p22Reminder}`,
         [
-          { text: 'Done — Continue Placement', action: () => {
+          { text: getHeirPlacementDoneButtonText('Done — Continue Placement'), action: () => {
             gameState.heir.magicianAtTheaterThisTurn = true;
             startPlaceCharactersSequence();
           }}
@@ -9997,7 +10130,7 @@
       const activeSchoolProphecy = schoolProphecyMap[gameState.activeProphecy?.id];
       
       // Get prophecy reminder for Heir theater action (only shows "affects both" prophecies)
-      const prophecyReminder = getHeirProphecyReminderHtml('heir-theater-nonmagician');
+      const prophecyReminder = getHeirProphecyReminderHtml('heir-theater-markers');
       
       // Note about multiple tricks on same card (show if more markers remaining)
       let multiTrickNote = '';
@@ -10268,6 +10401,7 @@
       const chainsNote = isChains
         ? infoBox(`<strong>Master of Chains:</strong> The first Trick placed this turn could be oriented freely (didn't need to create a Link).`)
         : '';
+      const p22Reminder = getP22CompletionReminderHtml();
       
       setActionContent(
         `Turn ${gameState.currentTurn} — Theater Complete`,
@@ -10277,9 +10411,10 @@
          
          ${chainsNote}
          
-         <p style="color: var(--text-secondary);">Fame and Shards from Links have already been added to the Heir's totals during placement.</p>`,
+         <p style="color: var(--text-secondary);">Fame and Shards from Links have already been added to the Heir's totals during placement.</p>
+         ${p22Reminder}`,
         [
-          { text: 'Done — Continue Placement', action: () => {
+          { text: getHeirPlacementDoneButtonText('Done — Continue Placement'), action: () => {
             // Track non-magician placed at Theater (for backstage bonus calculation)
             gameState.heir.nonMagiciansAtTheaterThisTurn++;
             
@@ -10319,6 +10454,7 @@
     }
     
     function showAcademyAPInput() {
+      const heirProphecyReminder = getHeirProphecyReminderHtml('heir-academy');
       const wagonNote = (gameState.expansions?.arcane && gameState.wagonLocation === 'academy') 
         ? noteBox(`<strong>Wagon Location (Arcane Arts):</strong> Resolve with 1 fewer AP (minimum 1)`)
         : '';
@@ -10328,6 +10464,7 @@
         `Turn ${gameState.currentTurn} — Academy`,
         `<p>The Heir is placing a Character at the Academy.</p>
          ${wagonNote}
+         ${heirProphecyReminder}
          
          <p style="margin-top: 15px;"><strong>How many Action Points does this Character have?</strong></p>
          <p style="color: var(--text-secondary); font-size: 0.9rem;">Include the slot's AP modifier and the Character's base AP.</p>
@@ -10381,15 +10518,10 @@
         return;
       }
       
-      // Show prophecy reminder for Heir academy action (only shows "affects both" prophecies like p28, p29, p32)
-      const prophecyReminder = getHeirProphecyReminderHtml('heir-academy');
-      
       // Heir will learn a secret - use coin flip like Dark Alley
       setActionContent(
         `Turn ${gameState.currentTurn} — Academy: Learn Secret`,
         `<p>The Heir has <strong>${gameState.heir.secrets}</strong> of 2 Secrets.</p>
-         
-         ${prophecyReminder}
          
          <p style="color: var(--text-secondary); margin-bottom: 20px;">Flip a coin to determine which Secret the Heir takes.</p>
          
@@ -10554,8 +10686,8 @@
         ? boardAction(`Discard <strong>${coinDiscard} Coin${coinDiscard === '1' ? '' : 's'}</strong> from Heir (${coins} → ${newCoinTotal})`)
         : '';
       
-      // Prophecy reminder
-      const prophecyReminder = getHeirProphecyReminderHtml('heir-academy');
+      // Prophecy reminder (only p28 is relevant for Renovate)
+      const prophecyReminder = getHeirProphecyReminderHtml('heir-academy-renovate');
       
       // Geert ability note
       const geertNote = isGeert ? magicianAbilityBox(`<strong>Geert van Augustin:</strong> Always chooses the <strong>most expensive</strong> renovation regardless of Coins. Gains <strong>+1 Shard</strong> when Renovating.`) : '';
@@ -10570,7 +10702,6 @@
           `<p>The Heir Renovates.</p>
            
            ${geertNote}
-           ${prophecyReminder}
            
            ${boardAction(`Select the <strong>${selectionRule}</strong> space where Heir's Fame (${gameState.heir.fame}) exceeds threshold`)}
            <p style="color: var(--text-secondary); font-size: 0.9rem; margin: -4px 0 12px 12px;">Tie-breaker: ${tiebreaker}, then top to bottom</p>
@@ -10579,6 +10710,8 @@
            ${boardAction(`Place <strong>${bannerCount} Banner${bannerCount !== 1 ? 's' : ''}</strong> in Heir's color`)}
            ${coinDiscardAction}
            ${geertShardAction}
+           
+           ${prophecyReminder}
            
            <p style="margin-top: 15px;"><strong>Which Fame Threshold space was selected?</strong></p>
            <p style="color: var(--text-secondary); font-size: 0.9rem;">p28 grants +2/4/6 Fame based on threshold.</p>`,
@@ -10600,7 +10733,6 @@
           `<p>The Heir Renovates.</p>
            
            ${geertNote}
-           ${prophecyReminder}
            
            ${boardAction(`Select the <strong>${selectionRule}</strong> space where Heir's Fame (${gameState.heir.fame}) exceeds threshold`)}
            <p style="color: var(--text-secondary); font-size: 0.9rem; margin: -4px 0 12px 12px;">Tie-breaker: ${tiebreaker}, then top to bottom</p>
@@ -10705,18 +10837,18 @@
         ? 'Highest Fame Threshold Classroom, first slot from top'
         : 'Highest Fame Threshold (IGNORE slots that decrease Preparation cost), top to bottom';
       
-      const prophecyReminder = getHeirProphecyReminderHtml('heir-academy');
-      
       // p32: Teach Immediate Yield - need to collect yield
       if (isTeach && isP32Active) {
+        const prophecyReminder = getHeirProphecyReminderHtml('heir-academy-teach');
+        
         setActionContent(
           `Turn ${gameState.currentTurn} — Academy: Teach`,
           `<p>The Heir Teaches.</p>
            
-           ${prophecyReminder}
-           
            ${boardAction(`Select the <strong>${trickSelection}</strong> Trick from the Heir's board`)}
            ${boardAction(`Place its Academy marker in a ${slotType} slot (${slotSelection})`)}
+           
+           ${prophecyReminder}
            
            <p style="margin-top: 15px;"><strong>p32: Enter the Classroom's Yield for this Trick:</strong></p>
            <p style="color: var(--text-secondary); font-size: 0.9rem;">The Heir immediately receives the Classroom's Yield (check tile modifiers).</p>
@@ -10773,15 +10905,17 @@
       
       // p29: Practice Coins - need to ask for Trick's Fame Threshold
       if (!isTeach && isP29Active) {
+        const prophecyReminder = getHeirProphecyReminderHtml('heir-academy-practice');
+        
         setActionContent(
           `Turn ${gameState.currentTurn} — Academy: Practice`,
           `<p>The Heir Practices.</p>
            
-           ${prophecyReminder}
-           
            ${boardAction(`Select the <strong>${trickSelection}</strong> Trick from the Heir's board`)}
            ${boardAction(`Place its Academy marker in a ${slotType} slot (${slotSelection})`)}
            ${boardAction('If the Practice Room grants an extra Trick marker, place it on the Trick')}
+           
+           ${prophecyReminder}
            
            <p style="margin-top: 15px;"><strong>What is the Trick's Fame Threshold?</strong></p>
            <p style="color: var(--text-secondary); font-size: 0.9rem;">p29 grants +2/4/6 Coins based on the Trick's level.</p>`,
@@ -10798,8 +10932,6 @@
       setActionContent(
         `Turn ${gameState.currentTurn} — Academy: ${action}`,
         `<p>The Heir ${action}es.</p>
-         
-         ${prophecyReminder}
          
          ${boardAction(`Select the <strong>${trickSelection}</strong> Trick from the Heir's board`)}
          ${boardAction(`Place its Academy marker in a ${slotType} slot (${slotSelection})`)}
@@ -10911,11 +11043,13 @@
     }
     
     function academyComplete() {
+      const p22Reminder = getP22CompletionReminderHtml();
       setActionContent(
         `Turn ${gameState.currentTurn} — Academy Complete`,
-        `<p>The Heir has completed all Academy actions.</p>`,
+        `<p>The Heir has completed all Academy actions.</p>
+         ${p22Reminder}`,
         [
-          { text: 'Done — Continue Placement', action: () => startPlaceCharactersSequence() }
+          { text: getHeirPlacementDoneButtonText('Done — Continue Placement'), action: () => startPlaceCharactersSequence() }
         ]
       );
     }
@@ -10925,15 +11059,16 @@
     // ============================================
 
     function showWorkshopActions() {
-      
+      const p22Reminder = getP22CompletionReminderHtml();
       
       setActionContent(
         `Turn ${gameState.currentTurn} — Workshop`,
         `<p>The Heir is placing a Character at the Workshop.</p>
          
-         ${infoBox("Nothing happens. The Heir's Tricks are always Prepared automatically, so there's no Workshop action to take.")}`,
+         ${infoBox("Nothing happens. The Heir's Tricks are always Prepared automatically, so there's no Workshop action to take.")}
+         ${p22Reminder}`,
         [
-          { text: 'Done — Continue Placement', action: () => startPlaceCharactersSequence() }
+          { text: getHeirPlacementDoneButtonText('Done — Continue Placement'), action: () => startPlaceCharactersSequence() }
         ]
       );
     }
@@ -12163,6 +12298,9 @@
       // Check for active prophecies
       const isP36Active = gameState.activeProphecy?.id === 'p36'; // All Enchantments Trigger
       
+      // Get prophecy reminder for enchantment screens (p36, p37)
+      const prophecyReminder = getHeirProphecyReminderHtml('heir-enchantments');
+      
       // Enchantment type names
       const typeNames = { scrolls: 'Parchment Scrolls', runes: 'Stone Runes', amulets: 'Amulet Necklaces' };
       
@@ -12171,13 +12309,8 @@
       // If p36 is active, all enchantments trigger
       if (isP36Active) {
         content += `
-          <div style="background: rgba(212, 168, 71, 0.15); border-left: 3px solid var(--amber); padding: 12px; margin: 0 0 15px 0; border-radius: 0 4px 4px 0;">
-            <strong style="color: var(--amber);">🔮 p36: All Enchantments Trigger</strong>
-            <p style="margin: 8px 0 0 0; color: var(--text-secondary);">Ignore the Enchantment Die — ALL ${totalEnchantments} enchantment(s) trigger!</p>
-          </div>
-        `;
-        
-        content += `
+          ${prophecyReminder}
+          
           <p style="margin: 15px 0;"><strong>What does the Reward Die show?</strong></p>
           <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 10px;">Select the face showing on the Arcane Reward die.</p>
           
@@ -12203,7 +12336,9 @@
       } else {
         // Normal case - need enchantment die selection
         content += `
-          <p style="margin: 0 0 15px 0;"><strong>What does the Enchantment Die show?</strong></p>
+          ${prophecyReminder}
+          
+          <p style="margin: 15px 0;"><strong>What does the Enchantment Die show?</strong></p>
           <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 10px;">Select the Enchantment type showing on the die (or that the Heir set).</p>
           
           ${getEnchantmentDieHtml('enchant-die-btn')}
@@ -12763,11 +12898,16 @@
              </div>
            </div>`;
       
+      // Get prophecy reminder for performance phase
+      const prophecyReminder = getHeirProphecyReminderHtml('heir-performance');
+      
       setActionContent(
         `Turn ${gameState.currentTurn} — Performance (Step 3 of 3)`,
         `${cardSlotsHtml}
          
          ${breakdownGrid}
+         
+         ${prophecyReminder}
          
          ${totalsGrid}
          
@@ -13176,12 +13316,19 @@
       // Check for shard-related prophecies
       const isExtraShard = gameState.activeProphecy?.id === 'p19';
       const isShardsGiveFame = gameState.activeProphecy?.id === 'p20';
+      const isP34Active = gameState.activeProphecy?.id === 'p34';
+      
+      // If p34 is active, show the special two-section screen
+      if (isP34Active) {
+        showP34ClassroomYieldInput();
+        return;
+      }
       
       const currentFame = gameState.heir.fame;
       const currentCoins = gameState.heir.coins;
       const currentShards = gameState.heir.shards;
       
-      // Use standard prophecy reminder
+      // Use standard prophecy reminder (for p19, p20, p32, p36, p37)
       const prophecyReminder = getHeirProphecyReminderHtml('heir-classroom');
       
       setActionContent(
@@ -13265,108 +13412,110 @@
       attachStepperListeners(updateBoardAction);
     }
     
-    function applyClassroomYields() {
-      const isExtraShard = gameState.activeProphecy?.id === 'p19';
-      const isShardsGiveFame = gameState.activeProphecy?.id === 'p20';
-      const isP34Active = gameState.activeProphecy?.id === 'p34';
-      
-      // Store values for potential p34 flow
-      gameState.pendingClassroomYields = {
-        fame: parseInt($('#classroom-fame')?.dataset.value) || 0,
-        coins: parseInt($('#classroom-coins')?.dataset.value) || 0,
-        shards: parseInt($('#classroom-shards')?.dataset.value) || 0
-      };
-      
-      // If p34 is active, ask about doubling
-      if (isP34Active) {
-        showP34DoubleCheck();
-        return;
-      }
-      
-      // Apply yields normally
-      finalizeClassroomYields();
-    }
-    
-    function showP34DoubleCheck() {
-      const prophecyReminder = getHeirProphecyReminderHtml('heir-classroom');
-      
-      setActionContent(
-        `Turn ${gameState.currentTurn} — p34: Double Classroom Yield`,
-        `<p><strong>p34: Double Classroom Yield</strong></p>
-         
-         ${prophecyReminder}
-         
-         <p style="margin-top: 15px;">Did the Heir use p34 to <strong>double</strong> one Trick's Classroom Yield?</p>
-         <p style="color: var(--text-secondary); font-size: 0.9rem;">If yes, enter the Yield values for the ONE Trick that was doubled (these will be added again to double that Trick's contribution).</p>`,
-        [
-          { text: 'Yes — Enter Doubled Trick\'s Yield', action: () => showP34YieldInput() },
-          { text: 'No — Apply Normal Yields', action: () => finalizeClassroomYields() }
-        ]
-      );
-    }
-    
-    function showP34YieldInput() {
+    // Special p34 screen with two-section input
+    function showP34ClassroomYieldInput() {
       const currentFame = gameState.heir.fame;
       const currentCoins = gameState.heir.coins;
       const currentShards = gameState.heir.shards;
-      const pending = gameState.pendingClassroomYields;
+      
+      // Get p34 prophecy reminder
+      const prophecyReminder = getHeirProphecyReminderHtml('heir-classroom');
       
       setActionContent(
-        `Turn ${gameState.currentTurn} — p34: Doubled Trick Yield`,
-        `<p>Enter the Yield of the <strong>one Trick</strong> that was doubled by p34.</p>
-         <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 15px;">This Trick's Yield is already included in your total. Enter it again to double it.</p>
+        `Turn ${gameState.currentTurn} — Classroom Yields`,
+        `<p>The Heir has Tricks in Classrooms.</p>
+         
+         ${prophecyReminder}
+         
+         <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 15px 0;">The Heir doubles the yield of whichever Trick gives the highest return.</p>
          
          <div style="background: var(--bg-card); padding: 15px; border-radius: 8px; margin: 15px 0;">
+           <p style="color: var(--prophecy); font-weight: 600; margin-bottom: 12px;">🔮 Highest-Yield Trick (doubled)</p>
+           <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 12px;">Enter the yield of the Trick with the highest Classroom yield.</p>
            <div class="stepper-grid" style="text-align: center;">
              <div>
                <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 8px;">Fame ★</label>
-               ${createStepper('p34-fame', 0)}
+               ${createStepper('p34-doubled-fame', 0)}
              </div>
              <div>
                <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 8px;">Coins</label>
-               ${createStepper('p34-coins', 0)}
+               ${createStepper('p34-doubled-coins', 0)}
              </div>
              <div>
                <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 8px;">Shards ◆</label>
-               ${createStepper('p34-shards', 0)}
+               ${createStepper('p34-doubled-shards', 0)}
+             </div>
+           </div>
+         </div>
+         
+         <div style="background: var(--bg-card); padding: 15px; border-radius: 8px; margin: 15px 0;">
+           <p style="color: var(--text-secondary); font-weight: 600; margin-bottom: 12px;">Other Tricks (if any)</p>
+           <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 12px;">Enter combined yields from any other Tricks in Classrooms.</p>
+           <div class="stepper-grid" style="text-align: center;">
+             <div>
+               <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 8px;">Fame ★</label>
+               ${createStepper('p34-other-fame', 0)}
+             </div>
+             <div>
+               <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 8px;">Coins</label>
+               ${createStepper('p34-other-coins', 0)}
+             </div>
+             <div>
+               <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 8px;">Shards ◆</label>
+               ${createStepper('p34-other-shards', 0)}
              </div>
            </div>
          </div>
          
          <div id="p34-board-action">
-           ${boardAction('No doubling bonus to apply')}
+           ${boardAction('No yields to apply')}
          </div>`,
         [
-          { text: 'Apply Doubled Yield & Continue', action: () => applyP34Doubling() }
+          { text: 'Apply Yields & Continue', action: () => applyP34ClassroomYields() }
         ]
       );
       
+      // Update board action dynamically
       const updateP34BoardAction = () => {
-        const fame = parseInt($('#p34-fame')?.dataset.value) || 0;
-        const coins = parseInt($('#p34-coins')?.dataset.value) || 0;
-        const shards = parseInt($('#p34-shards')?.dataset.value) || 0;
+        const doubledFame = parseInt($('#p34-doubled-fame')?.dataset.value) || 0;
+        const doubledCoins = parseInt($('#p34-doubled-coins')?.dataset.value) || 0;
+        const doubledShards = parseInt($('#p34-doubled-shards')?.dataset.value) || 0;
         
-        const totalFame = pending.fame + fame;
-        const totalCoins = pending.coins + coins;
-        const totalShards = pending.shards + shards;
+        const otherFame = parseInt($('#p34-other-fame')?.dataset.value) || 0;
+        const otherCoins = parseInt($('#p34-other-coins')?.dataset.value) || 0;
+        const otherShards = parseInt($('#p34-other-shards')?.dataset.value) || 0;
+        
+        // Doubled trick counts twice
+        const totalFame = (doubledFame * 2) + otherFame;
+        const totalCoins = (doubledCoins * 2) + otherCoins;
+        const totalShards = (doubledShards * 2) + otherShards;
         
         const actionDiv = $('#p34-board-action');
         if (!actionDiv) return;
         
-        if (fame === 0 && coins === 0 && shards === 0) {
-          actionDiv.innerHTML = boardAction('No doubling bonus to apply');
+        if (totalFame === 0 && totalCoins === 0 && totalShards === 0) {
+          actionDiv.innerHTML = boardAction('No yields to apply');
           return;
         }
         
         let parts = [];
         if (totalFame > 0) {
-          parts.push(`Update Heir's Fame (${currentFame}★ → ${currentFame + totalFame}★) <span style="color: var(--prophecy);">(+${fame} from p34)</span>`);
+          let breakdown = [];
+          if (doubledFame > 0) breakdown.push(`${doubledFame}×2`);
+          if (otherFame > 0) breakdown.push(`${otherFame}`);
+          parts.push(`Update Heir's Fame (${currentFame}★ → ${currentFame + totalFame}★) <span style="color: var(--text-muted);">(${breakdown.join(' + ')})</span>`);
         }
         if (totalCoins > 0) {
-          parts.push(`Update Heir's Coins (${currentCoins} → ${currentCoins + totalCoins}) <span style="color: var(--prophecy);">(+${coins} from p34)</span>`);
+          let breakdown = [];
+          if (doubledCoins > 0) breakdown.push(`${doubledCoins}×2`);
+          if (otherCoins > 0) breakdown.push(`${otherCoins}`);
+          parts.push(`Update Heir's Coins (${currentCoins} → ${currentCoins + totalCoins}) <span style="color: var(--text-muted);">(${breakdown.join(' + ')})</span>`);
         }
         if (totalShards > 0) {
-          parts.push(`Update Heir's Shards (${currentShards} → ${currentShards + totalShards}) <span style="color: var(--prophecy);">(+${shards} from p34)</span>`);
+          let breakdown = [];
+          if (doubledShards > 0) breakdown.push(`${doubledShards}×2`);
+          if (otherShards > 0) breakdown.push(`${otherShards}`);
+          parts.push(`Update Heir's Shards (${currentShards} → ${currentShards + totalShards}) <span style="color: var(--text-muted);">(${breakdown.join(' + ')})</span>`);
         }
         
         actionDiv.innerHTML = parts.map(p => boardAction(p)).join('');
@@ -13375,12 +13524,36 @@
       attachStepperListeners(updateP34BoardAction);
     }
     
-    function applyP34Doubling() {
-      // Add doubled Trick yields to pending
-      gameState.pendingClassroomYields.fame += parseInt($('#p34-fame')?.dataset.value) || 0;
-      gameState.pendingClassroomYields.coins += parseInt($('#p34-coins')?.dataset.value) || 0;
-      gameState.pendingClassroomYields.shards += parseInt($('#p34-shards')?.dataset.value) || 0;
+    // Apply p34 classroom yields (doubled trick + others)
+    function applyP34ClassroomYields() {
+      const doubledFame = parseInt($('#p34-doubled-fame')?.dataset.value) || 0;
+      const doubledCoins = parseInt($('#p34-doubled-coins')?.dataset.value) || 0;
+      const doubledShards = parseInt($('#p34-doubled-shards')?.dataset.value) || 0;
       
+      const otherFame = parseInt($('#p34-other-fame')?.dataset.value) || 0;
+      const otherCoins = parseInt($('#p34-other-coins')?.dataset.value) || 0;
+      const otherShards = parseInt($('#p34-other-shards')?.dataset.value) || 0;
+      
+      // Store combined yields (doubled trick counts twice)
+      gameState.pendingClassroomYields = {
+        fame: (doubledFame * 2) + otherFame,
+        coins: (doubledCoins * 2) + otherCoins,
+        shards: (doubledShards * 2) + otherShards
+      };
+      
+      // Go directly to finalize (skip the old p34 check flow)
+      finalizeClassroomYields();
+    }
+    
+    function applyClassroomYields() {
+      // Store values (p34 is handled separately via showP34ClassroomYieldInput)
+      gameState.pendingClassroomYields = {
+        fame: parseInt($('#classroom-fame')?.dataset.value) || 0,
+        coins: parseInt($('#classroom-coins')?.dataset.value) || 0,
+        shards: parseInt($('#classroom-shards')?.dataset.value) || 0
+      };
+      
+      // Apply yields normally
       finalizeClassroomYields();
     }
     
@@ -13610,6 +13783,9 @@
       const isP36Active = gameState.activeProphecy?.id === 'p36';
       const isP37Active = gameState.activeProphecy?.id === 'p37';
       
+      // Get prophecy reminder for enchantment screens (p36, p37)
+      const prophecyReminder = getHeirProphecyReminderHtml('heir-enchantments');
+      
       // Enchantment type names
       const typeNames = { scrolls: 'Parchment Scrolls', runes: 'Stone Runes', amulets: 'Amulet Necklaces' };
       
@@ -13618,22 +13794,13 @@
       // If p36 is active, all enchantments trigger
       if (isP36Active) {
         content += `
-          <div style="background: rgba(212, 168, 71, 0.15); border-left: 3px solid var(--amber); padding: 12px; margin: 0 0 15px 0; border-radius: 0 4px 4px 0;">
-            <strong style="color: var(--amber);">🔮 p36: All Enchantments Trigger</strong>
-            <p style="margin: 8px 0 0 0; color: var(--text-secondary);">Ignore the Enchantment Die — ALL ${totalEnchantments} enchantment(s) trigger!</p>
-          </div>
-        `;
-        
-        content += `
+          ${prophecyReminder}
+          
           <p style="margin: 15px 0;"><strong>What does the Reward Die show?</strong></p>
           <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 10px;">Select the face showing on the Arcane Reward die.</p>
           
           ${getRewardDieHtml('classroom-reward-btn')}
         `;
-        
-        if (isP37Active) {
-          content += `<div style="background: rgba(212, 168, 71, 0.15); border-left: 3px solid var(--amber); padding: 12px; margin: 15px 0; border-radius: 0 4px 4px 0;"><strong style="color: var(--amber);">🔮 p37: Double Reward</strong><p style="margin: 8px 0 0 0; color: var(--text-secondary);">All rewards will be doubled!</p></div>`;
-        }
         
         setActionContent(
           `Turn ${gameState.currentTurn} — Classroom: Enchantment Triggers`,
@@ -13654,7 +13821,9 @@
       } else {
         // Normal case - need enchantment die selection
         content += `
-          <p style="margin: 0 0 15px 0;"><strong>What does the Enchantment Die show?</strong></p>
+          ${prophecyReminder}
+          
+          <p style="margin: 15px 0;"><strong>What does the Enchantment Die show?</strong></p>
           <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 10px;">Select the Enchantment type showing on the die.</p>
           
           ${getEnchantmentDieHtml('classroom-ench-btn')}
@@ -13674,10 +13843,6 @@
             ${getRewardDieHtml('classroom-reward-btn')}
           </div>
         `;
-        
-        if (isP37Active) {
-          content += `<div style="background: rgba(212, 168, 71, 0.15); border-left: 3px solid var(--amber); padding: 12px; margin: 15px 0; border-radius: 0 4px 4px 0;"><strong style="color: var(--amber);">🔮 p37: Double Reward</strong><p style="margin: 8px 0 0 0; color: var(--text-secondary);">All rewards will be doubled!</p></div>`;
-        }
         
         setActionContent(
           `Turn ${gameState.currentTurn} — Classroom: Enchantment Triggers`,
