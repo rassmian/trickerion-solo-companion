@@ -523,8 +523,8 @@
         padding: 15px;
       }
       /* Force inline grids to stack on mobile */
-      .action-content [style*="grid-template-columns: 1fr 1fr"]:not(.stepper-grid):not(.bonus-grid):not(.totals-grid),
-      .action-content [style*="grid-template-columns: 1fr 1fr 1fr"]:not(.stepper-grid):not(.bonus-grid):not(.totals-grid) {
+      .action-content [style*="grid-template-columns: 1fr 1fr"]:not(.stepper-grid):not(.bonus-grid):not(.totals-grid):not(.breakdown-grid):not(.refill-grid),
+      .action-content [style*="grid-template-columns: 1fr 1fr 1fr"]:not(.stepper-grid):not(.bonus-grid):not(.totals-grid):not(.breakdown-grid):not(.refill-grid) {
         grid-template-columns: 1fr !important;
       }
       /* Reduce spacing in turn summary box */
@@ -1373,7 +1373,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.16.23-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.16.24-beta</p>
       <div class="header-buttons hidden" id="header-buttons">
         <button class="header-btn" id="restart-btn">↺ New Game</button>
         <button class="header-btn" id="save-quit-btn">💾 Save & Quit</button>
@@ -12849,7 +12849,7 @@
       
       // Build the grid for breakdowns - always 2 columns for mobile readability
       const hasArcaneShardReward = hasArcane && enchantmentArcaneShards > 0;
-      const breakdownGrid = `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0;">
+      const breakdownGrid = `<div class="breakdown-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0;">
              ${fameBreakdown}
              ${coinsBreakdown}
              ${shardsBreakdown}
@@ -14764,7 +14764,7 @@
       
       if (needsLeftRefill) {
         content += `
-            <div id="refill-left-options" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+            <div id="refill-left-options" class="refill-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
               ${enchantTypes.map(type => `
                 <button class="btn refill-btn" data-slot="left" data-type="${type.id}"
                         style="width: 52px; height: 52px; padding: 8px; display: flex; align-items: center; justify-content: center;">
@@ -14791,7 +14791,7 @@
       
       if (needsRightRefill) {
         content += `
-            <div id="refill-right-options" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+            <div id="refill-right-options" class="refill-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
               ${enchantTypes.map(type => `
                 <button class="btn refill-btn" data-slot="right" data-type="${type.id}"
                         style="width: 52px; height: 52px; padding: 8px; display: flex; align-items: center; justify-content: center;">
@@ -15891,7 +15891,7 @@
       
       setActionContent(
         'End Game Scoring (Step 2 of 2)',
-        `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0;">
+        `<div class="breakdown-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0;">
            ${fameBreakdown}
            ${coinsBreakdown}
            ${shardsBreakdown}
