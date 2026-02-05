@@ -1373,7 +1373,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.16.19-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.16.21-beta</p>
       <div class="header-buttons hidden" id="header-buttons">
         <button class="header-btn" id="restart-btn">↺ New Game</button>
         <button class="header-btn" id="save-quit-btn">💾 Save & Quit</button>
@@ -3322,7 +3322,7 @@
             type: 'action',
             step: 4,
             dieUsed: bankDieUsed,
-            text: `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Add ${coinValue} Coins to the Heir's Coin Purse${p02Text}</span></div>`
+            text: boardAction(`Update Heir's Coins (${gameState.heir.coins - coinValue} → ${gameState.heir.coins})${p02Text}`)
           });
         }
       }
@@ -3356,7 +3356,7 @@
             type: 'action',
             step: 5,
             dieUsed: bankDieUsed,
-            text: `<div style="background: var(--physical-action-bg); border-left: 3px solid var(--physical-action); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--physical-action); font-weight: 600;">⚙ BOARD:</span> <span style="color: var(--text-primary);">Add ${coinValue} Coins to the Heir's Coin Purse${p02Text}</span></div>`
+            text: boardAction(`Update Heir's Coins (${gameState.heir.coins - coinValue} → ${gameState.heir.coins})${p02Text}`)
           });
         }
       }
@@ -14406,7 +14406,7 @@
             <p style="color: var(--amber); font-weight: 600; margin-bottom: 4px;">Heir Coin Conversion</p>
             <p style="margin: 0;">The Heir had ${coinsConverted + gameState.heir.coins} coins → converted ${coinsConverted} coins to <strong>${fameGained}★ Fame</strong> (${gameState.heir.coins} remaining)</p>
           </div>`;
-        content += boardAction(`Move the Heir's Fame marker forward <strong>${fameGained}</strong> spaces (to ${gameState.heir.fame}★)`);
+        content += boardAction(`Update Heir's Fame (${gameState.heir.fame - fameGained}★ → ${gameState.heir.fame}★)`);
       } else {
         content += infoBox(`The Heir has ${gameState.heir.coins} coins (less than 10) — no conversion.`);
       }
@@ -15116,7 +15116,7 @@
             <p style="color: var(--amber); font-weight: 600; margin-bottom: 4px;">Heir Coin Conversion</p>
             <p style="margin: 0;">The Heir had ${coinsConverted + gameState.heir.coins} coins → converted ${coinsConverted} coins to <strong>${fameGained}★ Fame</strong> (${gameState.heir.coins} remaining)</p>
           </div>`;
-        content += boardAction(`Move the Heir's Fame marker forward <strong>${fameGained}</strong> spaces (to ${gameState.heir.fame}★)`);
+        content += boardAction(`Update Heir's Fame (${gameState.heir.fame - fameGained}★ → ${gameState.heir.fame}★)`);
       } else {
         content += infoBox(`The Heir has ${gameState.heir.coins} coins (less than 10) — no conversion.`);
       }
@@ -15286,7 +15286,7 @@
             <p style="color: var(--amber); font-weight: 600; margin-bottom: 4px;">Heir Coin Conversion</p>
             <p style="margin: 0;">The Heir had ${coinsConverted + gameState.heir.coins} coins → converted ${coinsConverted} coins to <strong>${fameGained}★ Fame</strong> (${gameState.heir.coins} remaining)</p>
           </div>`;
-        content += boardAction(`Move the Heir's Fame marker forward <strong>${fameGained}</strong> spaces (to ${gameState.heir.fame}★)`);
+        content += boardAction(`Update Heir's Fame (${gameState.heir.fame - fameGained}★ → ${gameState.heir.fame}★)`);
       } else {
         content += infoBox(`The Heir has ${gameState.heir.coins} coins (less than 10) — no conversion.`);
       }
@@ -16666,7 +16666,7 @@
         updateGameDisplay();
         showDowntownFinalInstructions('skipped');
         console.log('🎮 Jumped to Downtown Final Instructions');
-        console.log('📝 TEST: Verify "Add X Coins to Heir\'s Coin Purse" shows as board action');
+        console.log('📝 TEST: Verify "Update Heir\'s Coins (X → Y)" shows as board action');
       },
       
       // Jump to Turn 7 End Turn to test streamlined final turn flow
