@@ -523,8 +523,8 @@
         padding: 15px;
       }
       /* Force inline grids to stack on mobile */
-      .action-content [style*="grid-template-columns: 1fr 1fr"]:not(.stepper-grid):not(.bonus-grid),
-      .action-content [style*="grid-template-columns: 1fr 1fr 1fr"]:not(.stepper-grid):not(.bonus-grid) {
+      .action-content [style*="grid-template-columns: 1fr 1fr"]:not(.stepper-grid):not(.bonus-grid):not(.totals-grid),
+      .action-content [style*="grid-template-columns: 1fr 1fr 1fr"]:not(.stepper-grid):not(.bonus-grid):not(.totals-grid) {
         grid-template-columns: 1fr !important;
       }
       /* Reduce spacing in turn summary box */
@@ -1373,7 +1373,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.16.21-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.16.22-beta</p>
       <div class="header-buttons hidden" id="header-buttons">
         <button class="header-btn" id="restart-btn">↺ New Game</button>
         <button class="header-btn" id="save-quit-btn">💾 Save & Quit</button>
@@ -7560,20 +7560,27 @@
       const typeNames = { scrolls: 'Scrolls', runes: 'Runes', amulets: 'Amulets' };
       
       let content = `<p style="color: var(--text-secondary); margin-bottom: 15px;">Which Enchantment slot did you buy from?</p>
-        <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">`;
-      
-      if (hasLeft) {
-        content += `<button class="btn enchant-slot-btn" data-slot="left" style="padding: 15px 25px;">
-          ${enchantIcon(offer.left, 22)} Left (${typeNames[offer.left]})
-        </button>`;
-      }
-      if (hasRight) {
-        content += `<button class="btn enchant-slot-btn" data-slot="right" style="padding: 15px 25px;">
-          ${enchantIcon(offer.right, 22)} Right (${typeNames[offer.right]})
-        </button>`;
-      }
-      
-      content += `</div>`;
+        <div style="display: flex; align-items: flex-start; gap: 0;">
+          <div style="flex: 1; text-align: center;">
+            <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 8px;">Left (3 Coins):</label>
+            ${hasLeft 
+              ? `<button class="btn enchant-slot-btn" data-slot="left" style="padding: 15px 20px; width: 100%; max-width: 140px;">
+                  ${enchantIcon(offer.left, 28)}<br><span style="font-size: 0.9rem;">${typeNames[offer.left]}</span>
+                </button>`
+              : `<div style="border: 2px dashed var(--border); border-radius: 6px; padding: 15px 20px; max-width: 140px; margin: 0 auto; color: var(--text-muted); font-style: italic; font-size: 0.85rem;">Empty</div>`
+            }
+          </div>
+          <div style="border-left: 2px dotted var(--text-muted); height: 80px; margin: 20px 12px 0 12px; opacity: 0.5;"></div>
+          <div style="flex: 1; text-align: center;">
+            <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 8px;">Right (4 Coins):</label>
+            ${hasRight 
+              ? `<button class="btn enchant-slot-btn" data-slot="right" style="padding: 15px 20px; width: 100%; max-width: 140px;">
+                  ${enchantIcon(offer.right, 28)}<br><span style="font-size: 0.9rem;">${typeNames[offer.right]}</span>
+                </button>`
+              : `<div style="border: 2px dashed var(--border); border-radius: 6px; padding: 15px 20px; max-width: 140px; margin: 0 auto; color: var(--text-muted); font-style: italic; font-size: 0.85rem;">Empty</div>`
+            }
+          </div>
+        </div>`;
       
       setActionContent(
         `Turn ${gameState.currentTurn} — Bought Enchantment`,
@@ -12864,7 +12871,7 @@
       const totalsCols = hasArcaneShardReward ? '1fr 1fr 1fr 1fr' : '1fr 1fr 1fr';
       const totalsGrid = `<div style="margin: 15px 0; padding: 15px; background: rgba(212, 168, 71, 0.15); border: 2px solid var(--amber); border-radius: 8px;">
              <div style="text-align: center; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px;">TOTAL</div>
-             <div style="display: grid; grid-template-columns: ${totalsCols}; gap: 10px;">
+             <div class="totals-grid" style="display: grid; grid-template-columns: ${totalsCols}; gap: 10px;">
                <div style="text-align: center;">
                  <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">${finalFame} ★</div>
                </div>
@@ -14754,19 +14761,15 @@
       
       content += `<p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;">Select the type${tilesToDraw > 1 ? 's' : ''} you drew:</p>`;
       
-      // Show current state for filled slot
-      if (!needsLeftRefill) {
-        content += `<p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 10px;">Left slot: ${enchantIcon(offer.left, 18)} ${typeNames[offer.left]} (already filled)</p>`;
-      }
-      
-      // Build slot selectors side by side
+      // Build slot selectors - always show both sides
       content += `<div style="display: flex; align-items: flex-start; gap: 0;">`;
       
-      // Left slot selection (if needed)
+      // Left slot
+      content += `<div style="flex: 1;">
+        <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 8px;">Left (3 Coins):</label>`;
+      
       if (needsLeftRefill) {
         content += `
-          <div style="flex: 1;">
-            <label style="color: var(--text-primary); font-size: 0.9rem; display: block; margin-bottom: 8px;">Left (3 Coins):</label>
             <div id="refill-left-options" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; max-width: 120px;">
               ${enchantTypes.map(type => `
                 <button class="btn refill-btn" data-slot="left" data-type="${type.id}"
@@ -14774,21 +14777,26 @@
                   ${type.id ? enchantIcon(type.id, 36) : '<span style="font-size: 24px; font-weight: bold;">✕</span>'}
                 </button>
               `).join('')}
-            </div>
-          </div>
-        `;
+            </div>`;
+      } else {
+        content += `
+            <div style="border: 2px solid var(--border); border-radius: 6px; padding: 12px; max-width: 120px; text-align: center;">
+              ${enchantIcon(offer.left, 32)}
+              <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;">${typeNames[offer.left]}</div>
+              <div style="color: var(--text-muted); font-size: 0.75rem; font-style: italic;">(filled)</div>
+            </div>`;
       }
+      content += `</div>`;
       
-      // Dotted divider (only if both slots need refilling)
-      if (needsLeftRefill && needsRightRefill) {
-        content += `<div style="border-left: 2px dotted var(--text-muted); height: 100px; margin: 20px 12px 0 12px; opacity: 0.5;"></div>`;
-      }
+      // Dotted divider - always show
+      content += `<div style="border-left: 2px dotted var(--text-muted); height: 100px; margin: 20px 12px 0 12px; opacity: 0.5;"></div>`;
       
-      // Right slot selection (if needed)
+      // Right slot
+      content += `<div style="flex: 1;">
+        <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 8px;">Right (4 Coins):</label>`;
+      
       if (needsRightRefill) {
         content += `
-          <div style="flex: 1;">
-            <label style="color: var(--text-primary); font-size: 0.9rem; display: block; margin-bottom: 8px;">Right (4 Coins):</label>
             <div id="refill-right-options" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; max-width: 120px;">
               ${enchantTypes.map(type => `
                 <button class="btn refill-btn" data-slot="right" data-type="${type.id}"
@@ -14796,10 +14804,16 @@
                   ${type.id ? enchantIcon(type.id, 36) : '<span style="font-size: 24px; font-weight: bold;">✕</span>'}
                 </button>
               `).join('')}
-            </div>
-          </div>
-        `;
+            </div>`;
+      } else {
+        content += `
+            <div style="border: 2px solid var(--border); border-radius: 6px; padding: 12px; max-width: 120px; text-align: center;">
+              ${enchantIcon(offer.right, 32)}
+              <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;">${typeNames[offer.right]}</div>
+              <div style="color: var(--text-muted); font-size: 0.75rem; font-style: italic;">(filled)</div>
+            </div>`;
       }
+      content += `</div>`;
       
       content += `</div>`;
       
@@ -15891,7 +15905,7 @@
          
          <div style="margin: 15px 0; padding: 15px; background: rgba(212, 168, 71, 0.15); border: 2px solid var(--amber); border-radius: 8px;">
            <div style="text-align: center; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px;">TOTAL</div>
-           <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+           <div class="totals-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
              <div style="text-align: center;">
                <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">${finalFame} ★</div>
              </div>
