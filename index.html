@@ -1373,7 +1373,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.16.22-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.16.23-beta</p>
       <div class="header-buttons hidden" id="header-buttons">
         <button class="header-btn" id="restart-btn">↺ New Game</button>
         <button class="header-btn" id="save-quit-btn">💾 Save & Quit</button>
@@ -12708,9 +12708,9 @@
       
       // Build the breakdown display
       let fameBreakdown = `
-        <div style="background: var(--bg-card); padding: 12px; border-radius: 6px; margin-bottom: 10px;">
-          <h4 style="margin: 0 0 10px 0; color: var(--text-primary);">★ Fame</h4>
-          <table style="width: 100%; font-size: 0.9rem;">
+        <div style="background: var(--bg-card); padding: 8px; border-radius: 6px;">
+          <h4 style="margin: 0 0 6px 0; color: var(--text-primary); font-size: 0.85rem;">★ Fame</h4>
+          <table style="width: 100%; font-size: 0.8rem;">
             <tr><td>Trick Yields</td><td style="text-align: right; font-weight: 600;">+${data.trickYields.fame}</td></tr>
             <tr><td>Card Bonus</td><td style="text-align: right; font-weight: 600;">+${data.cardBonus.fame}</td></tr>
             <tr><td>Links (${data.winningLinks})</td><td style="text-align: right; font-weight: 600;">+${data.winningLinks}</td></tr>
@@ -12748,9 +12748,9 @@
       
       // Coins breakdown
       let coinsBreakdown = `
-        <div style="background: var(--bg-card); padding: 12px; border-radius: 6px; margin-bottom: 10px;">
-          <h4 style="margin: 0 0 10px 0; color: var(--text-primary);">🪙 Coins</h4>
-          <table style="width: 100%; font-size: 0.9rem;">
+        <div style="background: var(--bg-card); padding: 8px; border-radius: 6px;">
+          <h4 style="margin: 0 0 6px 0; color: var(--text-primary); font-size: 0.85rem;">🪙 Coins</h4>
+          <table style="width: 100%; font-size: 0.8rem;">
             <tr><td>Trick Yields</td><td style="text-align: right; font-weight: 600;">+${data.trickYields.coins}</td></tr>
             <tr><td>Card Bonus</td><td style="text-align: right; font-weight: 600;">+${data.cardBonus.coins}</td></tr>
       `;
@@ -12781,9 +12781,9 @@
       
       // Shards breakdown
       let shardsBreakdown = `
-        <div style="background: var(--bg-card); padding: 12px; border-radius: 6px; margin-bottom: 10px;">
-          <h4 style="margin: 0 0 10px 0; color: var(--text-primary);">💎 Shards</h4>
-          <table style="width: 100%; font-size: 0.9rem;">
+        <div style="background: var(--bg-card); padding: 8px; border-radius: 6px;">
+          <h4 style="margin: 0 0 6px 0; color: var(--text-primary); font-size: 0.85rem;">💎 Shards</h4>
+          <table style="width: 100%; font-size: 0.8rem;">
             <tr><td>Trick Yields</td><td style="text-align: right; font-weight: 600;">+${data.trickYields.shards}</td></tr>
             <tr><td>Card Bonus</td><td style="text-align: right; font-weight: 600;">+${data.cardBonus.shards}</td></tr>
       `;
@@ -12813,9 +12813,9 @@
       let arcaneShardsBreakdown = '';
       if (hasArcane && enchantmentArcaneShards > 0) {
         arcaneShardsBreakdown = `
-          <div style="background: var(--bg-card); padding: 12px; border-radius: 6px; margin-bottom: 10px;">
-            <h4 style="margin: 0 0 10px 0; color: var(--text-primary);">✨ Arcane Shards</h4>
-            <table style="width: 100%; font-size: 0.9rem;">
+          <div style="background: var(--bg-card); padding: 8px; border-radius: 6px;">
+            <h4 style="margin: 0 0 6px 0; color: var(--text-primary); font-size: 0.85rem;">✨ Arcane Shards</h4>
+            <table style="width: 100%; font-size: 0.8rem;">
               <tr><td>Enchantment Reward</td><td style="text-align: right; font-weight: 600;">+${enchantmentArcaneShards}</td></tr>
             </table>
           </div>
@@ -12847,39 +12847,33 @@
         ? boardAction(`Update Heir's Arcane Shards (${currentArcaneShards} → ${currentArcaneShards + enchantmentArcaneShards})`)
         : '';
       
-      // Build the grid for breakdowns - dynamically add Arcane Shards column if needed
+      // Build the grid for breakdowns - always 2 columns for mobile readability
       const hasArcaneShardReward = hasArcane && enchantmentArcaneShards > 0;
-      const breakdownGrid = hasArcaneShardReward
-        ? `<div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; margin: 15px 0;">
+      const breakdownGrid = `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0;">
              ${fameBreakdown}
              ${coinsBreakdown}
              ${shardsBreakdown}
-             ${arcaneShardsBreakdown}
-           </div>`
-        : `<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 15px 0;">
-             ${fameBreakdown}
-             ${coinsBreakdown}
-             ${shardsBreakdown}
+             ${hasArcaneShardReward ? arcaneShardsBreakdown : ''}
            </div>`;
       
       // Build totals display - dynamically add Arcane Shards if needed
       const arcaneShardTotal = hasArcaneShardReward 
         ? `<div style="text-align: center;">
-               <div style="font-size: 1.5rem; font-weight: 700; color: var(--amber);">${enchantmentArcaneShards} ✨</div>
+               <div style="font-size: 1.3rem; font-weight: 700; color: var(--amber);">${enchantmentArcaneShards} ✨</div>
              </div>` 
         : '';
       const totalsCols = hasArcaneShardReward ? '1fr 1fr 1fr 1fr' : '1fr 1fr 1fr';
-      const totalsGrid = `<div style="margin: 15px 0; padding: 15px; background: rgba(212, 168, 71, 0.15); border: 2px solid var(--amber); border-radius: 8px;">
-             <div style="text-align: center; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px;">TOTAL</div>
-             <div class="totals-grid" style="display: grid; grid-template-columns: ${totalsCols}; gap: 10px;">
+      const totalsGrid = `<div style="margin: 10px 0; padding: 10px; background: rgba(212, 168, 71, 0.15); border: 2px solid var(--amber); border-radius: 8px;">
+             <div style="text-align: center; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 4px;">TOTAL</div>
+             <div class="totals-grid" style="display: grid; grid-template-columns: ${totalsCols}; gap: 8px;">
                <div style="text-align: center;">
-                 <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">${finalFame} ★</div>
+                 <div style="font-size: 1.3rem; font-weight: 700; color: var(--text-primary);">${finalFame} ★</div>
                </div>
                <div style="text-align: center;">
-                 <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">${finalCoins} 🪙</div>
+                 <div style="font-size: 1.3rem; font-weight: 700; color: var(--text-primary);">${finalCoins} 🪙</div>
                </div>
                <div style="text-align: center;">
-                 <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">${finalShards} 💎</div>
+                 <div style="font-size: 1.3rem; font-weight: 700; color: var(--text-primary);">${finalShards} 💎</div>
                </div>
                ${arcaneShardTotal}
              </div>
@@ -14770,7 +14764,7 @@
       
       if (needsLeftRefill) {
         content += `
-            <div id="refill-left-options" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; max-width: 120px;">
+            <div id="refill-left-options" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
               ${enchantTypes.map(type => `
                 <button class="btn refill-btn" data-slot="left" data-type="${type.id}"
                         style="width: 52px; height: 52px; padding: 8px; display: flex; align-items: center; justify-content: center;">
@@ -14780,7 +14774,7 @@
             </div>`;
       } else {
         content += `
-            <div style="border: 2px solid var(--border); border-radius: 6px; padding: 12px; max-width: 120px; text-align: center;">
+            <div style="border: 2px solid var(--border); border-radius: 6px; padding: 12px; text-align: center;">
               ${enchantIcon(offer.left, 32)}
               <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;">${typeNames[offer.left]}</div>
               <div style="color: var(--text-muted); font-size: 0.75rem; font-style: italic;">(filled)</div>
@@ -14797,7 +14791,7 @@
       
       if (needsRightRefill) {
         content += `
-            <div id="refill-right-options" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; max-width: 120px;">
+            <div id="refill-right-options" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
               ${enchantTypes.map(type => `
                 <button class="btn refill-btn" data-slot="right" data-type="${type.id}"
                         style="width: 52px; height: 52px; padding: 8px; display: flex; align-items: center; justify-content: center;">
@@ -14807,7 +14801,7 @@
             </div>`;
       } else {
         content += `
-            <div style="border: 2px solid var(--border); border-radius: 6px; padding: 12px; max-width: 120px; text-align: center;">
+            <div style="border: 2px solid var(--border); border-radius: 6px; padding: 12px; text-align: center;">
               ${enchantIcon(offer.right, 32)}
               <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;">${typeNames[offer.right]}</div>
               <div style="color: var(--text-muted); font-size: 0.75rem; font-style: italic;">(filled)</div>
@@ -15807,10 +15801,10 @@
       
       // Build Fame breakdown
       let fameBreakdown = `
-        <div style="background: var(--bg-card); padding: 12px; border-radius: 6px;">
-          <h4 style="margin: 0 0 10px 0; color: var(--text-primary);">★ Fame Breakdown</h4>
-          <table style="width: 100%; font-size: 0.9rem;">
-            <tr><td>Base Fame (during game)</td><td style="text-align: right; font-weight: 600;">${baseFame}</td></tr>`;
+        <div style="background: var(--bg-card); padding: 8px; border-radius: 6px;">
+          <h4 style="margin: 0 0 6px 0; color: var(--text-primary); font-size: 0.85rem;">★ Fame</h4>
+          <table style="width: 100%; font-size: 0.8rem;">
+            <tr><td>Base Fame</td><td style="text-align: right; font-weight: 600;">${baseFame}</td></tr>`;
       
       if (trickCount > 0) {
         fameBreakdown += `<tr><td>Tricks on cards (${rawTrickFame} - ${trickCount})</td><td style="text-align: right; font-weight: 600;">+${adjustedTrickFame}</td></tr>`;
@@ -15846,9 +15840,9 @@
       
       // Build Coins breakdown (informational only)
       let coinsBreakdown = `
-        <div style="background: var(--bg-card); padding: 12px; border-radius: 6px;">
-          <h4 style="margin: 0 0 10px 0; color: var(--text-primary);">🪙 Coins</h4>
-          <table style="width: 100%; font-size: 0.9rem;">
+        <div style="background: var(--bg-card); padding: 8px; border-radius: 6px;">
+          <h4 style="margin: 0 0 6px 0; color: var(--text-primary); font-size: 0.85rem;">🪙 Coins</h4>
+          <table style="width: 100%; font-size: 0.8rem;">
             <tr><td>Tracked Coins</td><td style="text-align: right; font-weight: 600;">${baseCoins}</td></tr>`;
       
       if (trickCount > 0) {
@@ -15857,14 +15851,14 @@
       
       coinsBreakdown += `
           </table>
-          <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 8px; font-style: italic;">Heir does not score Fame from leftover Coins</p>
+          <p style="color: var(--text-muted); font-size: 0.75rem; margin-top: 4px; font-style: italic;">No Fame from leftover Coins</p>
         </div>`;
       
       // Build Shards breakdown
       let shardsBreakdown = `
-        <div style="background: var(--bg-card); padding: 12px; border-radius: 6px;">
-          <h4 style="margin: 0 0 10px 0; color: var(--text-primary);">💎 Shards</h4>
-          <table style="width: 100%; font-size: 0.9rem;">
+        <div style="background: var(--bg-card); padding: 8px; border-radius: 6px;">
+          <h4 style="margin: 0 0 6px 0; color: var(--text-primary); font-size: 0.85rem;">💎 Shards</h4>
+          <table style="width: 100%; font-size: 0.8rem;">
             <tr><td>Tracked Shards</td><td style="text-align: right; font-weight: 600;">${baseShards}</td></tr>`;
       
       if (rawTrickShards > 0) {
@@ -15897,23 +15891,23 @@
       
       setActionContent(
         'End Game Scoring (Step 2 of 2)',
-        `<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 15px 0;">
+        `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0;">
            ${fameBreakdown}
            ${coinsBreakdown}
            ${shardsBreakdown}
          </div>
          
-         <div style="margin: 15px 0; padding: 15px; background: rgba(212, 168, 71, 0.15); border: 2px solid var(--amber); border-radius: 8px;">
-           <div style="text-align: center; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px;">TOTAL</div>
-           <div class="totals-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+         <div style="margin: 10px 0; padding: 10px; background: rgba(212, 168, 71, 0.15); border: 2px solid var(--amber); border-radius: 8px;">
+           <div style="text-align: center; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 4px;">TOTAL</div>
+           <div class="totals-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
              <div style="text-align: center;">
-               <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">${finalFame} ★</div>
+               <div style="font-size: 1.3rem; font-weight: 700; color: var(--text-primary);">${finalFame} ★</div>
              </div>
              <div style="text-align: center;">
-               <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">${finalCoins} 🪙</div>
+               <div style="font-size: 1.3rem; font-weight: 700; color: var(--text-primary);">${finalCoins} 🪙</div>
              </div>
              <div style="text-align: center;">
-               <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">${finalShards} 💎</div>
+               <div style="font-size: 1.3rem; font-weight: 700; color: var(--text-primary);">${finalShards} 💎</div>
              </div>
            </div>
          </div>
