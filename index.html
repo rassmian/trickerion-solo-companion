@@ -1373,7 +1373,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.16.28-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.16.29-beta</p>
       <div class="header-buttons hidden" id="header-buttons">
         <button class="header-btn" id="restart-btn">↺ New Game</button>
         <button class="header-btn" id="save-quit-btn">💾 Save & Quit</button>
@@ -7468,8 +7468,8 @@
           <p style="margin-top: 10px; color: var(--text-primary);">${message}</p>
         </div>`,
         [
-          { text: 'Confirm', action: onConfirm },
-          { text: 'Cancel', action: () => showPlayerTurnScreen() }
+          { text: 'Cancel', action: () => showPlayerTurnScreen() },
+          { text: 'Confirm', action: onConfirm }
         ]
       );
     }
@@ -7512,6 +7512,7 @@
           </div>
         </div>`,
         [
+          { text: 'Cancel', action: () => showPlayerTurnScreen() },
           { text: 'Confirm', action: () => {
             const diff = newSupplyCount - currentSupply;
             gameState.arcaneShardsSupply = newSupplyCount;
@@ -7524,8 +7525,7 @@
               message = `Supply unchanged: ${newSupplyCount} Arcane Shard(s)`;
             }
             showPlayerActionConfirmation('Arcane Shards', message);
-          }},
-          { text: 'Cancel', action: () => showPlayerTurnScreen() }
+          }}
         ]
       );
       
@@ -11958,20 +11958,20 @@
          
          ${redLotusHtml}`,
         [
-          { text: 'Continue →', action: () => {
-            if (isRedLotus) {
-              heirPerformanceTempData.redLotusTricks = parseInt($('#red-lotus-tricks')?.dataset?.value) || 0;
-            }
-            showHeirPerformanceStep2b_P33Check();
-          }, id: 'continue-btn', disabled: true },
-          { text: 'No Heir Tricks on this card', action: () => {
+          { text: 'No Heir Tricks', action: () => {
             heirPerformanceTempData.trickYields = { fame: 0, coins: 0, shards: 0 };
             heirPerformanceTempData.trickCountsByLevel = { level1: 0, level2: 0, level3: 0 };
             if (isRedLotus) {
               heirPerformanceTempData.redLotusTricks = parseInt($('#red-lotus-tricks')?.dataset?.value) || 0;
             }
             showHeirPerformanceStep2b_P33Check();
-          }}
+          }},
+          { text: 'Continue →', action: () => {
+            if (isRedLotus) {
+              heirPerformanceTempData.redLotusTricks = parseInt($('#red-lotus-tricks')?.dataset?.value) || 0;
+            }
+            showHeirPerformanceStep2b_P33Check();
+          }, id: 'continue-btn', disabled: true }
         ]
       );
       
@@ -12098,18 +12098,6 @@
          
          ${redLotusHtml}`,
         [
-          { text: 'Continue →', action: () => {
-            // Save inputs
-            heirPerformanceTempData.cardBonus = {
-              fame: parseInt($('#card-bonus-fame')?.dataset?.value) || 0,
-              coins: parseInt($('#card-bonus-coins')?.dataset?.value) || 0,
-              shards: parseInt($('#card-bonus-shards')?.dataset?.value) || 0
-            };
-            if (isRedLotus) {
-              heirPerformanceTempData.redLotusTricks = parseInt($('#red-lotus-tricks')?.dataset?.value) || 0;
-            }
-            showHeirPerformanceStep2b_P33Check();
-          }},
           { text: '← Back', action: () => {
             // Save current inputs before going back
             heirPerformanceTempData.cardBonus = {
@@ -12121,6 +12109,18 @@
               heirPerformanceTempData.redLotusTricks = parseInt($('#red-lotus-tricks')?.dataset?.value) || 0;
             }
             showHeirPerformanceStep1_TrickYields(heirPerformanceTempData.winningCard, heirPerformanceTempData.results);
+          }},
+          { text: 'Continue →', action: () => {
+            // Save inputs
+            heirPerformanceTempData.cardBonus = {
+              fame: parseInt($('#card-bonus-fame')?.dataset?.value) || 0,
+              coins: parseInt($('#card-bonus-coins')?.dataset?.value) || 0,
+              shards: parseInt($('#card-bonus-shards')?.dataset?.value) || 0
+            };
+            if (isRedLotus) {
+              heirPerformanceTempData.redLotusTricks = parseInt($('#red-lotus-tricks')?.dataset?.value) || 0;
+            }
+            showHeirPerformanceStep2b_P33Check();
           }}
         ]
       );
@@ -12300,12 +12300,12 @@
         `Turn ${gameState.currentTurn} — Performance: Enchanted Tricks`,
         content,
         [
-          { text: 'Continue →', action: () => showHeirPerformanceStep2d_DiceSelection(), id: 'continue-btn', disabled: true },
-          { text: 'None on this card', action: () => {
+          { text: 'No Enchantments', action: () => {
             heirPerformanceTempData.enchantmentReward = { fame: 0, coins: 0, shards: 0, arcaneShards: 0, saCard: false };
             heirPerformanceTempData.selectedEnchantedTricks = [];
             showHeirPerformanceStep3_FinalTotals();
-          }}
+          }},
+          { text: 'Continue →', action: () => showHeirPerformanceStep2d_DiceSelection(), id: 'continue-btn', disabled: true }
         ]
       );
       
@@ -12977,6 +12977,9 @@
          
          ${boardAction("Return YOUR Trick markers (if any) from card " + winningCard + " to your supply")}`,
         [
+          { text: '← Back', action: () => {
+            showHeirPerformanceStep1_TrickYields(heirPerformanceTempData.winningCard, heirPerformanceTempData.results);
+          }},
           { text: 'Done', action: () => {
             // Update gameState with final totals
             gameState.heir.fame += finalFame;
@@ -13009,9 +13012,6 @@
             } else {
               advancePhase();
             }
-          }},
-          { text: '← Back', action: () => {
-            showHeirPerformanceStep1_TrickYields(heirPerformanceTempData.winningCard, heirPerformanceTempData.results);
           }}
         ]
       );
@@ -13935,8 +13935,8 @@
         `Turn ${gameState.currentTurn} — Classroom: Enchanted Tricks`,
         content,
         [
-          { text: 'Continue →', action: () => showClassroomEnchantmentDiceSelection(), id: 'classroom-continue-btn', disabled: true },
-          { text: 'None in Classrooms', action: () => continueAfterClassroomEnchantments() }
+          { text: 'No Enchantments', action: () => continueAfterClassroomEnchantments() },
+          { text: 'Continue →', action: () => showClassroomEnchantmentDiceSelection(), id: 'classroom-continue-btn', disabled: true }
         ]
       );
       
@@ -16142,15 +16142,15 @@
          
          ${noteBox("The Heir's final Fame score is <strong>" + finalFame + " ★</strong>")}`,
         [
-          { text: 'Continue to Player Scoring →', action: () => {
+          { text: '← Back', action: () => showEndGameStep1_TricksOnCards() },
+          { text: 'Player Scoring →', action: () => {
             // Update gameState with final values
             gameState.heir.fame = finalFame;
             gameState.heir.coins = finalCoins;
             gameState.heir.shards = finalShards;
             updateGameDisplay();
             showEndGameStep3_PlayerGuide(finalFame);
-          }},
-          { text: '← Back', action: () => showEndGameStep1_TricksOnCards() }
+          }}
         ]
       );
     }
