@@ -6505,14 +6505,23 @@
         button.addEventListener('click', btn.action);
         if (btn.id) button.id = btn.id;
         if (btn.disabled) button.disabled = true;
-        if (buttons.length === 2) {
-          button.style.flex = '1';
-          button.style.padding = '14px 10px';
-        }
         btnContainer.appendChild(button);
       });
-      if (buttons.length === 2) btnContainer.style.flexWrap = 'nowrap';
-      else btnContainer.style.flexWrap = 'wrap';
+      // Force side-by-side for 2-button pairs where both labels are short
+      if (buttons.length === 2) {
+        const totalChars = buttons[0].text.length + buttons[1].text.length;
+        if (totalChars <= 28) {
+          btnContainer.style.flexWrap = 'nowrap';
+          btnContainer.querySelectorAll('.btn').forEach(b => {
+            b.style.flex = '1';
+            b.style.padding = '14px 10px';
+          });
+        } else {
+          btnContainer.style.flexWrap = 'wrap';
+        }
+      } else {
+        btnContainer.style.flexWrap = 'wrap';
+      }
       
       // Scroll action panel into view (instant, no animation)
       const actionPanel = $('.action-panel');
