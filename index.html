@@ -1373,7 +1373,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.16.26-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.16.27-beta</p>
       <div class="header-buttons hidden" id="header-buttons">
         <button class="header-btn" id="restart-btn">↺ New Game</button>
         <button class="header-btn" id="save-quit-btn">💾 Save & Quit</button>
@@ -6550,8 +6550,8 @@
       'p16': ['performance'],                     // Coins count as Fame during performance
       'p17': ['theater'],                         // Enhance at Theater
       'p18': ['workshop'],                        // Enhance receives 2 AP
-      'p19': ['performance', 'end-turn', 'theater', 'end-game', 'classroom'],  // +1 extra shard when receiving shards
-      'p20': ['performance', 'end-turn', 'theater', 'end-game', 'classroom'],  // Receiving shards gives +2 Fame
+      'p19': ['performance', 'end-turn', 'theater', 'end-game', 'classroom', 'shared-links'],  // +1 extra shard when receiving shards
+      'p20': ['performance', 'end-turn', 'theater', 'end-game', 'classroom', 'shared-links'],  // Receiving shards gives +2 Fame
       'p21': ['assignment'],                      // Pay 3 coins for +2 slots
       'p22': ['place-characters'],                // Place 2 characters at once
       'p25': ['place-characters'],                // All characters 1 base AP
@@ -7468,8 +7468,8 @@
           <p style="margin-top: 10px; color: var(--text-primary);">${message}</p>
         </div>`,
         [
-          { text: 'Cancel', action: () => showPlayerTurnScreen() },
-          { text: 'Confirm', action: onConfirm }
+          { text: 'Confirm', action: onConfirm },
+          { text: 'Cancel', action: () => showPlayerTurnScreen() }
         ]
       );
     }
@@ -7512,7 +7512,6 @@
           </div>
         </div>`,
         [
-          { text: 'Cancel', action: () => showPlayerTurnScreen() },
           { text: 'Confirm', action: () => {
             const diff = newSupplyCount - currentSupply;
             gameState.arcaneShardsSupply = newSupplyCount;
@@ -7525,7 +7524,8 @@
               message = `Supply unchanged: ${newSupplyCount} Arcane Shard(s)`;
             }
             showPlayerActionConfirmation('Arcane Shards', message);
-          }}
+          }},
+          { text: 'Cancel', action: () => showPlayerTurnScreen() }
         ]
       );
       
@@ -7608,8 +7608,8 @@
     
     function showSharedLinksFromPlayerTurn() {
       // Same as showPlayerLinksWithHeirTricks but returns to Player Turn screen
-      
-      const prophecyReminder = getProphecyReminderHtml('performance');
+      // Only p19/p20 are relevant here (shard-receiving context, NOT performance phase)
+      const prophecyReminder = getProphecyReminderHtml('shared-links');
       
       // Check for shard-related prophecies
       const isExtraShard = gameState.activeProphecy?.id === 'p19';
@@ -7762,8 +7762,6 @@
         `${heirTurnBox(`Placing character ${heirPlaced + 1} of ${heirTotal}`)}
          
          ${prophecyReminder}
-         
-         ${infoBox("The Heir sends whichever Character is assigned to the <strong>highest priority Location</strong> (not left to right).")}
          
          ${exceptionBox("Theater is NOT contested if the only character remaining to place there (for either side) is a Magician.")}
          ${exceptionBox("Workshop is NEVER contested.")}
@@ -10223,7 +10221,7 @@
            <div style="display: flex; flex-direction: column; gap: 15px;">
              <div>
                <p style="margin-bottom: 10px;">★ Links created</p>
-               <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+               <div style="display: flex; gap: 8px;">
                  <button class="btn theater-links-btn" data-links="0" style="min-width: 44px; flex: 1;">0</button>
                  <button class="btn theater-links-btn btn-selected" data-links="1" style="min-width: 44px; flex: 1;">1</button>
                  <button class="btn theater-links-btn" data-links="2" style="min-width: 44px; flex: 1;">2</button>
@@ -10232,7 +10230,7 @@
              </div>
              <div>
                <p style="margin-bottom: 10px;">💎 Shard-space links</p>
-               <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+               <div style="display: flex; gap: 8px;">
                  <button class="btn theater-shards-btn btn-selected" data-shards="0" style="min-width: 44px; flex: 1;">0</button>
                  <button class="btn theater-shards-btn" data-shards="1" style="min-width: 44px; flex: 1;">1</button>
                  <button class="btn theater-shards-btn" data-shards="2" style="min-width: 44px; flex: 1;">2</button>
@@ -11133,7 +11131,11 @@
               gameState.performanceOrder = 'heir-first';
               askIfPlayerPerforming();
             }},
-            { text: '⏭️ No One Performs', action: () => handleEndTurnPhase() }
+            { text: '⏭️ No One Performs', action: () => {
+              gameState.currentPhaseIndex = 6; // End Turn phase
+              updatePhaseDisplay();
+              handleEndTurnPhase();
+            }}
           ]
         );
       } else {
@@ -11156,7 +11158,11 @@
               gameState.performanceOrder = 'heir-first';
               showHeirPerformingCheck();
             }},
-            { text: '⏭️ No One Performs', action: () => handleEndTurnPhase() }
+            { text: '⏭️ No One Performs', action: () => {
+              gameState.currentPhaseIndex = 6; // End Turn phase
+              updatePhaseDisplay();
+              handleEndTurnPhase();
+            }}
           ]
         );
       }
@@ -12092,18 +12098,6 @@
          
          ${redLotusHtml}`,
         [
-          { text: '← Back', action: () => {
-            // Save current inputs before going back
-            heirPerformanceTempData.cardBonus = {
-              fame: parseInt($('#card-bonus-fame')?.dataset?.value) || 0,
-              coins: parseInt($('#card-bonus-coins')?.dataset?.value) || 0,
-              shards: parseInt($('#card-bonus-shards')?.dataset?.value) || 0
-            };
-            if (isRedLotus) {
-              heirPerformanceTempData.redLotusTricks = parseInt($('#red-lotus-tricks')?.dataset?.value) || 0;
-            }
-            showHeirPerformanceStep1_TrickYields(heirPerformanceTempData.winningCard, heirPerformanceTempData.results);
-          }},
           { text: 'Continue →', action: () => {
             // Save inputs
             heirPerformanceTempData.cardBonus = {
@@ -12115,6 +12109,18 @@
               heirPerformanceTempData.redLotusTricks = parseInt($('#red-lotus-tricks')?.dataset?.value) || 0;
             }
             showHeirPerformanceStep2b_P33Check();
+          }},
+          { text: '← Back', action: () => {
+            // Save current inputs before going back
+            heirPerformanceTempData.cardBonus = {
+              fame: parseInt($('#card-bonus-fame')?.dataset?.value) || 0,
+              coins: parseInt($('#card-bonus-coins')?.dataset?.value) || 0,
+              shards: parseInt($('#card-bonus-shards')?.dataset?.value) || 0
+            };
+            if (isRedLotus) {
+              heirPerformanceTempData.redLotusTricks = parseInt($('#red-lotus-tricks')?.dataset?.value) || 0;
+            }
+            showHeirPerformanceStep1_TrickYields(heirPerformanceTempData.winningCard, heirPerformanceTempData.results);
           }}
         ]
       );
@@ -12971,9 +12977,6 @@
          
          ${boardAction("Return YOUR Trick markers (if any) from card " + winningCard + " to your supply")}`,
         [
-          { text: '← Back', action: () => {
-            showHeirPerformanceStep1_TrickYields(heirPerformanceTempData.winningCard, heirPerformanceTempData.results);
-          }},
           { text: 'Done', action: () => {
             // Update gameState with final totals
             gameState.heir.fame += finalFame;
@@ -13006,6 +13009,9 @@
             } else {
               advancePhase();
             }
+          }},
+          { text: '← Back', action: () => {
+            showHeirPerformanceStep1_TrickYields(heirPerformanceTempData.winningCard, heirPerformanceTempData.results);
           }}
         ]
       );
@@ -13133,7 +13139,7 @@
       }).join('');
       
       const html = `
-        <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 10px; flex-wrap: wrap;">
+        <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 10px;">
           ${slotsHtml}
         </div>
         <div style="display: flex; justify-content: center; gap: 20px; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;">
@@ -16136,7 +16142,6 @@
          
          ${noteBox("The Heir's final Fame score is <strong>" + finalFame + " ★</strong>")}`,
         [
-          { text: '← Back', action: () => showEndGameStep1_TricksOnCards() },
           { text: 'Continue to Player Scoring →', action: () => {
             // Update gameState with final values
             gameState.heir.fame = finalFame;
@@ -16144,7 +16149,8 @@
             gameState.heir.shards = finalShards;
             updateGameDisplay();
             showEndGameStep3_PlayerGuide(finalFame);
-          }}
+          }},
+          { text: '← Back', action: () => showEndGameStep1_TricksOnCards() }
         ]
       );
     }
