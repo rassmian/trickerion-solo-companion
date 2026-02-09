@@ -6505,8 +6505,14 @@
         button.addEventListener('click', btn.action);
         if (btn.id) button.id = btn.id;
         if (btn.disabled) button.disabled = true;
+        if (buttons.length === 2) {
+          button.style.flex = '1';
+          button.style.padding = '14px 10px';
+        }
         btnContainer.appendChild(button);
       });
+      if (buttons.length === 2) btnContainer.style.flexWrap = 'nowrap';
+      else btnContainer.style.flexWrap = 'wrap';
       
       // Scroll action panel into view (instant, no animation)
       const actionPanel = $('.action-panel');
