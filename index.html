@@ -1373,7 +1373,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.16.27-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.16.28-beta</p>
       <div class="header-buttons hidden" id="header-buttons">
         <button class="header-btn" id="restart-btn">↺ New Game</button>
         <button class="header-btn" id="save-quit-btn">💾 Save & Quit</button>
@@ -11958,6 +11958,12 @@
          
          ${redLotusHtml}`,
         [
+          { text: 'Continue →', action: () => {
+            if (isRedLotus) {
+              heirPerformanceTempData.redLotusTricks = parseInt($('#red-lotus-tricks')?.dataset?.value) || 0;
+            }
+            showHeirPerformanceStep2b_P33Check();
+          }, id: 'continue-btn', disabled: true },
           { text: 'No Heir Tricks on this card', action: () => {
             heirPerformanceTempData.trickYields = { fame: 0, coins: 0, shards: 0 };
             heirPerformanceTempData.trickCountsByLevel = { level1: 0, level2: 0, level3: 0 };
@@ -11965,13 +11971,7 @@
               heirPerformanceTempData.redLotusTricks = parseInt($('#red-lotus-tricks')?.dataset?.value) || 0;
             }
             showHeirPerformanceStep2b_P33Check();
-          }},
-          { text: 'Continue →', action: () => {
-            if (isRedLotus) {
-              heirPerformanceTempData.redLotusTricks = parseInt($('#red-lotus-tricks')?.dataset?.value) || 0;
-            }
-            showHeirPerformanceStep2b_P33Check();
-          }, id: 'continue-btn', disabled: true }
+          }}
         ]
       );
       
@@ -12300,12 +12300,12 @@
         `Turn ${gameState.currentTurn} — Performance: Enchanted Tricks`,
         content,
         [
+          { text: 'Continue →', action: () => showHeirPerformanceStep2d_DiceSelection(), id: 'continue-btn', disabled: true },
           { text: 'None on this card', action: () => {
             heirPerformanceTempData.enchantmentReward = { fame: 0, coins: 0, shards: 0, arcaneShards: 0, saCard: false };
             heirPerformanceTempData.selectedEnchantedTricks = [];
             showHeirPerformanceStep3_FinalTotals();
-          }},
-          { text: 'Continue →', action: () => showHeirPerformanceStep2d_DiceSelection(), id: 'continue-btn', disabled: true }
+          }}
         ]
       );
       
@@ -13935,8 +13935,8 @@
         `Turn ${gameState.currentTurn} — Classroom: Enchanted Tricks`,
         content,
         [
-          { text: 'None in Classrooms', action: () => continueAfterClassroomEnchantments() },
-          { text: 'Continue →', action: () => showClassroomEnchantmentDiceSelection(), id: 'classroom-continue-btn', disabled: true }
+          { text: 'Continue →', action: () => showClassroomEnchantmentDiceSelection(), id: 'classroom-continue-btn', disabled: true },
+          { text: 'None in Classrooms', action: () => continueAfterClassroomEnchantments() }
         ]
       );
       
