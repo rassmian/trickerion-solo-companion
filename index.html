@@ -523,8 +523,8 @@
         padding: 15px;
       }
       /* Force inline grids to stack on mobile */
-      .action-content [style*="grid-template-columns: 1fr 1fr"]:not(.stepper-grid):not(.bonus-grid):not(.totals-grid):not(.breakdown-grid):not(.refill-grid),
-      .action-content [style*="grid-template-columns: 1fr 1fr 1fr"]:not(.stepper-grid):not(.bonus-grid):not(.totals-grid):not(.breakdown-grid):not(.refill-grid) {
+      .action-content [style*="grid-template-columns: 1fr 1fr"]:not(.stepper-grid):not(.bonus-grid):not(.totals-grid):not(.breakdown-grid):not(.refill-grid):not(.ap-grid):not(.turn-summary-grid),
+      .action-content [style*="grid-template-columns: 1fr 1fr 1fr"]:not(.stepper-grid):not(.bonus-grid):not(.totals-grid):not(.breakdown-grid):not(.refill-grid):not(.ap-grid):not(.turn-summary-grid) {
         grid-template-columns: 1fr !important;
       }
       /* Reduce spacing in turn summary box */
@@ -1373,7 +1373,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.16.32-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.16.33-beta</p>
       <div class="header-buttons hidden" id="header-buttons">
         <button class="header-btn" id="restart-btn">↺ New Game</button>
         <button class="header-btn" id="save-quit-btn">💾 Save & Quit</button>
@@ -3461,7 +3461,7 @@
 
     // AP button grid helper — generates 2 rows of 3 (1-5 + 6*)
     const buildAPButtonGrid = (btnClass = 'ap-btn') => `
-      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 20px; max-width: 340px;">
+      <div class="ap-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 20px; max-width: 340px;">
         ${[1,2,3,4,5].map(ap => `
           <button class="btn ${btnClass}" data-ap="${ap}" style="min-width: 50px;">${ap} AP</button>
         `).join('')}
@@ -7118,7 +7118,7 @@
            <div style="font-size: 1.4rem; color: var(--amber); margin-bottom: 20px;">✦ Turn ${gameState.currentTurn} Setup Complete ✦</div>
            
            <div class="turn-summary-box" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 20px; text-align: left;">
-             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+             <div class="turn-summary-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                <div>
                  <div style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 4px;">Plan Card</div>
                  <div style="color: var(--text-primary); font-size: 1.1rem;">${isPerformCard ? 'Perform' : 'Set Up'}</div>
