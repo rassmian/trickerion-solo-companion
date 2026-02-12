@@ -1373,7 +1373,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.16.33-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.16.34-beta</p>
       <div class="header-buttons hidden" id="header-buttons">
         <button class="header-btn" id="restart-btn">↺ New Game</button>
         <button class="header-btn" id="save-quit-btn">💾 Save & Quit</button>
@@ -3458,6 +3458,10 @@
     };
 
     const noteBox = (text) => infoBox(text, 'NOTE');
+
+    const exceptionBox = (text, label = 'EXCEPTION') => {
+      return `<div style="background: var(--exception-bg); border-left: 3px solid var(--exception); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--exception); font-weight: 600;">⚠️ ${label}:</span> ${text}</div>`;
+    };
 
     // AP button grid helper — generates 2 rows of 3 (1-5 + 6*)
     const buildAPButtonGrid = (btnClass = 'ap-btn') => `
@@ -7872,7 +7876,6 @@
 
     function showContestedCheck(fromBackButton = false) {
       // Check for contested locations
-      const exceptionBox = (text) => `<div style="background: var(--exception-bg); border-left: 3px solid var(--exception); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--exception); font-weight: 600;">⚠️ EXCEPTION:</span> ${text}</div>`;
       
       
       const heirTurnBox = (text) => `<div style="background: rgba(212, 168, 71, 0.15); border: 2px solid var(--amber); padding: 15px; margin: 15px 0; border-radius: 8px; text-align: center;"><span style="color: var(--amber); font-weight: 600; font-size: 1.1rem;">🎭 HEIR'S TURN</span><p style="margin-top: 8px; color: var(--text-primary);">${text}</p></div>`;
@@ -10132,7 +10135,6 @@
 
     function showTheaterNonMagicianPreCheck() {
       // Pre-check: Does Heir have any Trick markers available?
-      const exceptionBox = (text) => `<div style="background: var(--exception-bg); border-left: 3px solid var(--exception); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--exception); font-weight: 600;">⚠️ IMPORTANT:</span> ${text}</div>`;
       
       setActionContent(
         `Turn ${gameState.currentTurn} — Theater (Non-Magician)`,
@@ -10151,11 +10153,9 @@
     }
 
     function showTheaterNoMarkers() {
-      const exceptionBox = (text) => `<div style="background: var(--exception-bg); border-left: 3px solid var(--exception); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--exception); font-weight: 600;">⚠️ IMPORTANT:</span> ${text}</div>`;
-      
       setActionContent(
         `Turn ${gameState.currentTurn} — Theater`,
-        `${exceptionBox("Cannot send to Theater — no Trick markers available!")}
+        `${exceptionBox("Cannot send to Theater — no Trick markers available!", "IMPORTANT")}
          
          <p style="margin: 15px 0;">The Heir must send a different Character to a different location instead.</p>
          
@@ -10167,7 +10167,6 @@
     }
 
     function showTheaterAPInput() {
-      const exceptionBox = (text) => `<div style="background: var(--exception-bg); border-left: 3px solid var(--exception); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--exception); font-weight: 600;">⚠️ EXCEPTION:</span> ${text}</div>`;
       const heirProphecyReminder = getHeirProphecyReminderHtml('heir-theater-nonmagician');
       const opticoReminder = getOpticoAPReminderHtml();
       const mechanikerReminder = getMechanikerAPReminderHtml();
@@ -10369,8 +10368,6 @@
     }
 
     function showTheaterMarkerDoPlacement(actionPoints, totalMarkers, currentMarker, hasLink, priorityType) {
-      
-      const exceptionBox = (text) => `<div style="background: var(--exception-bg); border-left: 3px solid var(--exception); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--exception); font-weight: 600;">⚠️ EXCEPTION:</span> ${text}</div>`;
       
       const markersRemaining = totalMarkers - currentMarker;
       
@@ -10942,8 +10939,7 @@
         return;
       }
       
-      // TODO: Implement full Renovate logic
-      // For now, ask if conditions are met
+      // Ask if Renovate conditions are met
       setActionContent(
         `Turn ${gameState.currentTurn} — Academy: Renovate Check`,
         `<p><strong>Check Renovate conditions:</strong></p>
@@ -15520,76 +15516,6 @@
       processSACardUsageFull();
     }
     
-    function showSACardUsageQuestionFull() {
-      const assignments = gameState.heir.specialAssignments;
-      
-      // Build location buttons only for colors they have
-      let locationButtons = '';
-      if (assignments.theater > 0) locationButtons += `<button class="btn sa-select-btn-full" data-color="theater" style="background: rgba(152, 48, 48, 0.2); border: 2px solid #983030;">Theater</button>`;
-      if (assignments.downtown > 0) locationButtons += `<button class="btn sa-select-btn-full" data-color="downtown" style="background: rgba(201, 184, 74, 0.2); border: 2px solid #C9B84A;">Downtown</button>`;
-      if (assignments.academy > 0) locationButtons += `<button class="btn sa-select-btn-full" data-color="academy" style="background: rgba(74, 144, 201, 0.2); border: 2px solid #4A90C9;">Academy</button>`;
-      if (assignments.market > 0) locationButtons += `<button class="btn sa-select-btn-full" data-color="market" style="background: rgba(196, 128, 64, 0.2); border: 2px solid #C48040;">Market</button>`;
-      if (assignments.workshop > 0) locationButtons += `<button class="btn sa-select-btn-full" data-color="workshop" style="background: rgba(200, 112, 96, 0.2); border: 2px solid #C87060;">Workshop</button>`;
-      
-      setActionContent(
-        `Turn ${gameState.currentTurn} — End Turn (SA Cards)`,
-        `<p><strong>Did the Heir use a Special Assignment card this turn?</strong></p>
-         
-         
-         <div style="background: var(--bg-card); padding: 15px; border-radius: 6px; margin: 15px 0;">
-           <p style="margin-bottom: 10px;"><strong>Current SA Cards:</strong></p>
-           <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">
-             ${assignments.theater > 0 ? `<span class="assignment-badge" style="background: rgba(152, 48, 48, 0.2); border: 1px solid #983030; padding: 4px 8px; border-radius: 4px;">Theater: ${assignments.theater}</span>` : ''}
-             ${assignments.downtown > 0 ? `<span class="assignment-badge" style="background: rgba(201, 184, 74, 0.2); border: 1px solid #C9B84A; padding: 4px 8px; border-radius: 4px;">Downtown: ${assignments.downtown}</span>` : ''}
-             ${assignments.academy > 0 ? `<span class="assignment-badge" style="background: rgba(74, 144, 201, 0.2); border: 1px solid #4A90C9; padding: 4px 8px; border-radius: 4px;">Academy: ${assignments.academy}</span>` : ''}
-             ${assignments.market > 0 ? `<span class="assignment-badge" style="background: rgba(196, 128, 64, 0.2); border: 1px solid #C48040; padding: 4px 8px; border-radius: 4px;">Market: ${assignments.market}</span>` : ''}
-             ${assignments.workshop > 0 ? `<span class="assignment-badge" style="background: rgba(200, 112, 96, 0.2); border: 1px solid #C87060; padding: 4px 8px; border-radius: 4px;">Workshop: ${assignments.workshop}</span>` : ''}
-           </div>
-         </div>
-         
-         <p style="margin-top: 15px;"><strong>Which SA card was used? (Select one)</strong></p>
-         <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
-           <button class="btn sa-select-btn-full" data-color="none">None</button>
-           ${locationButtons}
-         </div>
-         
-         <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 15px;"><em>Used cards are discarded and won't count for end game scoring.</em></p>`,
-        [
-          { text: 'Continue', action: () => processSACardUsageFull() }
-        ]
-      );
-      
-      // Single-select behavior + disable Continue until selection made
-      setTimeout(() => {
-        const continueBtn = $('#action-buttons .btn');
-        continueBtn.disabled = true;
-        
-        $$('.sa-select-btn-full').forEach(btn => {
-          btn.addEventListener('click', () => {
-            // Deselect all - reset to original colors
-            $$('.sa-select-btn-full').forEach(b => {
-              b.classList.remove('selected');
-              b.classList.remove('btn-selected');
-              if (b.dataset.color === 'none') {
-                b.style.background = 'var(--bg-card)';
-                b.style.borderColor = 'var(--border)';
-                b.style.color = 'var(--text-primary)';
-              } else {
-                b.style.borderColor = LOCATION_COLORS[b.dataset.color].border;
-                b.style.background = LOCATION_COLORS[b.dataset.color].bg;
-                b.style.color = 'var(--text-primary)';
-              }
-            });
-            // Select clicked
-            btn.classList.add('selected');
-            btn.classList.add('btn-selected');
-            // Enable continue button
-            continueBtn.disabled = false;
-          });
-        });
-      }, 0);
-    }
-    
     function processSACardUsageFull() {
       // Auto-apply using the SA card selection from the Assignment phase
       const color = gameState.heir.assignedSAThisTurn;
@@ -15944,68 +15870,6 @@
     function showEndTurnFinalTurnPartTwo() {
       // SA card usage is now handled automatically via assignedSAThisTurn
       processSACardUsageFinalTurn();
-    }
-    
-    function showSACardUsageQuestionFinalTurn() {
-      const assignments = gameState.heir.specialAssignments;
-      
-      let locationButtons = '';
-      if (assignments.theater > 0) locationButtons += `<button class="btn sa-select-btn-final" data-color="theater" style="background: rgba(152, 48, 48, 0.2); border: 2px solid #983030;">Theater</button>`;
-      if (assignments.downtown > 0) locationButtons += `<button class="btn sa-select-btn-final" data-color="downtown" style="background: rgba(201, 184, 74, 0.2); border: 2px solid #C9B84A;">Downtown</button>`;
-      if (assignments.academy > 0) locationButtons += `<button class="btn sa-select-btn-final" data-color="academy" style="background: rgba(74, 144, 201, 0.2); border: 2px solid #4A90C9;">Academy</button>`;
-      if (assignments.market > 0) locationButtons += `<button class="btn sa-select-btn-final" data-color="market" style="background: rgba(196, 128, 64, 0.2); border: 2px solid #C48040;">Market</button>`;
-      if (assignments.workshop > 0) locationButtons += `<button class="btn sa-select-btn-final" data-color="workshop" style="background: rgba(200, 112, 96, 0.2); border: 2px solid #C87060;">Workshop</button>`;
-      
-      setActionContent(
-        `Turn 7 — Final End Turn (SA Cards)`,
-        `<p><strong>Did the Heir use a Special Assignment card this turn?</strong></p>
-         
-         
-         <div style="background: var(--bg-card); padding: 15px; border-radius: 6px; margin: 15px 0;">
-           <p style="margin-bottom: 10px;"><strong>Current SA Cards:</strong></p>
-           <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">
-             ${assignments.theater > 0 ? `<span class="assignment-badge" style="background: rgba(152, 48, 48, 0.2); border: 1px solid #983030; padding: 4px 8px; border-radius: 4px;">Theater: ${assignments.theater}</span>` : ''}
-             ${assignments.downtown > 0 ? `<span class="assignment-badge" style="background: rgba(201, 184, 74, 0.2); border: 1px solid #C9B84A; padding: 4px 8px; border-radius: 4px;">Downtown: ${assignments.downtown}</span>` : ''}
-             ${assignments.academy > 0 ? `<span class="assignment-badge" style="background: rgba(74, 144, 201, 0.2); border: 1px solid #4A90C9; padding: 4px 8px; border-radius: 4px;">Academy: ${assignments.academy}</span>` : ''}
-             ${assignments.market > 0 ? `<span class="assignment-badge" style="background: rgba(196, 128, 64, 0.2); border: 1px solid #C48040; padding: 4px 8px; border-radius: 4px;">Market: ${assignments.market}</span>` : ''}
-             ${assignments.workshop > 0 ? `<span class="assignment-badge" style="background: rgba(200, 112, 96, 0.2); border: 1px solid #C87060; padding: 4px 8px; border-radius: 4px;">Workshop: ${assignments.workshop}</span>` : ''}
-           </div>
-         </div>
-         
-         <p style="margin-top: 15px;"><strong>Which SA card was used? (Select one)</strong></p>
-         <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
-           <button class="btn sa-select-btn-final" data-color="none">None</button>
-           ${locationButtons}
-         </div>
-         
-         <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 15px;"><em>Used cards are discarded and won't count for end game scoring.</em></p>`,
-        [
-          { text: 'Continue', action: () => processSACardUsageFinalTurn(), id: 'continue-btn-final', disabled: true }
-        ]
-      );
-      
-      setTimeout(() => {
-        const continueBtn = $('#continue-btn-final');
-        
-        $$('.sa-select-btn-final').forEach(btn => {
-          btn.addEventListener('click', () => {
-            $$('.sa-select-btn-final').forEach(b => {
-              b.classList.remove('selected');
-              b.classList.remove('btn-selected');
-              if (b.dataset.color === 'none') {
-                b.style.background = 'var(--bg-card)';
-                b.style.borderColor = 'var(--border)';
-              } else {
-                b.style.borderColor = LOCATION_COLORS[b.dataset.color].border;
-                b.style.background = LOCATION_COLORS[b.dataset.color].bg;
-              }
-            });
-            btn.classList.add('selected');
-            btn.classList.add('btn-selected');
-            if (continueBtn) continueBtn.disabled = false;
-          });
-        });
-      }, 0);
     }
     
     function processSACardUsageFinalTurn() {
