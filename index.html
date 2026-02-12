@@ -3459,6 +3459,32 @@
 
     const noteBox = (text) => infoBox(text, 'NOTE');
 
+    // AP button grid helper — generates 2 rows of 3 (1-5 + 6*)
+    const buildAPButtonGrid = (btnClass = 'ap-btn') => `
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 20px; max-width: 340px;">
+        ${[1,2,3,4,5].map(ap => `
+          <button class="btn ${btnClass}" data-ap="${ap}" style="min-width: 50px;">${ap} AP</button>
+        `).join('')}
+        <button class="btn ${btnClass}" data-ap="6" style="min-width: 50px;">6 AP*</button>
+      </div>`;
+
+    // 6 AP intermediate screen — shows info + board action, then continues with 5 AP
+    function show6APScreen(locationTitle, continueCallback) {
+      const currentFame = gameState.heir.fame;
+      const newFame = currentFame + 1;
+      
+      setActionContent(
+        `Turn ${gameState.currentTurn} — ${locationTitle} (6 AP*)`,
+        `${infoBox('The Heir has 6 AP — a rare situation. This is resolved as <strong>5 AP</strong>, and the Heir gains <strong>1 Fame</strong>.')}
+         ${boardAction(`Update Heir's Fame (${currentFame}★ → ${newFame}★)`)}`,
+        [{ text: 'Continue with 5 AP →', action: () => {
+          gameState.heir.fame = newFame;
+          updateGameDisplay();
+          continueCallback(5);
+        }}]
+      );
+    }
+
     // Enchantment type icon helper - returns inline image HTML
     const enchantIcon = (type, size = 20) => {
       const files = { scrolls: 'enchant_scrolls.png', runes: 'enchant_runes.png', amulets: 'enchant_amulets.png' };
@@ -3657,6 +3683,7 @@
         enchantedTricks: {}, // Arcane Arts: { trickId: ['scrolls', 'runes'] } - array of enchantment types per trick
         shoppingList: [], // ['Metal', 'Wood', ...]
         specialAssignments: { theater: 0, downtown: 0, market: 0, workshop: 0, academy: 0 },
+        assignedSAThisTurn: null, // Which SA card color is assigned to a character this turn
         pendingCharacters: [], // Characters hired this turn, join at end of turn
         // Academy expansion state
         secrets: 0,       // Secrets learned (0-2)
@@ -6987,7 +7014,101 @@
       }
       
       // Show transition screen instead of going directly to Place Characters
-      showTurnSetupComplete(isPerformCard, newStance, stanceExplanation);
+      // But first check if we need to ask about SA card assignment
+      const hasAnySACards = Object.values(gameState.heir.specialAssignments).some(c => c > 0);
+      if (hasAnySACards) {
+        showAssignedSACardCheck(isPerformCard, newStance, stanceExplanation);
+      } else {
+        gameState.heir.assignedSAThisTurn = null;
+        showTurnSetupComplete(isPerformCard, newStance, stanceExplanation);
+      }
+    }
+    
+    function showAssignedSACardCheck(isPerformCard, stance, stanceExplanation) {
+      const counts = gameState.heir.specialAssignments;
+      
+      // Build visual pile display - order matches physical board (same as Dark Alley draw)
+      const piles = [
+        { key: 'downtown', icon: 'assets/images/locations/downtown.png', name: 'Downtown' },
+        { key: 'market', icon: 'assets/images/locations/market_row.png', name: 'Market Row' },
+        { key: 'workshop', icon: 'assets/images/locations/workshop.png', name: 'Workshop' },
+        { key: 'theater', icon: 'assets/images/locations/theatre.png', name: 'Theater' }
+      ];
+      if (gameState.expansions.academy) {
+        piles.push({ key: 'academy', icon: 'assets/images/locations/academy.png', name: 'Academy' });
+      }
+      
+      const pileWidth = gameState.expansions.academy ? 58 : 70;
+      const pileHeight = gameState.expansions.academy ? 78 : 95;
+      const iconSize = gameState.expansions.academy ? 32 : 40;
+      
+      const pilesHtml = `
+        <div style="display: flex; justify-content: center; gap: ${gameState.expansions.academy ? '6px' : '10px'}; margin: 20px 0;">
+          ${piles.map(pile => {
+            const count = counts[pile.key] || 0;
+            const selectable = count > 0;
+            
+            return `<div class="sa-assigned-pile" data-color="${pile.key}" style="
+              width: ${pileWidth}px;
+              height: ${pileHeight}px;
+              background: transparent;
+              border: 2px ${selectable ? 'solid var(--border)' : 'dashed var(--border)'};
+              border-radius: 6px;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              gap: 2px;
+              cursor: ${selectable ? 'pointer' : 'default'};
+              ${selectable ? '' : 'opacity: 0.35;'}
+              transition: all 0.2s;
+            ">
+              <img src="${pile.icon}" alt="${pile.name}" style="width: ${iconSize}px; height: ${iconSize}px; object-fit: contain;">
+              <span style="font-size: 0.65rem; color: var(--text-muted); text-align: center; line-height: 1.2;">${pile.name}</span>
+              <span style="font-size: 0.8rem; color: var(--text-secondary);">×${count}</span>
+            </div>`;
+          }).join('')}
+        </div>`;
+      
+      setActionContent(
+        `Turn ${gameState.currentTurn} — Assignment`,
+        `<p><strong>Does the Heir's Plan card use an SA card this turn?</strong></p>
+         <p style="color: var(--text-secondary); margin-bottom: 10px;">If one of the locations on the Plan card shows an SA icon, tap the matching card below. Otherwise, just continue.</p>
+         
+         ${pilesHtml}`,
+        [{ text: 'Continue →', action: () => {
+          const selected = document.querySelector('.sa-assigned-pile.sa-assigned-selected');
+          gameState.heir.assignedSAThisTurn = selected ? selected.dataset.color : null;
+          showTurnSetupComplete(isPerformCard, stance, stanceExplanation);
+        }}]
+      );
+      
+      // Add click handlers for pile toggles (max 1)
+      setTimeout(() => {
+        document.querySelectorAll('.sa-assigned-pile').forEach(pile => {
+          const count = counts[pile.dataset.color] || 0;
+          if (count === 0) return;
+          
+          pile.addEventListener('click', () => {
+            const wasSelected = pile.classList.contains('sa-assigned-selected');
+            
+            // Deselect all first
+            document.querySelectorAll('.sa-assigned-pile').forEach(p => {
+              p.classList.remove('sa-assigned-selected');
+              p.style.background = 'transparent';
+              p.style.borderColor = 'var(--border)';
+              p.querySelector('span:last-child').style.color = 'var(--text-secondary)';
+            });
+            
+            if (!wasSelected) {
+              pile.classList.add('sa-assigned-selected');
+              pile.style.background = 'rgba(212, 168, 71, 0.15)';
+              pile.style.borderColor = 'var(--amber)';
+              pile.querySelector('span:last-child').style.color = 'var(--amber)';
+            }
+          });
+        });
+      }, 0);
     }
 
     function showTurnSetupComplete(isPerformCard, stance, stanceExplanation) {
@@ -7048,6 +7169,9 @@
       
       // Reset stance to busy for new turn
       gameState.heir.stance = 'busy';
+      
+      // Reset assigned SA card for new turn
+      gameState.heir.assignedSAThisTurn = null;
       
       // Reset Academy classroom phase flag for new turn
       if (gameState.expansions.academy) {
@@ -8669,6 +8793,9 @@
       // Only check for Mechaniker and only if first apprentice hasn't been placed
       const isMechaniker = gameState.heirMagician?.id === 'mechaniker';
       
+      // Reset per-placement flag
+      gameState.currentPlacementMechanikerBonus = false;
+      
       if (!isMechaniker || gameState.firstApprenticePlacedThisTurn) {
         // Check Optico next
         checkOpticoNonApprentice(location, continueFunc);
@@ -8688,6 +8815,7 @@
         [
           { text: 'Yes — Apprentice (+1 AP)', action: () => {
             gameState.firstApprenticePlacedThisTurn = true;
+            gameState.currentPlacementMechanikerBonus = true;
             continueFunc();
           }},
           { text: 'No — Not an Apprentice', action: () => continueFunc() }
@@ -8697,22 +8825,25 @@
     
     // Helper to show Optico +1 AP reminder on AP selection screens
     function getOpticoAPReminderHtml() {
-      const isOptico = gameState.heirMagician?.id === 'optico';
-      const remainingBonus = (gameState.opticoPlayerSACards || 0) - (gameState.opticoNonApprenticesPlaced || 0);
+      if (!gameState.currentPlacementOpticoBonus) return '';
       
-      if (!isOptico || remainingBonus <= 0) return '';
+      return noteBox('Include <strong>+1 AP</strong> for this character (Optico — non-Apprentice bonus).');
+    }
+    
+    // Helper to show Mechaniker +1 AP reminder on AP selection screens
+    function getMechanikerAPReminderHtml() {
+      if (!gameState.currentPlacementMechanikerBonus) return '';
       
-      return `<div style="background: rgba(180, 100, 200, 0.15); border-left: 3px solid #a6c; padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;">
-        <span style="color: #a6c; font-weight: 600;">✨ OPTICO:</span> 
-        If this is a <strong>non-Apprentice</strong> (Magician/Specialist), include <strong>+1 AP</strong> in your selection. 
-        <span style="color: var(--text-muted);">(${remainingBonus} bonus${remainingBonus > 1 ? 'es' : ''} remaining)</span>
-      </div>`;
+      return noteBox('Include <strong>+1 AP</strong> for this Apprentice (Mechaniker — first Apprentice this turn).');
     }
     
     function checkOpticoNonApprentice(location, continueFunc) {
       // Only check for Optico and only if we haven't exhausted the bonus
       const isOptico = gameState.heirMagician?.id === 'optico';
       const remainingBonus = (gameState.opticoPlayerSACards || 0) - (gameState.opticoNonApprenticesPlaced || 0);
+      
+      // Reset per-placement flag
+      gameState.currentPlacementOpticoBonus = false;
       
       if (!isOptico || remainingBonus <= 0) {
         continueFunc();
@@ -8732,6 +8863,7 @@
         [
           { text: 'Yes — Non-Apprentice (+1 AP)', action: () => {
             gameState.opticoNonApprenticesPlaced = (gameState.opticoNonApprenticesPlaced || 0) + 1;
+            gameState.currentPlacementOpticoBonus = true;
             continueFunc();
           }},
           { text: 'No — This is an Apprentice', action: () => continueFunc() }
@@ -8739,9 +8871,20 @@
       );
     }
     
+    // Helper to show SA card +1 AP reminder when the Heir is using an SA card at this location
+    function getSACardAPReminderHtml(locationKey) {
+      const assigned = gameState.heir.assignedSAThisTurn;
+      if (!assigned || assigned !== locationKey) return '';
+      
+      const locationNames = { theater: 'Theater', downtown: 'Downtown', academy: 'Academy', market: 'Market Row', workshop: 'Workshop' };
+      return noteBox(`Include <strong>+1 AP</strong> for the Heir's SA card (${locationNames[assigned]}).`);
+    }
+
     function showDowntownAPInput() {
       const heirProphecyReminder = getHeirProphecyReminderHtml('heir-downtown');
       const opticoReminder = getOpticoAPReminderHtml();
+      const mechanikerReminder = getMechanikerAPReminderHtml();
+      const saCardReminder = getSACardAPReminderHtml('downtown');
       
       // Ask for Action Points first
       const wagonNote = (gameState.expansions?.arcane && gameState.wagonLocation === 'downtown') 
@@ -8754,13 +8897,11 @@
          ${wagonNote}
          ${heirProphecyReminder}
          ${opticoReminder}
+         ${mechanikerReminder}
+         ${saCardReminder}
          <p><strong>How many Action Points does this Character have?</strong></p>
          <p style="color: var(--text-secondary); font-size: 0.9rem;">Include the slot's AP modifier and the Character's base AP.</p>
-         <div class="ap-selector" style="display: flex; gap: 10px; margin-top: 20px; justify-content: flex-start; flex-wrap: wrap;">
-           ${[1,2,3,4,5].map(ap => `
-             <button class="btn ap-btn" data-ap="${ap}" style="min-width: 50px;">${ap} AP</button>
-           `).join('')}
-         </div>`,
+         ${buildAPButtonGrid()}`,
         []
       );
       
@@ -8769,7 +8910,11 @@
         $$('.ap-btn').forEach(btn => {
           btn.addEventListener('click', () => {
             const ap = parseInt(btn.dataset.ap);
-            showDowntownDiceSelection(ap);
+            if (ap === 6) {
+              show6APScreen('Downtown', showDowntownDiceSelection);
+            } else {
+              showDowntownDiceSelection(ap);
+            }
           });
         });
       }, 0);
@@ -8890,6 +9035,124 @@
       // Save dice state for next Downtown visit this turn
       gameState.downtownDice = { ...diceState };
       
+      // Check if reroll is needed: fewer non-X dice than the Heir can collect
+      const diceCount = getDowntownDiceCount(actionPoints);
+      const nonXCount = Object.values(diceState).filter(v => v !== 'x').length;
+      
+      if (nonXCount < diceCount) {
+        // Need to reroll one X die — find which one using priority
+        showDowntownReroll(actionPoints, diceState, diceCount, nonXCount);
+        return;
+      }
+      
+      // No reroll needed — proceed normally
+      proceedWithDowntownActions(actionPoints, diceState);
+    }
+    
+    function getRerollDiePriority(diceState) {
+      // Priority: Trick → Specialist → Money → Apprentice
+      // For pairs (trick, bank), left/first takes priority
+      const priority = [
+        { key: 'trick1', label: 'Trick Die 1', selectId: 'reroll-die' },
+        { key: 'trick2', label: 'Trick Die 2', selectId: 'reroll-die' },
+        { key: 'specialist', label: 'Specialist Die', selectId: 'reroll-die' },
+        { key: 'bank1', label: 'Bank Die 1', selectId: 'reroll-die' },
+        { key: 'bank2', label: 'Bank Die 2', selectId: 'reroll-die' },
+        { key: 'apprentice', label: 'Apprentice Die', selectId: 'reroll-die' }
+      ];
+      
+      for (const die of priority) {
+        if (diceState[die.key] === 'x') {
+          return die;
+        }
+      }
+      return null;
+    }
+    
+    function getRerollOptions(dieKey) {
+      const heirSchool = gameState.heirMagician.school;
+      const options = {
+        trick1: [
+          { value: 'x', label: 'X' },
+          { value: 'mechanical', label: 'Mechanical' },
+          { value: 'spiritual', label: 'Spiritual' },
+          { value: 'escape', label: 'Escape' },
+          { value: 'optical', label: 'Optical' },
+          { value: 'wild', label: '? (Wild)' }
+        ],
+        trick2: [
+          { value: 'x', label: 'X' },
+          { value: 'mechanical', label: 'Mechanical' },
+          { value: 'spiritual', label: 'Spiritual' },
+          { value: 'escape', label: 'Escape' },
+          { value: 'optical', label: 'Optical' },
+          { value: 'wild', label: '? (Wild)' }
+        ],
+        specialist: [
+          { value: 'x', label: 'X' },
+          { value: 'engineer', label: 'Engineer' },
+          { value: 'manager', label: 'Manager' },
+          { value: 'assistant', label: 'Assistant' }
+        ],
+        bank1: [
+          { value: 'x', label: 'X' },
+          { value: '3', label: '3 Coins' },
+          { value: '4', label: '4 Coins' },
+          { value: '5', label: '5 Coins' },
+          { value: '6', label: '6 Coins' }
+        ],
+        bank2: [
+          { value: 'x', label: 'X' },
+          { value: '3', label: '3 Coins' },
+          { value: '4', label: '4 Coins' },
+          { value: '5', label: '5 Coins' },
+          { value: '6', label: '6 Coins' }
+        ],
+        apprentice: [
+          { value: 'x', label: 'X' },
+          { value: 'apprentice', label: 'Apprentice' }
+        ]
+      };
+      return options[dieKey] || [];
+    }
+    
+    function showDowntownReroll(actionPoints, diceState, diceCount, nonXCount) {
+      const missing = diceCount - nonXCount;
+      const dieToReroll = getRerollDiePriority(diceState);
+      
+      if (!dieToReroll) {
+        // Shouldn't happen, but fall through
+        proceedWithDowntownActions(actionPoints, diceState);
+        return;
+      }
+      
+      const options = getRerollOptions(dieToReroll.key);
+      const optionsHtml = options.map(o => 
+        `<option value="${o.value}">${o.label}</option>`
+      ).join('');
+      
+      setActionContent(
+        `Turn ${gameState.currentTurn} — Downtown (${actionPoints} AP)`,
+        `${infoBox('Not enough non-X dice for the Heir to collect.')}
+         
+         ${boardAction(`Reroll the <strong>${dieToReroll.label}</strong>`)}
+         
+         <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 15px; margin-top: 15px; max-width: 300px;">
+           <label style="color: var(--text-secondary); font-size: 0.85rem;">Reroll result for ${dieToReroll.label}:</label>
+           <select id="reroll-die" style="width: 100%; padding: 8px; margin-top: 4px; background: var(--bg-dark); color: var(--text-primary); border: 1px solid var(--border); border-radius: 4px;">
+             ${optionsHtml}
+           </select>
+         </div>`,
+        [{ text: 'Continue →', action: () => {
+          const newValue = $('#reroll-die').value;
+          diceState[dieToReroll.key] = newValue;
+          gameState.downtownDice = { ...diceState };
+          proceedWithDowntownActions(actionPoints, diceState);
+        }}]
+      );
+    }
+    
+    function proceedWithDowntownActions(actionPoints, diceState) {
       // Store for later use in this flow
       gameState.pendingDowntown = { actionPoints, diceState };
       
@@ -9258,6 +9521,8 @@
     function showMarketRowAPInput() {
       const heirProphecyReminder = getHeirProphecyReminderHtml('heir-market');
       const opticoReminder = getOpticoAPReminderHtml();
+      const mechanikerReminder = getMechanikerAPReminderHtml();
+      const saCardReminder = getSACardAPReminderHtml('market');
       const wagonNote = (gameState.expansions?.arcane && gameState.wagonLocation === 'market') 
         ? noteBox(`<strong>Wagon Location (Arcane Arts):</strong> Resolve with 1 fewer AP (minimum 1)`)
         : '';
@@ -9269,13 +9534,11 @@
          ${wagonNote}
          ${heirProphecyReminder}
          ${opticoReminder}
+         ${mechanikerReminder}
+         ${saCardReminder}
          <p style="margin-top: 15px;"><strong>How many Action Points does this Character have?</strong></p>
          <p style="color: var(--text-secondary); font-size: 0.9rem;">Include the slot's AP modifier and the Character's base AP.</p>
-         <div class="ap-selector" style="display: flex; gap: 10px; margin-top: 20px; justify-content: flex-start; flex-wrap: wrap;">
-           ${[1,2,3,4,5].map(ap => `
-             <button class="btn ap-btn" data-ap="${ap}" style="min-width: 50px;">${ap} AP</button>
-           `).join('')}
-         </div>`,
+         ${buildAPButtonGrid()}`,
         []
       );
 
@@ -9284,7 +9547,11 @@
         $$('.ap-btn').forEach(btn => {
           btn.addEventListener('click', () => {
             const ap = parseInt(btn.dataset.ap);
-            showMarketRowComponentInput(ap);
+            if (ap === 6) {
+              show6APScreen('Market Row', showMarketRowComponentInput);
+            } else {
+              showMarketRowComponentInput(ap);
+            }
           });
         });
       }, 0);
@@ -9415,28 +9682,21 @@
           if (notAvailableInMarket.length <= actionPoints) {
             orderedComponents = notAvailableInMarket;
           } else {
-            // Need to randomly select - tell user to do this
-            orderedComponents = null; // Will be handled in display
+            // App randomly selects — shuffle and pick
+            const shuffled = [...notAvailableInMarket].sort(() => Math.random() - 0.5);
+            orderedComponents = shuffled.slice(0, actionPoints);
           }
 
-          if (orderedComponents) {
-            instructions.push({
-              type: 'action',
-              step: 2,
-              text: `<strong>Order components:</strong> ${orderedComponents.join(', ')}`,
-              boardAction: `Place ${orderedComponents.join(', ')} onto the first ${orderedComponents.length} empty Order slot(s)`
-            });
-          } else {
-            instructions.push({
-              type: 'action',
-              step: 2,
-              text: `<strong>Randomly select ${actionPoints} component(s) to order</strong> from: ${notAvailableInMarket.join(', ')}`,
-              substeps: [
-                `The Heir has ${actionPoints} AP but ${notAvailableInMarket.length} components need ordering — randomly select ${actionPoints}`
-              ],
-              boardAction: `Place the ${actionPoints} randomly selected component(s) onto empty Order slot(s)`
-            });
-          }
+          const randomNote = notAvailableInMarket.length > actionPoints
+            ? `<br><span style="color: var(--text-secondary); font-size: 0.85rem;">The app randomly selected ${orderedComponents.length} of ${notAvailableInMarket.length} needed components.</span>`
+            : '';
+
+          instructions.push({
+            type: 'action',
+            step: 2,
+            text: `<strong>Order components:</strong> ${orderedComponents.map(c => c.charAt(0).toUpperCase() + c.slice(1)).join(', ')}${randomNote}`,
+            boardAction: `Place ${orderedComponents.map(c => c.charAt(0).toUpperCase() + c.slice(1)).join(', ')} onto the first ${orderedComponents.length} empty Order slot(s)`
+          });
         }
       } else if (availableInMarket.length === 0) {
         instructions.push({
@@ -9529,6 +9789,7 @@
     function showDarkAlleyAPInput() {
       const heirProphecyReminder = getHeirProphecyReminderHtml('heir-darkalley');
       const opticoReminder = getOpticoAPReminderHtml();
+      const mechanikerReminder = getMechanikerAPReminderHtml();
       const wagonNote = (gameState.expansions?.arcane && gameState.wagonLocation === 'darkalley') 
         ? noteBox(`<strong>Wagon Location (Arcane Arts):</strong> Resolve with 1 fewer AP (minimum 1)`)
         : '';
@@ -9540,13 +9801,10 @@
          ${wagonNote}
          ${heirProphecyReminder}
          ${opticoReminder}
+         ${mechanikerReminder}
          <p><strong>How many Action Points does this Character have?</strong></p>
          <p style="color: var(--text-secondary); font-size: 0.9rem;">Include the slot's AP modifier and the Character's base AP.</p>
-         <div class="ap-selector" style="display: flex; gap: 10px; margin-top: 20px; justify-content: flex-start; flex-wrap: wrap;">
-           ${[1,2,3,4,5].map(ap => `
-             <button class="btn ap-btn" data-ap="${ap}" style="min-width: 50px;">${ap} AP</button>
-           `).join('')}
-         </div>`,
+         ${buildAPButtonGrid()}`,
         []
       );
 
@@ -9555,7 +9813,11 @@
         $$('.ap-btn').forEach(btn => {
           btn.addEventListener('click', () => {
             const ap = parseInt(btn.dataset.ap);
-            showDarkAlleyCoinFlip(ap);
+            if (ap === 6) {
+              show6APScreen('Dark Alley', showDarkAlleyCoinFlip);
+            } else {
+              showDarkAlleyCoinFlip(ap);
+            }
           });
         });
       }, 0);
@@ -9670,9 +9932,15 @@
     }
 
     function showDarkAlleyCardDraw(actionPoints, cardCount) {
+      // Use the SA card assignment from the Assignment phase (already asked there)
+      const assignedColor = gameState.heir.assignedSAThisTurn;
+      showDarkAlleyCardDrawResult(actionPoints, cardCount, assignedColor);
+    }
+    
+    function showDarkAlleyCardDrawResult(actionPoints, cardCount, assignedColor) {
       
       // Calculate which cards to draw based on fewest owned + priority
-      const cardsToDraw = calculateSACardsToDraw(cardCount);
+      const cardsToDraw = calculateSACardsToDraw(cardCount, assignedColor);
       
       // Count how many of each color to draw
       const drawCounts = {};
@@ -9752,7 +10020,7 @@
       );
     }
     
-    function calculateSACardsToDraw(count) {
+    function calculateSACardsToDraw(count, assignedColor = null) {
       // Priority order: Theater → Downtown → Academy → Market Row → Workshop
       // (Academy only included when expansion enabled)
       let priority = ['theater', 'downtown'];
@@ -9764,7 +10032,11 @@
       const cardsToDraw = [];
       
       // Create a working copy of current counts
+      // Subtract 1 from assignedColor (not counting cards currently assigned to Characters)
       const workingCounts = { ...gameState.heir.specialAssignments };
+      if (assignedColor && workingCounts[assignedColor] > 0) {
+        workingCounts[assignedColor]--;
+      }
       
       for (let i = 0; i < count; i++) {
         // Find the color(s) with the minimum count
@@ -9898,17 +10170,21 @@
       const exceptionBox = (text) => `<div style="background: var(--exception-bg); border-left: 3px solid var(--exception); padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;"><span style="color: var(--exception); font-weight: 600;">⚠️ EXCEPTION:</span> ${text}</div>`;
       const heirProphecyReminder = getHeirProphecyReminderHtml('heir-theater-nonmagician');
       const opticoReminder = getOpticoAPReminderHtml();
+      const mechanikerReminder = getMechanikerAPReminderHtml();
+      const saCardReminder = getSACardAPReminderHtml('theater');
       
       setActionContent(
         `Turn ${gameState.currentTurn} — Theater (Non-Magician)`,
         `<p><strong>Step 1: Determine Trick Markers</strong></p>
          ${heirProphecyReminder}
          ${opticoReminder}
+         ${mechanikerReminder}
+         ${saCardReminder}
          ${exceptionBox("Ignore the +1/−1 AP slot modifier for the Heir. Use only the Character's base AP.")}
          <p style="margin: 15px 0;"><strong>How many Action Points does this Character have?</strong></p>
          <div class="ap-selector" style="display: flex; gap: 10px; margin-top: 20px; justify-content: flex-start; flex-wrap: wrap;">
            ${[1,2,3].map(ap => `
-             <button class="btn ap-btn" data-ap="${ap}" style="min-width: 50px;">${ap} AP</button>
+             <button class="btn ap-btn" data-ap="${ap}" style="min-width: 50px;">${ap === 3 ? '3+ AP' : ap + ' AP'}</button>
            `).join('')}
          </div>`,
         []
@@ -10474,14 +10750,17 @@
       const isGentleman = gameState.heirMagician?.id === 'gentleman';
       
       if (isGentleman) {
-        showGentlemanMagicianCheck('academy', showAcademyAPInput);
+        showGentlemanMagicianCheck('academy', () => checkMechanikerApprentice('academy', showAcademyAPInput));
       } else {
-        showAcademyAPInput();
+        checkMechanikerApprentice('academy', showAcademyAPInput);
       }
     }
     
     function showAcademyAPInput() {
       const heirProphecyReminder = getHeirProphecyReminderHtml('heir-academy');
+      const opticoReminder = getOpticoAPReminderHtml();
+      const mechanikerReminder = getMechanikerAPReminderHtml();
+      const saCardReminder = getSACardAPReminderHtml('academy');
       const wagonNote = (gameState.expansions?.arcane && gameState.wagonLocation === 'academy') 
         ? noteBox(`<strong>Wagon Location (Arcane Arts):</strong> Resolve with 1 fewer AP (minimum 1)`)
         : '';
@@ -10492,15 +10771,13 @@
         `<p>The Heir is placing a Character at the Academy.</p>
          ${wagonNote}
          ${heirProphecyReminder}
+         ${opticoReminder}
+         ${mechanikerReminder}
+         ${saCardReminder}
          
          <p style="margin-top: 15px;"><strong>How many Action Points does this Character have?</strong></p>
          <p style="color: var(--text-secondary); font-size: 0.9rem;">Include the slot's AP modifier and the Character's base AP.</p>
-         
-         <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: flex-start; flex-wrap: wrap;">
-           ${[1,2,3,4,5].map(ap => `
-             <button class="btn academy-ap-btn" data-ap="${ap}" style="min-width: 50px;">${ap} AP</button>
-           `).join('')}
-         </div>`,
+         ${buildAPButtonGrid('academy-ap-btn')}`,
         []
       );
       
@@ -10508,7 +10785,11 @@
         $$('.academy-ap-btn').forEach(btn => {
           btn.addEventListener('click', () => {
             const ap = parseInt(btn.dataset.ap);
-            showAcademyActions(ap);
+            if (ap === 6) {
+              show6APScreen('Academy', showAcademyActions);
+            } else {
+              showAcademyActions(ap);
+            }
           });
         });
       }, 0);
@@ -14852,14 +15133,8 @@
     }
     
     function showEndTurnPartTwo() {
-      // First ask about SA card usage this turn
-      const totalSACards = Object.values(gameState.heir.specialAssignments).reduce((a, b) => a + b, 0);
-      
-      if (totalSACards > 0) {
-        showSACardUsageQuestion();
-      } else {
-        showEndTurnPartTwoFinal();
-      }
+      // SA card usage is now handled automatically via assignedSAThisTurn (set during Assignment phase)
+      processSACardUsage();
     }
     
     function showSACardUsageQuestion() {
@@ -14933,13 +15208,10 @@
     }
     
     function processSACardUsage() {
-      // Find selected SA card (if not "none")
-      const selected = $('.sa-select-btn.selected');
-      if (selected && selected.dataset.color !== 'none') {
-        const color = selected.dataset.color;
-        if (gameState.heir.specialAssignments[color] > 0) {
-          gameState.heir.specialAssignments[color]--;
-        }
+      // Auto-apply using the SA card selection from the Assignment phase
+      const color = gameState.heir.assignedSAThisTurn;
+      if (color && gameState.heir.specialAssignments[color] > 0) {
+        gameState.heir.specialAssignments[color]--;
       }
       
       updateGameDisplay();
@@ -15244,14 +15516,8 @@
       // Store conversion info for display
       gameState.pendingEndTurn = { coinsConverted, fameGained };
       
-      // Check if we need to ask about SA card usage
-      const totalSACards = Object.values(gameState.heir.specialAssignments).reduce((a, b) => a + b, 0);
-      
-      if (totalSACards > 0) {
-        showSACardUsageQuestionFull();
-      } else {
-        showEndTurnFullFinal();
-      }
+      // SA card usage is now handled automatically via assignedSAThisTurn
+      processSACardUsageFull();
     }
     
     function showSACardUsageQuestionFull() {
@@ -15325,13 +15591,10 @@
     }
     
     function processSACardUsageFull() {
-      // Find selected SA card (if not "none")
-      const selected = $('.sa-select-btn-full.selected');
-      if (selected && selected.dataset.color !== 'none') {
-        const color = selected.dataset.color;
-        if (gameState.heir.specialAssignments[color] > 0) {
-          gameState.heir.specialAssignments[color]--;
-        }
+      // Auto-apply using the SA card selection from the Assignment phase
+      const color = gameState.heir.assignedSAThisTurn;
+      if (color && gameState.heir.specialAssignments[color] > 0) {
+        gameState.heir.specialAssignments[color]--;
       }
       
       updateGameDisplay();
@@ -15679,14 +15942,8 @@
     }
     
     function showEndTurnFinalTurnPartTwo() {
-      // Check if we need to ask about SA card usage
-      const totalSACards = Object.values(gameState.heir.specialAssignments).reduce((a, b) => a + b, 0);
-      
-      if (totalSACards > 0) {
-        showSACardUsageQuestionFinalTurn();
-      } else {
-        showEndTurnFinalTurnFinal();
-      }
+      // SA card usage is now handled automatically via assignedSAThisTurn
+      processSACardUsageFinalTurn();
     }
     
     function showSACardUsageQuestionFinalTurn() {
@@ -15752,12 +16009,10 @@
     }
     
     function processSACardUsageFinalTurn() {
-      const selected = $('.sa-select-btn-final.selected');
-      if (selected && selected.dataset.color !== 'none') {
-        const color = selected.dataset.color;
-        if (gameState.heir.specialAssignments[color] > 0) {
-          gameState.heir.specialAssignments[color]--;
-        }
+      // Auto-apply using the SA card selection from the Assignment phase
+      const color = gameState.heir.assignedSAThisTurn;
+      if (color && gameState.heir.specialAssignments[color] > 0) {
+        gameState.heir.specialAssignments[color]--;
       }
       
       updateGameDisplay();
