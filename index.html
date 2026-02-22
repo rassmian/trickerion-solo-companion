@@ -523,8 +523,8 @@
         padding: 15px;
       }
       /* Force inline grids to stack on mobile */
-      .action-content [style*="grid-template-columns: 1fr 1fr"]:not(.stepper-grid):not(.bonus-grid):not(.totals-grid):not(.breakdown-grid):not(.refill-grid):not(.ap-grid):not(.turn-summary-grid),
-      .action-content [style*="grid-template-columns: 1fr 1fr 1fr"]:not(.stepper-grid):not(.bonus-grid):not(.totals-grid):not(.breakdown-grid):not(.refill-grid):not(.ap-grid):not(.turn-summary-grid) {
+      .action-content [style*="grid-template-columns: 1fr 1fr"]:not(.stepper-grid):not(.bonus-grid):not(.totals-grid):not(.breakdown-grid):not(.refill-grid):not(.ap-grid):not(.turn-summary-grid):not(.renovation-grid),
+      .action-content [style*="grid-template-columns: 1fr 1fr 1fr"]:not(.stepper-grid):not(.bonus-grid):not(.totals-grid):not(.breakdown-grid):not(.refill-grid):not(.ap-grid):not(.turn-summary-grid):not(.renovation-grid) {
         grid-template-columns: 1fr !important;
       }
       /* Reduce spacing in turn summary box */
@@ -1373,7 +1373,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.16.34-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.16.36-beta</p>
       <div class="header-buttons hidden" id="header-buttons">
         <button class="header-btn" id="restart-btn">↺ New Game</button>
         <button class="header-btn" id="save-quit-btn">💾 Save & Quit</button>
@@ -3774,6 +3774,7 @@
       gameState.heirPlacementsThisTurn = 0;
       gameState.heirPlacementsEndedEarly = false;
       gameState.classroomPhaseDone = false;
+      gameState.renovationSpaces = null; // Initialized during game start if Academy enabled
     }
 
     // ============================================
@@ -3899,6 +3900,14 @@
       
       // Restore gameState
       Object.assign(gameState, save.gameState);
+      
+      // Migration: Add renovation space tracking if missing (saves from before v0.16.36)
+      if (gameState.expansions?.academy && !gameState.renovationSpaces) {
+        initRenovationSpaces();
+        // Spaces that should be open based on current turn are handled by initRenovationSpaces
+        // Note: we can't know which spaces were already filled in old saves, but they start as empty
+        console.log('Migrated: Added renovation space tracking for Academy');
+      }
       
       // Show header buttons
       $('#header-buttons').classList.remove('hidden');
@@ -6482,6 +6491,7 @@
         gameState.heir.protegeAP = 1;    // Protégé starts with 1 AP
         gameState.heir.banners = 0;      // Banners placed
         gameState.classroomPhaseDone = false;  // Reset each turn
+        initRenovationSpaces();          // Track renovation space occupancy
       }
       
       // Arcane Arts: Initialize expansion state
@@ -7445,6 +7455,7 @@
       // Check if Arcane Arts is enabled
       const hasArcane = gameState.expansions?.arcane;
       const hasHeirTricks = gameState.heir.tricks && gameState.heir.tricks.length > 0;
+      const hasAcademyRenovation = gameState.expansions?.academy && getEmptySpaces().length > 0;
       
       // Arcane button disabled states
       const diceAlreadyLocked = gameState.arcaneDiceLocked === true;
@@ -7466,6 +7477,10 @@
                 <img src="assets/images/locations/theatre.png" alt="Theater">
                 <span>Shared Links</span>
               </div>
+              ${hasAcademyRenovation ? `<div class="icon-btn" id="btn-i-renovated" style="grid-column: 1; grid-row: 3;">
+                <img src="assets/images/locations/academy.png" alt="Academy">
+                <span>I Renovated</span>
+              </div>` : ''}
               <div class="gap"></div>
               <div class="icon-btn arcane-btn ${diceAlreadyLocked ? 'disabled' : ''}" id="btn-locked-dice" style="grid-column: 3; grid-row: 1;">
                 <img src="assets/images/arcane/enchant_die.png" alt="Dice">
@@ -7496,6 +7511,10 @@
               ${hasHeirTricks ? `<div class="icon-btn" id="btn-shared-links" style="width: 70px;">
                 <span class="emoji-icon">🎭</span>
                 <span>Shared Links</span>
+              </div>` : ''}
+              ${hasAcademyRenovation ? `<div class="icon-btn" id="btn-i-renovated" style="width: 70px;">
+                <span class="emoji-icon">🏛️</span>
+                <span>I Renovated</span>
               </div>` : ''}
             </div>
           `;
@@ -7533,6 +7552,14 @@
         if (sharedLinksBtn && hasHeirTricks) {
           sharedLinksBtn.addEventListener('click', () => {
             showSharedLinksFromPlayerTurn();
+          });
+        }
+        
+        // I Renovated button (Academy)
+        const renovatedBtn = $('#btn-i-renovated');
+        if (renovatedBtn) {
+          renovatedBtn.addEventListener('click', () => {
+            showPlayerRenovationFromTurnScreen();
           });
         }
         
@@ -10930,7 +10957,7 @@
       );
     }
     
-    // Step 2: Renovate (placeholder for now)
+    // Step 2: Renovate
     function academyStep2Renovate() {
       const { actionsRemaining } = gameState.pendingAcademy;
       
@@ -10939,7 +10966,16 @@
         return;
       }
       
-      // Ask if Renovate conditions are met
+      // Check if any empty spaces exist (from tracked state)
+      const emptySpaces = getEmptySpaces();
+      if (emptySpaces.length === 0) {
+        // No empty spaces — skip renovate entirely
+        gameState.pendingAcademy.currentStep = 3;
+        academyStep3And4TeachPractice();
+        return;
+      }
+      
+      // Ask if Renovate conditions are met (banner check is still manual)
       setActionContent(
         `Turn ${gameState.currentTurn} — Academy: Renovate Check`,
         `<p><strong>Check Renovate conditions:</strong></p>
@@ -10947,10 +10983,10 @@
          <ul style="color: var(--text-secondary); margin: 15px 0 15px 20px; line-height: 1.8;">
            <li>Heir has <strong>equal or fewer</strong> Banners than you</li>
            <li>Heir has at least <strong>one Banner</strong> remaining</li>
-           <li>There is at least <strong>one empty</strong> Classroom or Practice Room space</li>
+           <li style="color: var(--success);">✓ Empty spaces available (${emptySpaces.length} remaining)</li>
          </ul>
          
-         <p><strong>Are ALL conditions met?</strong></p>`,
+         <p><strong>Are the Banner conditions met?</strong></p>`,
         [
           { text: 'Yes — Heir Renovates', action: () => academyRenovateAction() },
           { text: 'No — Skip to Teach/Practice', action: () => {
@@ -10961,20 +10997,221 @@
       );
     }
     
+    // Renovation spaces — verified from physical board scan (2026-02-21)
+    // Layout mirrors board: Classrooms (left), Practice Rooms (right), top-to-bottom
+    const RENOVATION_SPACES = [
+      { id: 'CR1', type: 'classroom', row: 'A', costs: [5,7,9], fame: [2,5,9], opensOnTurn: 4 },
+      { id: 'CR2', type: 'classroom', row: 'B', costs: [3,4,6], fame: [1,3,6], opensOnTurn: 6 },
+      { id: 'CR3', type: 'classroom', row: 'start', costs: [6,8,10], fame: [4,7,10], opensOnTurn: 1 },
+      { id: 'CR4', type: 'classroom', row: 'start', costs: [4,5,11], fame: [1,3,13], opensOnTurn: 1 },
+      { id: 'PR1', type: 'practice',  row: 'A', costs: [4,5,11], fame: [1,3,13], opensOnTurn: 4 },
+      { id: 'PR2', type: 'practice',  row: 'B', costs: [6,8,10], fame: [4,7,10], opensOnTurn: 6 },
+      { id: 'PR3', type: 'practice',  row: 'start', costs: [3,4,6], fame: [1,3,6], opensOnTurn: 1 },
+      { id: 'PR4', type: 'practice',  row: 'start', costs: [5,7,9], fame: [2,5,9], opensOnTurn: 1 },
+    ];
+    const THRESHOLDS = [1, 16, 36];
+    const THRESHOLD_STAR_COLORS = ['#c9a84a', '#7a7a7a', '#b87333']; // gold, silver, bronze
+    
+    function spaceDisplayName(id) {
+      const num = id.replace(/\D/g, '');
+      return id.startsWith('CR') ? `Classroom ${num}` : `Practice Room ${num}`;
+    }
+    
+    function initRenovationSpaces() {
+      gameState.renovationSpaces = RENOVATION_SPACES.map(s => ({
+        id: s.id,
+        status: s.opensOnTurn <= gameState.currentTurn ? 'empty' : 'closed'
+      }));
+    }
+    
+    function updateRenovationSpaceOpenings() {
+      if (!gameState.renovationSpaces) return;
+      gameState.renovationSpaces.forEach(space => {
+        if (space.status === 'closed') {
+          const def = RENOVATION_SPACES.find(s => s.id === space.id);
+          if (def && gameState.currentTurn >= def.opensOnTurn) {
+            space.status = 'empty';
+          }
+        }
+      });
+    }
+    
+    function getSpaceStatus(id) {
+      const space = gameState.renovationSpaces?.find(s => s.id === id);
+      return space ? space.status : 'closed';
+    }
+    
+    function markSpaceFilled(id) {
+      const space = gameState.renovationSpaces?.find(s => s.id === id);
+      if (space) space.status = 'filled';
+    }
+    
+    function getEmptySpaces() {
+      if (!gameState.renovationSpaces) return [];
+      return gameState.renovationSpaces
+        .filter(s => s.status === 'empty')
+        .map(s => RENOVATION_SPACES.find(def => def.id === s.id));
+    }
+    
+    // Compute the Heir's exact renovation choice
+    function computeHeirRenovation() {
+      const emptySpaces = getEmptySpaces();
+      if (emptySpaces.length === 0) return null;
+      
+      const heirFame = gameState.heir.fame;
+      const heirCoins = gameState.heir.coins;
+      const isGeert = gameState.heirMagician?.id === 'geert';
+      const isEvenTurn = gameState.currentTurn % 2 === 0;
+      const selectMostExpensive = isGeert || heirCoins >= 5;
+      
+      // Build all eligible space+tier combos
+      const candidates = [];
+      for (const space of emptySpaces) {
+        for (let t = 0; t < 3; t++) {
+          if (heirFame > THRESHOLDS[t]) {
+            candidates.push({
+              space,
+              tierIndex: t,
+              threshold: THRESHOLDS[t],
+              cost: space.costs[t],
+              fame: space.fame[t]
+            });
+          }
+        }
+      }
+      
+      if (candidates.length === 0) return null;
+      
+      // Sort by cost (primary), then tiebreak
+      candidates.sort((a, b) => {
+        // Primary: cost
+        const costDiff = selectMostExpensive ? (b.cost - a.cost) : (a.cost - b.cost);
+        if (costDiff !== 0) return costDiff;
+        
+        // Tiebreak 1: odd turns = classrooms first, even = practice rooms first
+        const aIsClassroom = a.space.type === 'classroom' ? 1 : 0;
+        const bIsClassroom = b.space.type === 'classroom' ? 1 : 0;
+        if (isEvenTurn) {
+          // Practice rooms first (non-classroom first)
+          if (aIsClassroom !== bIsClassroom) return aIsClassroom - bIsClassroom;
+        } else {
+          // Classrooms first
+          if (aIsClassroom !== bIsClassroom) return bIsClassroom - aIsClassroom;
+        }
+        
+        // Tiebreak 2: top to bottom (order in RENOVATION_SPACES array)
+        const aIdx = RENOVATION_SPACES.indexOf(a.space);
+        const bIdx = RENOVATION_SPACES.indexOf(b.space);
+        return aIdx - bIdx;
+      });
+      
+      return candidates[0];
+    }
+    
+    // Render the 4x2 renovation grid HTML
+    function renderRenovationGrid(mode, selectedId, selectedTierIndex) {
+      // mode: 'player-mark' (tappable empties) or 'heir-result' (computed highlight)
+      const classrooms = RENOVATION_SPACES.filter(s => s.type === 'classroom');
+      const practices = RENOVATION_SPACES.filter(s => s.type === 'practice');
+      
+      const renderTile = (space) => {
+        const status = getSpaceStatus(space.id);
+        const isSelected = space.id === selectedId;
+        const isClosed = status === 'closed';
+        const isFilled = status === 'filled';
+        const isEmpty = status === 'empty';
+        const tappable = mode === 'player-mark' && isEmpty;
+        
+        let wrapStyle, contentOpacity;
+        if (isSelected) {
+          wrapStyle = `background: rgba(212,168,71,0.12); border: 2px solid #d4a847;`;
+          contentOpacity = 1;
+        } else if (isFilled) {
+          wrapStyle = `background: rgba(74,158,107,0.04); border: 2px solid var(--border); opacity: 0.35;`;
+          contentOpacity = 1;
+        } else if (isClosed) {
+          wrapStyle = `background: var(--bg-dark); border: 2px solid var(--border); opacity: 0.25;`;
+          contentOpacity = 1;
+        } else {
+          wrapStyle = `background: var(--bg-dark); border: 2px solid var(--border);`;
+          contentOpacity = 1;
+        }
+        
+        const cursor = tappable ? 'cursor: pointer;' : (isClosed || isFilled ? 'cursor: default;' : 'cursor: default;');
+        
+        let rows = '';
+        for (let t = 0; t < 3; t++) {
+          const isTierSelected = isSelected && t === selectedTierIndex;
+          const isGreyedOut = isSelected && !isTierSelected;
+          const starColor = isTierSelected ? '#d4a847' : (isGreyedOut ? 'var(--text-muted)' : THRESHOLD_STAR_COLORS[t]);
+          const textColor = isTierSelected ? '#d4a847' : (isGreyedOut ? 'var(--text-muted)' : '#e8e4ec');
+          const weight = isTierSelected ? 'font-weight: 700;' : '';
+          const opacity = isGreyedOut ? 'opacity: 0.35;' : '';
+          rows += `<div style="text-align: center; color: ${textColor}; font-size: 0.8rem; ${weight} ${opacity} line-height: 1.4;">
+            ${space.costs[t]}🪙→${space.fame[t]}<span style="color: ${starColor};">★</span>
+          </div>`;
+        }
+        
+        // Filled checkmark badge
+        const checkBadge = isFilled ? `<div style="position: absolute; top: 4px; right: 4px; width: 20px; height: 20px; border-radius: 50%; background: rgba(74,158,107,0.85); display: flex; align-items: center; justify-content: center;"><span style="color: #0d0b0e; font-size: 11px; font-weight: 700;">✓</span></div>` : '';
+        
+        // Closed turn badge
+        let closedBadge = '';
+        if (isClosed) {
+          const openTurn = space.opensOnTurn === 4 ? 'Turn IV' : 'Turn VI';
+          closedBadge = `<div style="text-align: center; margin-top: 2px;"><span style="background: rgba(61,51,71,0.6); color: var(--text-muted); font-size: 0.6rem; padding: 1px 6px; border-radius: 3px;">${openTurn}</span></div>`;
+        }
+        
+        return `<div class="renovation-tile" data-id="${space.id}" data-status="${status}" style="position: relative; border-radius: 5px; padding: 6px 4px; ${wrapStyle} ${cursor} transition: all 0.2s;">
+          ${checkBadge}
+          ${rows}
+          ${closedBadge}
+        </div>`;
+      };
+      
+      // Build grid HTML
+      let html = `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 10px 0;" class="renovation-grid">`;
+      
+      // Column headers
+      html += `<div style="text-align: center; color: var(--amber); font-size: 0.7rem; font-weight: 600; letter-spacing: 1px; padding-bottom: 2px;">CLASSROOMS</div>`;
+      html += `<div style="text-align: center; color: var(--amber); font-size: 0.7rem; font-weight: 600; letter-spacing: 1px; padding-bottom: 2px;">PRACTICE ROOMS</div>`;
+      
+      // Rows (paired: CR then PR)
+      for (let i = 0; i < classrooms.length; i++) {
+        html += renderTile(classrooms[i]);
+        html += renderTile(practices[i]);
+      }
+      
+      html += `</div>`;
+      return html;
+    }
+    
     function academyRenovateAction() {
       gameState.pendingAcademy.actionsRemaining--;
       
-      const coins = gameState.heir.coins;
-      const currentTurn = gameState.currentTurn;
-      const isEvenTurn = currentTurn % 2 === 0;
       const isP28Active = gameState.activeProphecy?.id === 'p28';
       const isGeert = gameState.heirMagician?.id === 'geert';
+      const coins = gameState.heir.coins;
+      const currentTurn = gameState.currentTurn;
       
-      // Selection rule based on coins (Geert always chooses most expensive)
-      const selectionRule = isGeert ? 'most expensive' : (coins <= 4 ? 'cheapest' : 'most expensive');
+      // Compute the Heir's exact renovation choice
+      const result = computeHeirRenovation();
       
-      // Tie-breaker based on odd/even turn
-      const tiebreaker = isEvenTurn ? 'Practice Rooms first' : 'Classrooms first';
+      if (!result) {
+        // No valid renovation — shouldn't happen if conditions were checked, but safety fallback
+        setActionContent(
+          `Turn ${gameState.currentTurn} — Academy: Renovate`,
+          `<p>No valid renovation space found (Heir's Fame doesn't exceed any available threshold).</p>`,
+          [{ text: 'Continue', action: () => {
+            gameState.pendingAcademy.currentStep = 3;
+            academyStep3And4TeachPractice();
+          }}]
+        );
+        return;
+      }
+      
+      const { space, tierIndex, threshold, cost, fame } = result;
+      const thresholdLabel = ['1', '16', '36'][tierIndex];
       
       // Banner count based on turn
       let bannerCount;
@@ -10983,118 +11220,57 @@
       else if (currentTurn <= 6) bannerCount = 2;
       else bannerCount = 1;
       
-      // Coin discard amount (only show if coins > 0)
-      const coinDiscard = coins <= 9 ? `all ${coins}` : '9';
-      const newCoinTotal = coins <= 9 ? 0 : coins - 9;
-      const coinDiscardAction = coins > 0 
-        ? boardAction(`Discard <strong>${coinDiscard} Coin${coinDiscard === '1' ? '' : 's'}</strong> from Heir (${coins} → ${newCoinTotal})`)
-        : '';
+      // p28 bonus
+      const p28Bonus = isP28Active ? { 1: 2, 16: 4, 36: 6 }[threshold] : 0;
+      const totalFame = fame + p28Bonus;
       
-      // Prophecy reminder (only p28 is relevant for Renovate)
-      const prophecyReminder = getHeirProphecyReminderHtml('heir-academy-renovate');
+      // Coin discard (max 9)
+      const coinDiscard = coins <= 9 ? coins : 9;
+      const newCoinTotal = coins - coinDiscard;
+      
+      // Selection rule label
+      const selectMostExpensive = isGeert || coins >= 5;
+      const selectionRule = selectMostExpensive ? 'most expensive' : 'cheapest';
+      const isEvenTurn = currentTurn % 2 === 0;
+      const tiebreaker = isEvenTurn ? 'Practice Rooms first' : 'Classrooms first';
       
       // Geert ability note
-      const geertNote = isGeert ? magicianAbilityBox(`<strong>Geert van Augustin:</strong> Always chooses the <strong>most expensive</strong> renovation regardless of Coins. Gains <strong>+1 Shard</strong> when Renovating.`) : '';
+      const geertNote = isGeert ? magicianAbilityBox(`<strong>Geert van Augustin:</strong> Always chooses the <strong>most expensive</strong> renovation. Gains <strong>+1 Shard</strong> when Renovating.`) : '';
       
-      // Geert shard bonus
-      const geertShardAction = isGeert ? boardAction(`Update Heir's Shards (${gameState.heir.shards} → ${gameState.heir.shards + 1}) <span style="color: #a6c;">(Geert ability)</span>`) : '';
+      // Prophecy reminder (p28)
+      const prophecyReminder = getHeirProphecyReminderHtml('heir-academy-renovate');
       
-      // If p28 is active, need to ask which Fame Threshold was selected
-      if (isP28Active) {
-        setActionContent(
-          `Turn ${gameState.currentTurn} — Academy: Renovate`,
-          `<p>The Heir Renovates.</p>
-           
-           ${geertNote}
-           
-           ${boardAction(`Select the <strong>${selectionRule}</strong> space where Heir's Fame (${gameState.heir.fame}) exceeds threshold`)}
-           <p style="color: var(--text-secondary); font-size: 0.9rem; margin: -4px 0 12px 12px;">Tie-breaker: ${tiebreaker}, then top to bottom</p>
-           
-           ${boardAction('Place a random tile from the selected stack')}
-           ${boardAction(`Place <strong>${bannerCount} Banner${bannerCount !== 1 ? 's' : ''}</strong> in Heir's color`)}
-           ${coinDiscardAction}
-           ${geertShardAction}
-           
-           ${prophecyReminder}
-           
-           <p style="margin-top: 15px;"><strong>Which Fame Threshold space was selected?</strong></p>
-           <p style="color: var(--text-secondary); font-size: 0.9rem;">p28 grants +2/4/6 Fame based on threshold.</p>`,
-          [
-            { text: 'Threshold 1 (+2 Fame)', action: () => applyRenovateP28Bonus(2, isGeert) },
-            { text: 'Threshold 16 (+4 Fame)', action: () => applyRenovateP28Bonus(4, isGeert) },
-            { text: 'Threshold 36 (+6 Fame)', action: () => applyRenovateP28Bonus(6, isGeert) }
-          ]
-        );
-      } else {
-        // Apply Geert shard bonus immediately if not going to p28 flow
-        if (isGeert) {
-          gameState.heir.shards += 1;
-          updateGameDisplay();
-        }
-        
-        setActionContent(
-          `Turn ${gameState.currentTurn} — Academy: Renovate`,
-          `<p>The Heir Renovates.</p>
-           
-           ${geertNote}
-           
-           ${boardAction(`Select the <strong>${selectionRule}</strong> space where Heir's Fame (${gameState.heir.fame}) exceeds threshold`)}
-           <p style="color: var(--text-secondary); font-size: 0.9rem; margin: -4px 0 12px 12px;">Tie-breaker: ${tiebreaker}, then top to bottom</p>
-           
-           ${boardAction('Place a random tile from the selected stack')}
-           ${boardAction(`Place <strong>${bannerCount} Banner${bannerCount !== 1 ? 's' : ''}</strong> in Heir's color`)}
-           ${coinDiscardAction}
-           ${geertShardAction}
-           
-           <p style="margin-top: 15px;"><strong>${gameState.pendingAcademy.actionsRemaining}</strong> action${gameState.pendingAcademy.actionsRemaining !== 1 ? 's' : ''} remaining.</p>`,
-          [
-            { text: 'Continue', action: () => {
-              // Apply coin discard (was only shown as board action, not applied to state)
-              const coinsToDiscard = gameState.heir.coins <= 9 ? gameState.heir.coins : 9;
-              gameState.heir.coins -= coinsToDiscard;
-              updateGameDisplay();
-              
-              gameState.pendingAcademy.currentStep = 3;
-              academyStep3And4TeachPractice();
-            }}
-          ]
-        );
-      }
-    }
-    
-    function applyRenovateP28Bonus(fameBonus, isGeert = false) {
-      const currentFame = gameState.heir.fame;
-      const currentShards = gameState.heir.shards;
-      
-      gameState.heir.fame += fameBonus;
-      if (isGeert) {
-        gameState.heir.shards += 1;
-      }
-      updateGameDisplay();
-      
-      const geertShardNote = isGeert 
-        ? boardAction(`Update Heir's Shards (${currentShards} → ${gameState.heir.shards}) <span style="color: #a6c;">(Geert ability)</span>`)
-        : '';
+      // Build the grid with computed selection highlighted
+      const grid = renderRenovationGrid('heir-result', space.id, tierIndex);
       
       setActionContent(
-        `Turn ${gameState.currentTurn} — Academy: Renovate Complete`,
-        `<p>p28 Bonus Applied!</p>
+        `Turn ${gameState.currentTurn} — Academy: Renovate`,
+        `<p>The Heir Renovates <strong>${spaceDisplayName(space.id)}</strong> at Level ${thresholdLabel}.</p>
+         <p style="color: var(--text-secondary); font-size: 0.85rem; margin: 2px 0 10px 0;">(${selectionRule} space, tie-break: ${tiebreaker})</p>
          
-         ${boardAction(`Update Heir's Fame (${currentFame}★ → ${gameState.heir.fame}★) <span style="color: var(--prophecy);">(+${fameBonus} from p28)</span>`)}
-         ${geertShardNote}
+         ${geertNote}
          
-         <p style="margin-top: 15px;"><strong>${gameState.pendingAcademy.actionsRemaining}</strong> action${gameState.pendingAcademy.actionsRemaining !== 1 ? 's' : ''} remaining.</p>`,
-        [
-          { text: 'Continue', action: () => {
-            // Apply coin discard (was only shown as board action, not applied to state)
-            const coinsToDiscard = gameState.heir.coins <= 9 ? gameState.heir.coins : 9;
-            gameState.heir.coins -= coinsToDiscard;
-            updateGameDisplay();
-            
-            gameState.pendingAcademy.currentStep = 3;
-            academyStep3And4TeachPractice();
-          }}
-        ]
+         ${grid}
+         
+         ${boardAction(`Place a random <strong>Level ${thresholdLabel}</strong> tile on <strong>${spaceDisplayName(space.id)}</strong>`)}
+         ${boardAction(`Place <strong>${bannerCount} Banner${bannerCount !== 1 ? 's' : ''}</strong> in Heir's color`)}
+         ${boardAction(`Update Heir's Fame (${gameState.heir.fame}★ → ${gameState.heir.fame + totalFame}★)`)}
+         ${coins > 0 ? boardAction(`Discard <strong>${coinDiscard === coins ? 'all ' + coins : coinDiscard} Coin${coinDiscard !== 1 ? 's' : ''}</strong> from Heir (${coins} → ${newCoinTotal})`) : ''}
+         ${isGeert ? boardAction(`Update Heir's Shards (${gameState.heir.shards} → ${gameState.heir.shards + 1}) <span style="color: #a6c;">(Geert ability)</span>`) : ''}
+         
+         ${prophecyReminder}`,
+        [{ text: 'Continue', action: () => {
+          // Apply all changes
+          gameState.heir.fame += totalFame;
+          gameState.heir.coins -= coinDiscard;
+          if (isGeert) gameState.heir.shards += 1;
+          markSpaceFilled(space.id);
+          updateGameDisplay();
+          saveGame();
+          
+          gameState.pendingAcademy.currentStep = 3;
+          academyStep3And4TeachPractice();
+        }}]
       );
     }
     
@@ -11324,6 +11500,23 @@
         return;
       }
       
+      const emptySpaces = getEmptySpaces();
+      const canRenovate = emptySpaces.length > 0;
+      
+      if (!canRenovate) {
+        // No empty spaces — actions are lost
+        setActionContent(
+          `Turn ${gameState.currentTurn} — Academy: Overflow`,
+          `<p>Neither Teach nor Practice is possible, and <strong>no empty renovation spaces</strong> remain.</p>
+           <p style="margin-top: 10px; color: var(--text-secondary);">Remaining actions are lost.</p>`,
+          [{ text: 'Continue', action: () => {
+            gameState.pendingAcademy.actionsRemaining = 0;
+            academyComplete();
+          }}]
+        );
+        return;
+      }
+      
       // Force Renovate (even if more Banners than player)
       setActionContent(
         `Turn ${gameState.currentTurn} — Academy: Overflow`,
@@ -11331,13 +11524,12 @@
          
          <p style="margin-top: 15px;">The Heir must <strong>Renovate</strong> (even if it has more Banners than you), then continue with Teach/Practice.</p>
          
-         <p style="margin-top: 15px;"><strong>Can the Heir Renovate?</strong></p>
-         <p style="color: var(--text-secondary); font-size: 0.9rem;">Requires: Heir has Banners AND empty room space exists</p>`,
+         <p style="margin-top: 15px;"><strong>Does the Heir have Banners remaining?</strong></p>`,
         [
           { text: 'Yes — Renovate', action: () => {
             academyRenovateAction();
           }},
-          { text: 'No — Cannot Renovate', action: () => {
+          { text: 'No Banners — Cannot Renovate', action: () => {
             // Actions are lost
             gameState.pendingAcademy.actionsRemaining = 0;
             academyComplete();
@@ -15913,6 +16105,8 @@
       // Reset Academy classroom phase flag for new turn
       if (gameState.expansions.academy) {
         gameState.classroomPhaseDone = false;
+        // Open any rooms that should now be available
+        updateRenovationSpaceOpenings();
       }
       
       // Arcane Arts: Reset dice lock for new turn (wagon already moved in End Turn phase)
@@ -15931,7 +16125,47 @@
       };
       
       updateGameDisplay();
+      
+      // Go straight to Roll Dice phase
       handlePhase('roll-dice');
+    }
+    
+    function showPlayerRenovationFromTurnScreen() {
+      const grid = renderRenovationGrid('player-mark', null, null);
+      
+      setActionContent(
+        `Turn ${gameState.currentTurn} — I Renovated`,
+        `<p><strong>Tap the space(s) you filled:</strong></p>
+         ${grid}`,
+        [
+          { text: 'Cancel', action: () => showPlayerTurnScreen() },
+          { text: 'Confirm', action: () => {
+            document.querySelectorAll('.renovation-tile.player-selected').forEach(tile => {
+              markSpaceFilled(tile.dataset.id);
+            });
+            saveGame();
+            showPlayerTurnScreen();
+          }}
+        ]
+      );
+      
+      // Add toggle handlers for empty tiles
+      setTimeout(() => {
+        document.querySelectorAll('.renovation-tile[data-status="empty"]').forEach(tile => {
+          tile.addEventListener('click', () => {
+            const isSelected = tile.classList.contains('player-selected');
+            if (isSelected) {
+              tile.classList.remove('player-selected');
+              tile.style.background = 'var(--bg-dark)';
+              tile.style.borderColor = 'var(--border)';
+            } else {
+              tile.classList.add('player-selected');
+              tile.style.background = 'rgba(212,168,71,0.12)';
+              tile.style.borderColor = '#d4a847';
+            }
+          });
+        });
+      }, 0);
     }
     
     // Get the next wagon location in the rotation sequence
