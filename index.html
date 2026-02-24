@@ -11327,7 +11327,7 @@
          ${boardAction(`Place a random <strong>Level ${thresholdLabel}</strong> tile on <strong>${spaceDisplayName(space.id)}</strong>`)}
          ${boardAction(`Place <strong>${bannersToPlace} Banner${bannersToPlace !== 1 ? 's' : ''}</strong> in Heir's color (${bannersAfter} remaining)`)}
          ${isLastBanner && gameState.player.banners > 0 ? boardAction(`Heir placed its last Banner — <strong>return 1 of your unused Banners</strong> to the box (${gameState.player.banners} → ${playerBannersAfter})`) : ''}
-         ${boardAction(`Update Heir's Fame (${gameState.heir.fame}★ → ${gameState.heir.fame + totalFame}★)`)}
+         ${boardAction(`Update Heir's Fame (${gameState.heir.fame}★ → ${gameState.heir.fame + totalFame}★)${p28Bonus > 0 ? ` <span style="color: var(--prophecy);">(includes +${p28Bonus} from p28)</span>` : ''}`)}
          ${coins > 0 ? boardAction(`Discard <strong>${coinDiscard === coins ? 'all ' + coins : coinDiscard} Coin${coinDiscard !== 1 ? 's' : ''}</strong> from Heir (${coins} → ${newCoinTotal})`) : ''}
          ${isGeert ? boardAction(`Update Heir's Shards (${gameState.heir.shards} → ${gameState.heir.shards + 1}) <span style="color: #a6c;">(Geert ability)</span>`) : ''}
          
