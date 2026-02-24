@@ -1373,7 +1373,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.16.37-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.16.38-beta</p>
       <div class="header-buttons hidden" id="header-buttons">
         <button class="header-btn" id="restart-btn">↺ New Game</button>
         <button class="header-btn" id="save-quit-btn">💾 Save & Quit</button>
@@ -2350,6 +2350,14 @@
             <div class="state-row">
               <span class="state-label">Protégé AP</span>
               <span class="state-count" id="heir-protege-ap-display">1</span>
+            </div>
+            <div class="state-row">
+              <span class="state-label">Heir Banners</span>
+              <span class="state-count" id="heir-banners-display">12</span>
+            </div>
+            <div class="state-row">
+              <span class="state-label">Your Banners</span>
+              <span class="state-count" id="player-banners-display">12</span>
             </div>
           </div>
 
@@ -3692,12 +3700,13 @@
         // Academy expansion state
         secrets: 0,       // Secrets learned (0-2)
         protegeAP: 1,     // Protégé AP (1-3), derived from secrets
-        banners: 0        // Banners placed on Academy board
+        banners: 12       // Banners remaining in supply (start with 12)
       },
       
       // Player state (for tracking tricks)
       player: {
-        tricks: [] // [{ ...trickData }, ...]
+        tricks: [], // [{ ...trickData }, ...]
+        banners: 12
       },
       
       // Downtown dice state (persists within a turn)
@@ -3754,10 +3763,11 @@
         pendingCharacters: [],
         secrets: 0,
         protegeAP: 1,
-        banners: 0
+        banners: 12
       };
       gameState.player = {
-        tricks: []
+        tricks: [],
+        banners: 12
       };
       gameState.downtownDice = {
         trick1: 'x',
@@ -3907,6 +3917,18 @@
         // Spaces that should be open based on current turn are handled by initRenovationSpaces
         // Note: we can't know which spaces were already filled in old saves, but they start as empty
         console.log('Migrated: Added renovation space tracking for Academy');
+      }
+      
+      // Migration: Add banner tracking if missing (saves from before v0.16.38)
+      if (gameState.expansions?.academy) {
+        if (gameState.heir.banners === 0 || gameState.heir.banners === undefined) {
+          gameState.heir.banners = 12;
+          console.log('Migrated: Set heir banners to 12');
+        }
+        if (!gameState.player.banners || gameState.player.banners === undefined) {
+          gameState.player.banners = 12;
+          console.log('Migrated: Set player banners to 12');
+        }
       }
       
       // Show header buttons
@@ -5870,8 +5892,12 @@
           academyStatsCard.style.display = 'block';
           const secretsDisplay = $('#heir-secrets-display');
           const protegeAPDisplay = $('#heir-protege-ap-display');
+          const heirBannersDisplay = $('#heir-banners-display');
+          const playerBannersDisplay = $('#player-banners-display');
           if (secretsDisplay) secretsDisplay.textContent = gameState.heir.secrets || 0;
           if (protegeAPDisplay) protegeAPDisplay.textContent = gameState.heir.protegeAP || 1;
+          if (heirBannersDisplay) heirBannersDisplay.textContent = gameState.heir.banners ?? 12;
+          if (playerBannersDisplay) playerBannersDisplay.textContent = gameState.player.banners ?? 12;
         } else {
           academyStatsCard.style.display = 'none';
         }
@@ -6489,7 +6515,8 @@
       if (gameState.expansions.academy) {
         gameState.heir.secrets = 0;      // Secrets learned (0-2)
         gameState.heir.protegeAP = 1;    // Protégé starts with 1 AP
-        gameState.heir.banners = 0;      // Banners placed
+        gameState.heir.banners = 12;     // Banners remaining in supply
+        gameState.player.banners = 12;   // Player banners remaining in supply
         gameState.classroomPhaseDone = false;  // Reset each turn
         initRenovationSpaces();          // Track renovation space occupancy
       }
@@ -7455,7 +7482,7 @@
       // Check if Arcane Arts is enabled
       const hasArcane = gameState.expansions?.arcane;
       const hasHeirTricks = gameState.heir.tricks && gameState.heir.tricks.length > 0;
-      const hasAcademyRenovation = gameState.expansions?.academy && getEmptySpaces().length > 0;
+      const hasAcademyRenovation = gameState.expansions?.academy && getEmptySpaces().length > 0 && (gameState.player.banners ?? 12) > 0;
       
       // Arcane button disabled states
       const diceAlreadyLocked = gameState.arcaneDiceLocked === true;
@@ -10966,34 +10993,43 @@
         return;
       }
       
-      // Check if any empty spaces exist (from tracked state)
+      // Check all three renovation conditions automatically
       const emptySpaces = getEmptySpaces();
+      const heirBannersRemaining = gameState.heir.banners ?? 12;
+      const playerBannersRemaining = gameState.player.banners ?? 12;
+      const heirBannersPlaced = 12 - heirBannersRemaining;
+      const playerBannersPlaced = 12 - playerBannersRemaining;
+      
+      // Condition 1: Empty spaces available
       if (emptySpaces.length === 0) {
-        // No empty spaces — skip renovate entirely
-        gameState.pendingAcademy.currentStep = 3;
-        academyStep3And4TeachPractice();
+        skipRenovateWithReason('no empty renovation spaces remain');
         return;
       }
       
-      // Ask if Renovate conditions are met (banner check is still manual)
+      // Condition 2: Heir has at least 1 banner remaining in supply
+      if (heirBannersRemaining <= 0) {
+        skipRenovateWithReason('the Heir has no Banners remaining');
+        return;
+      }
+      
+      // Condition 3: Heir has equal or fewer banners IN THE ACADEMY than player
+      if (heirBannersPlaced > playerBannersPlaced) {
+        skipRenovateWithReason(`the Heir has more Banners in the Academy (${heirBannersPlaced}) than you (${playerBannersPlaced})`);
+        return;
+      }
+      
+      // All conditions met — proceed to renovation
+      academyRenovateAction();
+    }
+    
+    function skipRenovateWithReason(reason) {
       setActionContent(
-        `Turn ${gameState.currentTurn} — Academy: Renovate Check`,
-        `<p><strong>Check Renovate conditions:</strong></p>
-         
-         <ul style="color: var(--text-secondary); margin: 15px 0 15px 20px; line-height: 1.8;">
-           <li>Heir has <strong>equal or fewer</strong> Banners than you</li>
-           <li>Heir has at least <strong>one Banner</strong> remaining</li>
-           <li style="color: var(--success);">✓ Empty spaces available (${emptySpaces.length} remaining)</li>
-         </ul>
-         
-         <p><strong>Are the Banner conditions met?</strong></p>`,
-        [
-          { text: 'Yes — Heir Renovates', action: () => academyRenovateAction() },
-          { text: 'No — Skip to Teach/Practice', action: () => {
-            gameState.pendingAcademy.currentStep = 3;
-            academyStep3And4TeachPractice();
-          }}
-        ]
+        `Turn ${gameState.currentTurn} — Academy: Renovate Skipped`,
+        `<p>The Heir <strong>skips Renovate</strong> because ${reason}.</p>`,
+        [{ text: 'Continue', action: () => {
+          gameState.pendingAcademy.currentStep = 3;
+          academyStep3And4TeachPractice();
+        }}]
       );
     }
     
@@ -11051,6 +11087,36 @@
       return gameState.renovationSpaces
         .filter(s => s.status === 'empty')
         .map(s => RENOVATION_SPACES.find(def => def.id === s.id));
+    }
+    
+    // Banner count placed per renovation, based on turn number
+    function getBannerCountForTurn(turn) {
+      if (turn <= 2) return 4;
+      if (turn <= 4) return 3;
+      if (turn <= 6) return 2;
+      return 1;
+    }
+    
+    // Place banners for a renovation and handle the "last banner" rule
+    // Returns { placed, lastBannerTriggered } for UI feedback
+    function placeBanners(side, turn) {
+      const needed = getBannerCountForTurn(turn);
+      const available = gameState[side].banners;
+      const placed = Math.min(needed, available);
+      gameState[side].banners -= placed;
+      
+      // Last banner rule: if this player placed their last banner,
+      // the other side returns 1 unused banner to the box
+      let lastBannerTriggered = false;
+      if (gameState[side].banners === 0 && placed > 0) {
+        const otherSide = side === 'heir' ? 'player' : 'heir';
+        if (gameState[otherSide].banners > 0) {
+          gameState[otherSide].banners -= 1;
+          lastBannerTriggered = true;
+        }
+      }
+      
+      return { placed, lastBannerTriggered };
     }
     
     // Compute the Heir's exact renovation choice
@@ -11213,12 +11279,13 @@
       const { space, tierIndex, threshold, cost, fame } = result;
       const thresholdLabel = ['1', '16', '36'][tierIndex];
       
-      // Banner count based on turn
-      let bannerCount;
-      if (currentTurn <= 2) bannerCount = 4;
-      else if (currentTurn <= 4) bannerCount = 3;
-      else if (currentTurn <= 6) bannerCount = 2;
-      else bannerCount = 1;
+      // Banner count — use helper, cap at remaining supply
+      const turnBannerCount = getBannerCountForTurn(currentTurn);
+      const heirBanners = gameState.heir.banners;
+      const bannersToPlace = Math.min(turnBannerCount, heirBanners);
+      const bannersAfter = heirBanners - bannersToPlace;
+      const isLastBanner = bannersAfter === 0 && bannersToPlace > 0;
+      const playerBannersAfter = isLastBanner ? Math.max(0, gameState.player.banners - 1) : gameState.player.banners;
       
       // p28 bonus
       const p28Bonus = isP28Active ? { 1: 2, 16: 4, 36: 6 }[threshold] : 0;
@@ -11233,6 +11300,10 @@
       const selectionRule = selectMostExpensive ? 'most expensive' : 'cheapest';
       const isEvenTurn = currentTurn % 2 === 0;
       const tiebreaker = isEvenTurn ? 'Practice Rooms first' : 'Classrooms first';
+      
+      // Fewer banners note
+      const fewerBannersNote = bannersToPlace < turnBannerCount 
+        ? `<p style="color: var(--warning); font-size: 0.85rem; margin: 4px 0;">⚠ Heir only has ${heirBanners} Banner${heirBanners !== 1 ? 's' : ''} left — placing as many as possible.</p>` : '';
       
       // Geert ability note
       const geertNote = isGeert ? magicianAbilityBox(`<strong>Geert van Augustin:</strong> Always chooses the <strong>most expensive</strong> renovation. Gains <strong>+1 Shard</strong> when Renovating.`) : '';
@@ -11249,11 +11320,13 @@
          <p style="color: var(--text-secondary); font-size: 0.85rem; margin: 2px 0 10px 0;">(${selectionRule} space, tie-break: ${tiebreaker})</p>
          
          ${geertNote}
+         ${fewerBannersNote}
          
          ${grid}
          
          ${boardAction(`Place a random <strong>Level ${thresholdLabel}</strong> tile on <strong>${spaceDisplayName(space.id)}</strong>`)}
-         ${boardAction(`Place <strong>${bannerCount} Banner${bannerCount !== 1 ? 's' : ''}</strong> in Heir's color`)}
+         ${boardAction(`Place <strong>${bannersToPlace} Banner${bannersToPlace !== 1 ? 's' : ''}</strong> in Heir's color (${bannersAfter} remaining)`)}
+         ${isLastBanner && gameState.player.banners > 0 ? boardAction(`Heir placed its last Banner — <strong>return 1 of your unused Banners</strong> to the box (${gameState.player.banners} → ${playerBannersAfter})`) : ''}
          ${boardAction(`Update Heir's Fame (${gameState.heir.fame}★ → ${gameState.heir.fame + totalFame}★)`)}
          ${coins > 0 ? boardAction(`Discard <strong>${coinDiscard === coins ? 'all ' + coins : coinDiscard} Coin${coinDiscard !== 1 ? 's' : ''}</strong> from Heir (${coins} → ${newCoinTotal})`) : ''}
          ${isGeert ? boardAction(`Update Heir's Shards (${gameState.heir.shards} → ${gameState.heir.shards + 1}) <span style="color: #a6c;">(Geert ability)</span>`) : ''}
@@ -11265,6 +11338,8 @@
           gameState.heir.coins -= coinDiscard;
           if (isGeert) gameState.heir.shards += 1;
           markSpaceFilled(space.id);
+          // Place banners using helper (handles last-banner rule)
+          placeBanners('heir', currentTurn);
           updateGameDisplay();
           saveGame();
           
@@ -11501,9 +11576,9 @@
       }
       
       const emptySpaces = getEmptySpaces();
-      const canRenovate = emptySpaces.length > 0;
+      const heirBannersRemaining = gameState.heir.banners ?? 12;
       
-      if (!canRenovate) {
+      if (emptySpaces.length === 0) {
         // No empty spaces — actions are lost
         setActionContent(
           `Turn ${gameState.currentTurn} — Academy: Overflow`,
@@ -11517,24 +11592,28 @@
         return;
       }
       
-      // Force Renovate (even if more Banners than player)
+      if (heirBannersRemaining <= 0) {
+        // Has empty spaces but no banners — actions are lost
+        setActionContent(
+          `Turn ${gameState.currentTurn} — Academy: Overflow`,
+          `<p>Neither Teach nor Practice is possible, and the Heir has <strong>no Banners remaining</strong>.</p>
+           <p style="margin-top: 10px; color: var(--text-secondary);">Remaining actions are lost.</p>`,
+          [{ text: 'Continue', action: () => {
+            gameState.pendingAcademy.actionsRemaining = 0;
+            academyComplete();
+          }}]
+        );
+        return;
+      }
+      
+      // Force Renovate (even if more Banners than player) — auto-proceed
       setActionContent(
         `Turn ${gameState.currentTurn} — Academy: Overflow`,
         `<p>Neither Teach nor Practice is possible.</p>
-         
-         <p style="margin-top: 15px;">The Heir must <strong>Renovate</strong> (even if it has more Banners than you), then continue with Teach/Practice.</p>
-         
-         <p style="margin-top: 15px;"><strong>Does the Heir have Banners remaining?</strong></p>`,
-        [
-          { text: 'Yes — Renovate', action: () => {
-            academyRenovateAction();
-          }},
-          { text: 'No Banners — Cannot Renovate', action: () => {
-            // Actions are lost
-            gameState.pendingAcademy.actionsRemaining = 0;
-            academyComplete();
-          }}
-        ]
+         <p style="margin-top: 15px;">The Heir must <strong>Renovate</strong> (even if it has more Banners than you), then continue with Teach/Practice.</p>`,
+        [{ text: 'Continue — Heir Renovates', action: () => {
+          academyRenovateAction();
+        }}]
       );
     }
     
@@ -16132,36 +16211,64 @@
     
     function showPlayerRenovationFromTurnScreen() {
       const grid = renderRenovationGrid('player-mark', null, null);
+      const turnBannerCount = getBannerCountForTurn(gameState.currentTurn);
       
       setActionContent(
         `Turn ${gameState.currentTurn} — I Renovated`,
-        `<p><strong>Tap the space(s) you filled:</strong></p>
+        `<p><strong>Tap the space you filled:</strong></p>
          ${grid}`,
         [
           { text: 'Cancel', action: () => showPlayerTurnScreen() },
           { text: 'Confirm', action: () => {
-            document.querySelectorAll('.renovation-tile.player-selected').forEach(tile => {
-              markSpaceFilled(tile.dataset.id);
-            });
+            const selected = document.querySelector('.renovation-tile.player-selected');
+            if (!selected) return;
+            const spaceId = selected.dataset.id;
+            markSpaceFilled(spaceId);
+            placeBanners('player', gameState.currentTurn);
             saveGame();
-            showPlayerTurnScreen();
-          }}
+            
+            // Show board action confirmation
+            const bannersAfter = gameState.player.banners;
+            const bannersPlaced = Math.min(turnBannerCount, bannersAfter + turnBannerCount); // what was placed (before deduction already happened)
+            const lastBannerNote = bannersAfter === 0 && (gameState.heir.banners < 12) 
+              ? boardAction(`You placed your last Banner — <strong>return 1 of the Heir's unused Banners</strong> to the box`)
+              : '';
+            
+            setActionContent(
+              `Turn ${gameState.currentTurn} — Renovation Recorded`,
+              `${boardAction(`Pay costs and gain Fame. Place tile on <strong>${spaceDisplayName(spaceId)}</strong>. Place <strong>${turnBannerCount} Banner${turnBannerCount !== 1 ? 's' : ''}</strong> on the adjacent slots.`)}
+               ${lastBannerNote}
+               ${getProphecyReminderHtml('academy')}
+               <p style="margin-top: 12px;">You now have <strong>${bannersAfter}</strong> Banner${bannersAfter !== 1 ? 's' : ''} remaining.</p>`,
+              [{ text: 'Done', action: () => showPlayerTurnScreen() }]
+            );
+          }, id: 'confirm-renovate-btn', disabled: true }
         ]
       );
       
-      // Add toggle handlers for empty tiles
+      // Add single-select handlers for empty tiles
       setTimeout(() => {
         document.querySelectorAll('.renovation-tile[data-status="empty"]').forEach(tile => {
           tile.addEventListener('click', () => {
+            // Deselect any previously selected tile
+            const prev = document.querySelector('.renovation-tile.player-selected');
+            if (prev && prev !== tile) {
+              prev.classList.remove('player-selected');
+              prev.style.background = 'var(--bg-dark)';
+              prev.style.borderColor = 'var(--border)';
+            }
+            
             const isSelected = tile.classList.contains('player-selected');
             if (isSelected) {
               tile.classList.remove('player-selected');
               tile.style.background = 'var(--bg-dark)';
               tile.style.borderColor = 'var(--border)';
+              $('#confirm-renovate-btn').disabled = true;
             } else {
               tile.classList.add('player-selected');
               tile.style.background = 'rgba(212,168,71,0.12)';
               tile.style.borderColor = '#d4a847';
+              $('#confirm-renovate-btn').disabled = false;
             }
           });
         });
@@ -16314,31 +16421,26 @@
     }
     
     function showEndGameStep1b_BannerCheck() {
+      const heirBannersPlaced = 12 - (gameState.heir.banners ?? 12);
+      const playerBannersPlaced = 12 - (gameState.player.banners ?? 12);
+      const heirHasMore = heirBannersPlaced > playerBannersPlaced;
+      
+      endGameTempData.bannerFame = heirHasMore ? 8 : 0;
+      
       setActionContent(
         'End Game — Banner Scoring (Academy)',
-        `<p><strong>Compare Banners on the Academy board:</strong></p>
-         
-         <p style="color: var(--text-secondary); margin: 15px 0;">Count the Banners each player has placed on Classroom and Practice Room tiles.</p>
+        `<p><strong>Academy Banner Comparison:</strong></p>
          
          <div style="background: var(--bg-card); padding: 15px; border-radius: 8px; margin: 15px 0;">
-           <p style="margin-bottom: 10px;"><strong>Banner Scoring (2-player):</strong></p>
-           <ul style="margin-left: 20px; line-height: 1.8;">
-             <li><strong>More Banners than Heir:</strong> +8 Fame for Heir</li>
-             <li><strong>Tied or Fewer:</strong> +0 Fame</li>
-           </ul>
+           <p>Heir Banners in Academy: <strong>${heirBannersPlaced}</strong></p>
+           <p>Your Banners in Academy: <strong>${playerBannersPlaced}</strong></p>
          </div>
          
-         <p style="margin-top: 15px;"><strong>Does the Heir have MORE Banners than you?</strong></p>`,
-        [
-          { text: 'Yes — Heir has more (+8 Fame)', action: () => {
-            endGameTempData.bannerFame = 8;
-            showEndGameStep2_FinalTotals();
-          }},
-          { text: 'No — Tied or I have more (+0 Fame)', action: () => {
-            endGameTempData.bannerFame = 0;
-            showEndGameStep2_FinalTotals();
-          }}
-        ]
+         ${heirHasMore 
+           ? `<p style="color: var(--warning);"><strong>Heir has more Banners → +8 Fame for the Heir</strong></p>`
+           : `<p style="color: var(--success);"><strong>${heirBannersPlaced === playerBannersPlaced ? 'Tied' : 'You have more'} → +0 Fame for the Heir</strong></p>`
+         }`,
+        [{ text: 'Continue', action: () => showEndGameStep2_FinalTotals() }]
       );
     }
     
