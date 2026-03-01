@@ -1373,7 +1373,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.16.39-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.16.40-beta</p>
       <div class="header-buttons hidden" id="header-buttons">
         <button class="header-btn" id="restart-btn">↺ New Game</button>
         <button class="header-btn" id="save-quit-btn">💾 Save & Quit</button>
@@ -16913,6 +16913,14 @@
         const dawnCheckbox = $('#dawn-challenge-rule');
         if (dawnCheckbox) dawnCheckbox.checked = false;
         
+        // Reset Academy options
+        const academyOptions = $('#academy-options');
+        if (academyOptions) academyOptions.classList.add('hidden');
+        
+        // Reset Arcane Arts options
+        const arcaneOptions = $('#arcane-options');
+        if (arcaneOptions) arcaneOptions.classList.add('hidden');
+        
         $$('#difficulty-options .option-card').forEach(c => c.classList.remove('selected'));
         $$('#player-school-options .option-card').forEach(c => c.classList.remove('selected'));
         $$('#player-magician-options .option-card').forEach(c => c.classList.remove('selected'));
@@ -16940,6 +16948,14 @@
         if (quickDawnOptions) quickDawnOptions.classList.add('hidden');
         const quickDawnCheckbox = $('#quick-dawn-challenge-rule');
         if (quickDawnCheckbox) quickDawnCheckbox.checked = false;
+        
+        // Reset Quick Setup Academy options
+        const quickAcademyOptions = $('#quick-academy-options');
+        if (quickAcademyOptions) quickAcademyOptions.classList.add('hidden');
+        
+        // Reset Quick Setup Arcane Arts options
+        const quickArcaneOptions = $('#quick-arcane-options');
+        if (quickArcaneOptions) quickArcaneOptions.classList.add('hidden');
         
         // Hide dynamic sections (Full Setup)
         const heirMagSection = $('#heir-magician-section');
