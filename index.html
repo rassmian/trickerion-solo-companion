@@ -398,6 +398,11 @@
       cursor: not-allowed;
     }
 
+    .btn-secondary {
+      border-color: var(--border);
+      color: var(--text-secondary);
+    }
+
     .btn-selected {
       background: var(--amber) !important;
       color: #1a1a1a !important;
@@ -1373,7 +1378,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.16.40-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.16.41-beta</p>
       <div class="header-buttons hidden" id="header-buttons">
         <button class="header-btn" id="restart-btn">↺ New Game</button>
         <button class="header-btn" id="save-quit-btn">💾 Save & Quit</button>
@@ -3958,7 +3963,7 @@
           </p>
           <p style="color: var(--text-muted); margin-bottom: 25px; font-size: 0.9rem;">Starting a new game will overwrite this save.</p>
           <div style="display: flex; gap: 10px; justify-content: center;">
-            <button class="btn" id="warning-cancel-btn" style="background: transparent; border: 1px solid var(--border);">Cancel</button>
+            <button class="btn btn-secondary" id="warning-cancel-btn">Cancel</button>
             <button class="btn" id="warning-confirm-btn">Start New Game</button>
           </div>
         </div>
@@ -7300,14 +7305,21 @@
              <button class="btn sa-count-btn" data-count="${n}" style="min-width: 50px;">${n}</button>
            `).join('')}
          </div>`,
-        []
+        [{ text: 'Confirm', action: () => {
+          proceedToPlaceCharacters();
+        }, id: 'optico-confirm-btn', disabled: true }]
       );
       
       setTimeout(() => {
         $$('.sa-count-btn').forEach(btn => {
           btn.addEventListener('click', () => {
+            // Deselect all, select this one
+            $$('.sa-count-btn').forEach(b => b.classList.remove('btn-selected'));
+            btn.classList.add('btn-selected');
             gameState.opticoPlayerSACards = parseInt(btn.dataset.count);
-            proceedToPlaceCharacters();
+            // Enable confirm
+            const confirmBtn = $('#optico-confirm-btn');
+            if (confirmBtn) confirmBtn.disabled = false;
           });
         });
       }, 0);
