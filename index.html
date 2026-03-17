@@ -1378,7 +1378,7 @@
     <header>
       <h1>Trickerion</h1>
       <p class="subtitle">Solo Companion — Dahlgaard's Heir</p>
-      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.16.41-beta</p>
+      <p style="color: var(--text-muted); font-size: 0.7rem; margin-top: 5px;">v0.16.42-beta</p>
       <div class="header-buttons hidden" id="header-buttons">
         <button class="header-btn" id="restart-btn">↺ New Game</button>
         <button class="header-btn" id="save-quit-btn">💾 Save & Quit</button>
@@ -3933,6 +3933,10 @@
       const phaseId = PHASES[gameState.currentPhaseIndex]?.id;
       
       if (phaseId === 'place-characters') {
+        // Reset per-turn flags — turn is replayed from start, so these must be fresh
+        gameState.firstApprenticePlacedThisTurn = false;
+        gameState.opticoNonApprenticesPlaced = 0;
+        gameState.opticoPlayerSACards = 0;
         // Go to player turn screen for Place Characters
         showPlayerTurnScreen();
       } else {
@@ -8903,7 +8907,7 @@
          ${mechanikerReminder}
          ${saCardReminder}
          <p><strong>How many Action Points does this Character have?</strong></p>
-         <p style="color: var(--text-secondary); font-size: 0.9rem;">Include the slot's AP modifier and the Character's base AP.</p>
+         <p style="color: var(--text-secondary); font-size: 0.9rem;">Enter the Character's final AP after all modifiers.</p>
          ${buildAPButtonGrid()}`,
         []
       );
@@ -9540,7 +9544,7 @@
          ${mechanikerReminder}
          ${saCardReminder}
          <p style="margin-top: 15px;"><strong>How many Action Points does this Character have?</strong></p>
-         <p style="color: var(--text-secondary); font-size: 0.9rem;">Include the slot's AP modifier and the Character's base AP.</p>
+         <p style="color: var(--text-secondary); font-size: 0.9rem;">Enter the Character's final AP after all modifiers.</p>
          ${buildAPButtonGrid()}`,
         []
       );
@@ -9806,7 +9810,7 @@
          ${opticoReminder}
          ${mechanikerReminder}
          <p><strong>How many Action Points does this Character have?</strong></p>
-         <p style="color: var(--text-secondary); font-size: 0.9rem;">Include the slot's AP modifier and the Character's base AP.</p>
+         <p style="color: var(--text-secondary); font-size: 0.9rem;">Enter the Character's final AP after all modifiers.</p>
          ${buildAPButtonGrid()}`,
         []
       );
@@ -10213,22 +10217,10 @@
       const stance = gameState.heir.stance;
       const dayPreference = stance === 'ready' ? 'earliest available day (left)' : 'latest available day (right)';
       const stanceReminder = `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 0 0 15px 0; border-radius: 0 4px 4px 0;">
-          <span style="color: var(--info); font-weight: 600;">ℹ️ PLACEMENT PREFERENCE:</span> Heir is <strong>${stance.charAt(0).toUpperCase() + stance.slice(1)}</strong> — place on the <strong>${dayPreference}</strong> when choosing between cards.
+          <span style="color: var(--info); font-weight: 600;">ℹ️ PLACEMENT PREFERENCE:</span> Heir is <strong>${stance.charAt(0).toUpperCase() + stance.slice(1)}</strong> — place on the <strong>${dayPreference}</strong>.
         </div>`;
       
-      // Removal warning/note
-      // Cards are removed from Turn 3 onwards (Turn 1-2: no removal)
-      let removalNote = '';
-      if (isFinalTurn) {
-        removalNote = `<div style="background: var(--info-bg); border-left: 3px solid var(--info); padding: 8px 12px; margin: 0 0 15px 0; border-radius: 0 4px 4px 0;">
-          <span style="color: var(--info); font-weight: 600;">ℹ️ FINAL TURN:</span> The Heir CAN place on any card (no restrictions — this is the last chance to perform all cards).
-        </div>`;
-      } else if (gameState.currentTurn >= 3) {
-        removalNote = `<div style="background: var(--exception-bg); border-left: 3px solid var(--exception); padding: 8px 12px; margin: 0 0 15px 0; border-radius: 0 4px 4px 0;">
-          <span style="color: var(--exception); font-weight: 600;">⚠️ AVOID RIGHTMOST CARD:</span> The rightmost Performance card will be removed at end of turn. The Heir should avoid placing there unless it's the only free space.
-        </div>`;
-      }
-      // Turns 1-2: No removal warning needed (no cards removed yet)
+      // Removal warning/note moved to showTheaterMarkerPriority1 (only relevant when choosing Performance card)
       
       
       // Check for Master of Chains - first trick can be oriented freely
@@ -10240,8 +10232,6 @@
       setActionContent(
         `Turn ${gameState.currentTurn} — Theater (Marker ${currentMarker} of ${totalMarkers})`,
         `${stanceReminder}
-         
-         ${removalNote}
          
          <p><strong>Step 2: Identify the Trick</strong></p>
          
@@ -10275,14 +10265,29 @@
          
          ${removalNote}
          
-         <p style="margin: 15px 0;">Can this Trick be legally placed on a card that already has <strong>Heir Tricks</strong> on it?</p>
+         <p style="margin: 15px 0;">Can this Trick be placed on a card that already has <strong>Heir Tricks</strong> on it?</p>
          
          <p style="color: var(--text-muted); font-size: 0.9rem;"><em>Why: The Heir prefers to add to cards where it already has Tricks, to create Links.</em></p>
          
          <p style="margin-top: 15px; color: var(--text-secondary); font-size: 0.9rem;">(Check: Is there a card with Heir Tricks that has an empty spot for this Trick type?)</p>`,
         [
-          { text: 'Yes — Can place with Heir Tricks', action: () => showTheaterMarkerPlaceOnCard(actionPoints, totalMarkers, currentMarker, 'heir') },
+          { text: 'Yes — Can place with Heir Tricks', action: () => showTheaterMarkerPriority1b(actionPoints, totalMarkers, currentMarker) },
           { text: 'No — Cannot place there', action: () => showTheaterMarkerPriority2(actionPoints, totalMarkers, currentMarker) }
+        ]
+      );
+    }
+
+    function showTheaterMarkerPriority1b(actionPoints, totalMarkers, currentMarker) {
+      setActionContent(
+        `Turn ${gameState.currentTurn} — Theater (Marker ${currentMarker} of ${totalMarkers})`,
+        `<p><strong>Step 3: Select Performance Card — Priority 1 (continued)</strong></p>
+         
+         <p style="margin: 15px 0;">Among the cards that already have Heir Tricks, does any also already have <strong>your (player's) Tricks</strong> on it?</p>
+         
+         <p style="color: var(--text-muted); font-size: 0.9rem;"><em>Why: Among qualifying cards, the Heir prefers those that also have your Tricks — to maximise Links.</em></p>`,
+        [
+          { text: 'Yes — A card has both', action: () => showTheaterMarkerPlaceOnCard(actionPoints, totalMarkers, currentMarker, 'heir-and-player') },
+          { text: 'No — None have my Tricks', action: () => showTheaterMarkerPlaceOnCard(actionPoints, totalMarkers, currentMarker, 'heir') }
         ]
       );
     }
@@ -10292,7 +10297,7 @@
         `Turn ${gameState.currentTurn} — Theater (Marker ${currentMarker} of ${totalMarkers})`,
         `<p><strong>Step 3: Select Performance Card — Priority 2</strong></p>
          
-         <p style="margin: 15px 0;">Can this Trick be legally placed on a card that has <strong>your (player's) Tricks</strong> on it?</p>
+         <p style="margin: 15px 0;">Can this Trick be placed on a card that already has <strong>your (player's) Tricks</strong> on it?</p>
          
          <p style="color: var(--text-muted); font-size: 0.9rem;"><em>Why: If no Heir Tricks available, the Heir tries to Link with your Tricks.</em></p>`,
         [
@@ -10307,7 +10312,7 @@
         `Turn ${gameState.currentTurn} — Theater (Marker ${currentMarker} of ${totalMarkers})`,
         `<p><strong>Step 3: Select Performance Card — Priority 3</strong></p>
          
-         <p style="margin: 15px 0;">Use the <strong>leftmost available</strong> Performance card that can legally take this Trick.</p>
+         <p style="margin: 15px 0;">Use the <strong>leftmost available</strong> Performance card.</p>
          
          <p style="color: var(--text-muted); font-size: 0.9rem;"><em>Why: No existing Tricks to Link with, so use the first valid card.</em></p>
          
@@ -10343,6 +10348,8 @@
       let targetDescription = '';
       if (priorityType === 'heir') {
         targetDescription = 'the leftmost Performance card with Heir Tricks';
+      } else if (priorityType === 'heir-and-player') {
+        targetDescription = 'the leftmost Performance card with both Heir Tricks and your Tricks';
       } else if (priorityType === 'player') {
         targetDescription = 'the leftmost Performance card with your Tricks';
       } else {
@@ -10773,7 +10780,7 @@
          ${saCardReminder}
          
          <p style="margin-top: 15px;"><strong>How many Action Points does this Character have?</strong></p>
-         <p style="color: var(--text-secondary); font-size: 0.9rem;">Include the slot's AP modifier and the Character's base AP.</p>
+         <p style="color: var(--text-secondary); font-size: 0.9rem;">Enter the Character's final AP after all modifiers.</p>
          ${buildAPButtonGrid('academy-ap-btn')}`,
         []
       );
