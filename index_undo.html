@@ -3791,6 +3791,8 @@
       
       // Reset any phase-specific tracking variables
       gameState.heirPlacementsThisTurn = 0;
+      gameState.playerPlacementsThisTurn = 0;
+      gameState._heirTurnInProgress = false;
       gameState.heirPlacementsEndedEarly = false;
       gameState.classroomPhaseDone = false;
       gameState.renovationSpaces = null; // Initialized during game start if Academy enabled
@@ -3860,7 +3862,7 @@
     }
     
     function undoSignature(state) {
-      return `${state.currentTurn}:${state.currentPhaseIndex}:${state.heirPlacementsThisTurn || 0}`;
+      return `${state.currentTurn}:${state.currentPhaseIndex}:${state.heirPlacementsThisTurn || 0}:${state.playerPlacementsThisTurn || 0}:${state._heirTurnInProgress ? 'H' : 'P'}`;
     }
     
     function pushUndoSnapshot() {
@@ -3883,8 +3885,13 @@
     function labelForSnapshot(snap) {
       const phaseNames = ['Roll Dice', 'Initiative', 'Advertise', 'Assignment', 'Place Characters', 'Performance', 'End Turn'];
       const idx = snap.currentPhaseIndex;
-      if (idx === 4 && (snap.heirPlacementsThisTurn || 0) > 0) {
-        return `Heir placement ${snap.heirPlacementsThisTurn}`;
+      if (idx === 4) { // Place Characters — distinguish Heir vs player placements
+        if (snap._heirTurnInProgress) {
+          return `start of Heir placement ${(snap.heirPlacementsThisTurn || 0) + 1}`;
+        }
+        const pp = snap.playerPlacementsThisTurn || 0;
+        if (pp > 0) return `start of your placement ${pp}`;
+        return 'start of Place Characters';
       }
       return `start of ${phaseNames[idx] || 'the previous step'}`;
     }
@@ -4103,8 +4110,14 @@
         gameState.firstApprenticePlacedThisTurn = false;
         gameState.opticoNonApprenticesPlaced = 0;
         gameState.opticoPlayerSACards = 0;
-        // Go to player turn screen for Place Characters
-        showPlayerTurnScreen();
+        if (gameState._heirTurnInProgress) {
+          // Snapshot was taken mid-Heir-placement — re-enter the Heir's turn
+          // (re-asks the market row etc. from the start of that placement)
+          showHeirTurnStart();
+        } else {
+          // Otherwise return to the player's turn
+          showPlayerTurnScreen();
+        }
       } else {
         // Start at beginning of current phase
         handlePhase(phaseId);
@@ -7448,6 +7461,8 @@
     function handlePlaceCharactersPhase() {
       // Reset placement counter for this turn
       gameState.heirPlacementsThisTurn = 0;
+      gameState.playerPlacementsThisTurn = 0;
+      gameState._heirTurnInProgress = false;
       gameState.heirPlacementsEndedEarly = false;
       gameState.heirActualPlacements = 0;
       
@@ -7539,16 +7554,17 @@
          
          <p style="margin-top: 15px;">Heir's Fame: <strong>${gameState.heir.fame}★</strong></p>`,
         [
-          { text: 'I go first', action: () => showPlayerTurnScreen() },
+          { text: 'I go first', action: () => { gameState.playerPlacementsThisTurn = (gameState.playerPlacementsThisTurn || 0) + 1; showPlayerTurnScreen(); } },
           { text: 'Heir goes first', action: () => showHeirTurnStart() }
         ]
       );
     }
     
     function showPlayerTurnScreen() {
-      // Autosave after each Heir placement when returning to player
+      // It's the player's turn now — mark the Heir turn ended before checkpointing
+      gameState._heirTurnInProgress = false;
+      // Autosave and record undo point (deduped, so re-renders are no-ops)
       saveGame();
-      // Record undo point per Heir placement (deduped, so non-placement calls are no-ops)
       pushUndoSnapshot();
       
       const playerTurnBox = (text) => `<div style="background: rgba(100, 200, 100, 0.1); border: 1.5px solid #6c6; padding: 10px 14px; margin: 10px 0; border-radius: 6px; text-align: center;"><div style="color: #6c6; font-weight: 600; font-size: 0.95rem;">👤 YOUR TURN</div><div style="color: var(--text-primary); font-size: 0.85rem; margin-top: 4px;">${text}</div></div>`;
@@ -7784,6 +7800,9 @@
     function showHeirTurnStart() {
       // Reset p22 tracking for new Heir turn
       gameState.heirP22FirstPlacementDone = false;
+      // Mark the Heir's turn in progress and checkpoint its start for Undo
+      gameState._heirTurnInProgress = true;
+      pushUndoSnapshot();
       
       // First, check/set stance, then proceed to contested check
       if (gameState.heirPlacementsThisTurn === 0) {
@@ -8360,6 +8379,7 @@
       } else {
         // Normal flow: return to player's turn
         gameState.heirP22FirstPlacementDone = false;
+        gameState.playerPlacementsThisTurn = (gameState.playerPlacementsThisTurn || 0) + 1;
         showPlayerTurnScreen();
       }
     }
